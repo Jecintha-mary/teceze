@@ -1,0 +1,42 @@
+{
+ "app": "teceze",
+ "charts": [],
+ "content": "[]",
+ "creation": "2026-06-12 13:33:52.943221",
+ "custom_blocks": [],
+ "docstatus": 0,
+ "doctype": "Workspace",
+ "hide_custom": 0,
+ "idx": 0,
+ "indicator_color": "green",
+ "is_hidden": 0,
+ "label": "Teceze",
+ "link_type": "DocType",
+ "links": [],
+ "modified": "2026-06-12 13:36:21.052264",
+ "modified_by": "Administrator",
+ "module": "Teceze",
+ "name": "Teceze",
+ "number_cards": [],
+ "owner": "Administrator",
+ "public": 1,
+ "quick_lists": [],
+ "roles": [],
+ "sequence_id": 1.0,
+ "shortcuts": [
+  {
+   "doc_view": "",
+   "label": "Employee Probation",
+   "link_to": "Probation Review",
+   "type": "DocType"
+  },
+  {
+   "doc_view": "",
+   "label": "Employee Permission Request",
+   "link_to": "Employee Permission Request",
+   "type": "DocType"
+  }
+ ],
+ "title": "Teceze",
+ "type": "Workspace"
+}

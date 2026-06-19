@@ -47,7 +47,22 @@ app_license = "mit"
 # doctype_list_js = {"doctype" : "public/js/doctype_list.js"}
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
 # doctype_calendar_js = {"doctype" : "public/js/doctype_calendar.js"}
+doctype_js = {
+    "Employee" : ["public/js/employee.js"],
+    "Leave Application" : ["public/js/leave_application.js"],
 
+}
+doc_events = {
+	"Employee": {
+        "autoname": ["teceze.teceze.overrides.employee.autoname"],
+		"validate": ["teceze.teceze.overrides.employee.validate"],
+        "onload": ["teceze.teceze.overrides.employee.onload"],
+        "after_insert": ["teceze.teceze.overrides.employee.after_insert"],
+    },
+    "Leave Ledger Entry": {
+        "after_insert": ["teceze.teceze.overrides.leave_ledger_entry.after_insert"],
+    }
+}
 # Svg Icons
 # ------------------
 # include app icons in desk
@@ -167,6 +182,12 @@ app_license = "mit"
 # 	],
 # }
 
+scheduler_events = {
+    "daily": [
+        "teceze.teceze.overrides.employee.credit_privilege_leave",
+        # "teceze.teceze.overrides.employee.expire_comp_off_leave"
+    ]
+}
 # Testing
 # -------
 
