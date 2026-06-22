@@ -5,5 +5,5 @@
 from frappe.model.document import Document
 
 
-class CompensatoryLeaveLedger(Document):
+class AttendanceLocation(Document):
 	pass

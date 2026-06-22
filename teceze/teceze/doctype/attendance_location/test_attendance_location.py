@@ -13,9 +13,9 @@ IGNORE_TEST_RECORD_DEPENDENCIES = []  # eg. ["User"]
 
 
 
-class IntegrationTestCompensatoryLeaveLedger(IntegrationTestCase):
+class IntegrationTestAttendanceLocation(IntegrationTestCase):
 	"""
-	Integration tests for CompensatoryLeaveLedger.
+	Integration tests for AttendanceLocation.
 	Use this class for testing interactions between multiple components.
 	"""
 

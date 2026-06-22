@@ -2,7 +2,7 @@ app_name = "teceze"
 app_title = "Teceze"
 app_publisher = "Teceze Consultancy Pvt. Ltd."
 app_description = "Teceze Consultancy Pvt. Ltd."
-app_email = "support@teceze.com"
+app_email = "ERP@teceze.com"
 app_license = "mit"
 
 # Apps
@@ -276,4 +276,32 @@ scheduler_events = {
 # ------------
 # List of apps whose translatable strings should be excluded from this app's translations.
 # ignore_translatable_strings_from = []
+
+fixtures = [
+	{
+	"doctype": "Notification",
+	"filters": [{"is_standard":0}]
+	},
+	{
+	"doctype": "Dashboard",
+	"filters": [{"is_standard":0}]
+	},
+	{
+	"doctype": "Dashboard Chart",
+	"filters": [{"is_standard":0}]
+	},
+   	"Custom Field",
+   	"Property Setter",
+	"Workflow",
+   	"Workflow Action Master",
+   	"Workflow State",
+   	"Role",
+   	"Workspace",
+	"Print Format",
+   	"Custom DocPerm",
+   	"Report",
+	"Number Card",
+	"Web Form"
+]
+
 
