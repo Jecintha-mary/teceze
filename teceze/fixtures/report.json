@@ -186,8 +186,8 @@
   "javascript": null,
   "json": null,
   "letter_head": "",
-  "modified": "2017-07-13 17:14:40.408706",
-  "module": "Support",
+  "modified": "2021-10-21 14:31:29.524026",
+  "module": "Helpdesk",
   "name": "Support Hour Distribution",
   "prepared_report": 0,
   "query": null,
@@ -2743,6 +2743,35 @@
   "is_standard": "Yes",
   "javascript": null,
   "json": null,
+  "letter_head": "",
+  "modified": "2021-10-21 14:31:29.437910",
+  "module": "Helpdesk",
+  "name": "First Response Time for Tickets",
+  "prepared_report": 0,
+  "query": "select date(creation) as creation_date, avg(mins_to_first_response) from tabTicket where creation > '2016-05-01' group by date(creation) order by creation_date;",
+  "ref_doctype": "HD Ticket",
+  "reference_report": null,
+  "report_name": "First Response Time for Tickets",
+  "report_script": null,
+  "report_type": "Script Report",
+  "roles": [
+   {
+    "role": "Support Team"
+   }
+  ],
+  "timeout": 0
+ },
+ {
+  "add_total_row": 0,
+  "add_translate_data": 0,
+  "columns": [],
+  "disabled": 0,
+  "docstatus": 0,
+  "doctype": "Report",
+  "filters": [],
+  "is_standard": "Yes",
+  "javascript": null,
+  "json": null,
   "letter_head": "Test 2",
   "modified": "2020-08-10 18:34:19.083872",
   "module": "CRM",
@@ -2841,6 +2870,35 @@
   "ref_doctype": "Issue",
   "reference_report": null,
   "report_name": "Issue Analytics",
+  "report_script": null,
+  "report_type": "Script Report",
+  "roles": [
+   {
+    "role": "Support Team"
+   }
+  ],
+  "timeout": 0
+ },
+ {
+  "add_total_row": 1,
+  "add_translate_data": 0,
+  "columns": [],
+  "disabled": 0,
+  "docstatus": 0,
+  "doctype": "Report",
+  "filters": [],
+  "is_standard": "Yes",
+  "javascript": null,
+  "json": null,
+  "letter_head": null,
+  "modified": "2021-10-21 14:31:29.591583",
+  "module": "Helpdesk",
+  "name": "Ticket Analytics",
+  "prepared_report": 0,
+  "query": null,
+  "ref_doctype": "HD Ticket",
+  "reference_report": null,
+  "report_name": "Ticket Analytics",
   "report_script": null,
   "report_type": "Script Report",
   "roles": [
@@ -3761,6 +3819,35 @@
   "filters": [],
   "is_standard": "Yes",
   "javascript": null,
+  "json": null,
+  "letter_head": null,
+  "modified": "2022-11-21 13:02:56.691256",
+  "module": "Helpdesk",
+  "name": "Ticket Summary",
+  "prepared_report": 0,
+  "query": null,
+  "ref_doctype": "HD Ticket",
+  "reference_report": null,
+  "report_name": "Ticket Summary",
+  "report_script": null,
+  "report_type": "Script Report",
+  "roles": [
+   {
+    "role": "Support Team"
+   }
+  ],
+  "timeout": 0
+ },
+ {
+  "add_total_row": 0,
+  "add_translate_data": 0,
+  "columns": [],
+  "disabled": 0,
+  "docstatus": 0,
+  "doctype": "Report",
+  "filters": [],
+  "is_standard": "Yes",
+  "javascript": null,
   "json": "{}",
   "letter_head": null,
   "modified": "2022-12-06 14:16:55.969214",
@@ -4365,6 +4452,47 @@
   "report_script": null,
   "report_type": "Script Report",
   "roles": [],
+  "timeout": 0
+ },
+ {
+  "add_total_row": 0,
+  "add_translate_data": 0,
+  "columns": [],
+  "disabled": 0,
+  "docstatus": 0,
+  "doctype": "Report",
+  "filters": [],
+  "is_standard": "Yes",
+  "javascript": null,
+  "json": null,
+  "letter_head": null,
+  "modified": "2024-09-11 22:31:05.837918",
+  "module": "Helpdesk",
+  "name": "Ticket-Search Analysis",
+  "prepared_report": 0,
+  "query": null,
+  "ref_doctype": "HD Ticket",
+  "reference_report": null,
+  "report_name": "Ticket-Search Analysis",
+  "report_script": null,
+  "report_type": "Script Report",
+  "roles": [
+   {
+    "role": "System Manager"
+   },
+   {
+    "role": "Agent"
+   },
+   {
+    "role": "Support Team"
+   },
+   {
+    "role": "Supported Site User"
+   },
+   {
+    "role": "External Agent"
+   }
+  ],
   "timeout": 0
  },
  {
@@ -5765,14 +5893,14 @@
   "javascript": null,
   "json": "{\"add_total_row\": 0, \"sort_by\": \"Serial No.modified\", \"sort_order\": \"desc\", \"sort_by_next\": null, \"filters\": [[\"Serial No\", \"warehouse\", \"=\", \"\"]], \"sort_order_next\": \"desc\", \"columns\": [[\"name\", \"Serial No\"], [\"item_code\", \"Serial No\"], [\"amc_expiry_date\", \"Serial No\"], [\"maintenance_status\", \"Serial No\"],[\"item_name\", \"Serial No\"], [\"description\", \"Serial No\"], [\"item_group\", \"Serial No\"], [\"brand\", \"Serial No\"]]}",
   "letter_head": null,
-  "modified": "2024-09-26 13:07:23.451182",
+  "modified": "2025-04-24 13:07:23.451182",
   "module": "Stock",
-  "name": "Serial No Service Contract Expiry",
+  "name": "Serial No Warranty Expiry",
   "prepared_report": 0,
   "query": null,
   "ref_doctype": "Serial No",
   "reference_report": null,
-  "report_name": "Serial No Service Contract Expiry",
+  "report_name": "Serial No Warranty Expiry",
   "report_script": null,
   "report_type": "Report Builder",
   "roles": [
@@ -5800,14 +5928,14 @@
   "javascript": null,
   "json": "{\"add_total_row\": 0, \"sort_by\": \"Serial No.modified\", \"sort_order\": \"desc\", \"sort_by_next\": null, \"filters\": [[\"Serial No\", \"warehouse\", \"=\", \"\"]], \"sort_order_next\": \"desc\", \"columns\": [[\"name\", \"Serial No\"], [\"item_code\", \"Serial No\"], [\"amc_expiry_date\", \"Serial No\"], [\"maintenance_status\", \"Serial No\"],[\"item_name\", \"Serial No\"], [\"description\", \"Serial No\"], [\"item_group\", \"Serial No\"], [\"brand\", \"Serial No\"]]}",
   "letter_head": null,
-  "modified": "2025-04-24 13:07:23.451182",
+  "modified": "2024-09-26 13:07:23.451182",
   "module": "Stock",
-  "name": "Serial No Warranty Expiry",
+  "name": "Serial No Service Contract Expiry",
   "prepared_report": 0,
   "query": null,
   "ref_doctype": "Serial No",
   "reference_report": null,
-  "report_name": "Serial No Warranty Expiry",
+  "report_name": "Serial No Service Contract Expiry",
   "report_script": null,
   "report_type": "Report Builder",
   "roles": [

@@ -105,6 +105,7 @@ def create_leave_allocations(doc):
             leave_type,
             "max_leaves_allowed"
         )
+        frappe.log_error('annual_leaves',str(annual_leaves))
         if not annual_leaves:
             frappe.log_error(
                 f"Max Leaves Allowed not set for {leave_type}",

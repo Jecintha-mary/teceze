@@ -52,12 +52,15 @@ doctype_js = {
     "Leave Application" : ["public/js/leave_application.js"],
 
 }
+doctype_list_js = {
+    "Employee Checkin": "public/js/employee_checkin_list.js"
+}
 doc_events = {
 	"Employee": {
         "autoname": ["teceze.teceze.overrides.employee.autoname"],
 		"validate": ["teceze.teceze.overrides.employee.validate"],
         "onload": ["teceze.teceze.overrides.employee.onload"],
-        "after_insert": ["teceze.teceze.overrides.employee.after_insert"],
+        # "after_insert": ["teceze.teceze.overrides.employee.after_insert"],
     },
     "Leave Ledger Entry": {
         "after_insert": ["teceze.teceze.overrides.leave_ledger_entry.after_insert"],
