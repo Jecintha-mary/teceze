@@ -1,0 +1,198 @@
+{
+ "actions": [],
+ "allow_bulk_edit": 1,
+ "allow_rename": 1,
+ "autoname": "Exit-Fd-.####",
+ "creation": "2026-07-01 18:00:50.215177",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "employee_id",
+  "name1",
+  "department",
+  "manager",
+  "column_break_buma",
+  "date_of_departure",
+  "reason_for_leaving",
+  "please_specify",
+  "interview_coducted_by",
+  "date_of_interview",
+  "exitr_interview_tab",
+  "mark",
+  "des_exp",
+  "opp_growth",
+  "rate_wrk",
+  "7_do_you_feel_supported_by_your_direct_supervisormanager",
+  "sats_package",
+  "suggestion",
+  "column_break_bftv",
+  "utilized",
+  "trrain_prov",
+  "issues",
+  "feedback",
+  "retain"
+ ],
+ "fields": [
+  {
+   "fieldname": "employee_id",
+   "fieldtype": "Link",
+   "label": "Employee Id",
+   "options": "Employee"
+  },
+  {
+   "fetch_from": "employee_id.employee_name",
+   "fieldname": "name1",
+   "fieldtype": "Data",
+   "label": "Name"
+  },
+  {
+   "fetch_from": "employee_id.department",
+   "fieldname": "department",
+   "fieldtype": "Data",
+   "label": "Department"
+  },
+  {
+   "fetch_from": "employee_id.custom_reporting_manager",
+   "fieldname": "manager",
+   "fieldtype": "Data",
+   "label": "Manager"
+  },
+  {
+   "fieldname": "date_of_departure",
+   "fieldtype": "Date",
+   "label": "Date of Departure"
+  },
+  {
+   "fieldname": "reason_for_leaving",
+   "fieldtype": "Select",
+   "label": "Reason for Leaving",
+   "options": "\nNew job opportunity\nCareer change\nRelocation\nPersonal reasons\nHealth reasons\nRetirement\nDissatisfaction with role/company\nOthers"
+  },
+  {
+   "fieldname": "column_break_buma",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "mark",
+   "fieldtype": "Section Break",
+   "label": "Please Mark The Options"
+  },
+  {
+   "fieldname": "des_exp",
+   "fieldtype": "Select",
+   "label": "1. How would you describe your overall experience in this role?",
+   "options": "\nVery Satisfied\nSatisfied\nNeutral\nDissatisfied\nVery Dissatisfied"
+  },
+  {
+   "fieldname": "utilized",
+   "fieldtype": "Select",
+   "label": "2. Do you feel your skills were utilized effectively?",
+   "options": "\nYes\nNo\nPartially"
+  },
+  {
+   "fieldname": "opp_growth",
+   "fieldtype": "Select",
+   "label": "3. Do you feel you had opportunities for growth and advancement?",
+   "options": "\nYes\nNo\nSomewhat"
+  },
+  {
+   "fieldname": "trrain_prov",
+   "fieldtype": "Select",
+   "label": "4. Was training and guidance provided"
+  },
+  {
+   "fieldname": "rate_wrk",
+   "fieldtype": "Select",
+   "label": "5. How would you rate the work environment in terms of collaboration and team dynamics?",
+   "options": "\nExcellent\nGood\nFair\nPoor"
+  },
+  {
+   "fieldname": "interview_coducted_by",
+   "fieldtype": "Link",
+   "label": "Interview Coducted By",
+   "options": "Employee"
+  },
+  {
+   "fieldname": "date_of_interview",
+   "fieldtype": "Date",
+   "label": "Date Of Interview"
+  },
+  {
+   "fieldname": "exitr_interview_tab",
+   "fieldtype": "Tab Break",
+   "label": "Exit interview"
+  },
+  {
+   "fieldname": "issues",
+   "fieldtype": "Select",
+   "label": "6. Were there any issues with communication within the team or with management?",
+   "options": "\nYes\nNo\nOccasionally"
+  },
+  {
+   "fieldname": "7_do_you_feel_supported_by_your_direct_supervisormanager",
+   "fieldtype": "Select",
+   "label": "7. Do you feel supported by your direct supervisor/manager?",
+   "options": "\nYes\nNo\nsometimes"
+  },
+  {
+   "fieldname": "feedback",
+   "fieldtype": "Select",
+   "label": "8. Was the feedback and recognition you received during your employment helpful?",
+   "options": "\nYes\nNo\nOccasionally"
+  },
+  {
+   "fieldname": "sats_package",
+   "fieldtype": "Select",
+   "label": "9. How satisfied were you with your compensation and benefits package?",
+   "options": "\nVery Satisfied\nSatisfied\nNeutral\nDissatisfied\nVery Dissatisfied"
+  },
+  {
+   "fieldname": "retain",
+   "fieldtype": "Small Text",
+   "label": "10.Was there anything that could have been done to retain you as an employee?"
+  },
+  {
+   "fieldname": "suggestion",
+   "fieldtype": "Small Text",
+   "label": "11. What suggestions do you have for improving the work environment or company culture?"
+  },
+  {
+   "depends_on": "eval:doc.reason_for_leaving==\"Others\"",
+   "fieldname": "please_specify",
+   "fieldtype": "Data",
+   "label": "Please Specify"
+  },
+  {
+   "fieldname": "column_break_bftv",
+   "fieldtype": "Column Break"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-07-02 11:49:50.813284",
+ "modified_by": "Administrator",
+ "module": "Teceze",
+ "name": "Exit Feedback Form",
+ "naming_rule": "Expression",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}

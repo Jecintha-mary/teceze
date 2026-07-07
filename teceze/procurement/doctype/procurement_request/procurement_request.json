@@ -1,0 +1,237 @@
+{
+ "actions": [],
+ "allow_bulk_edit": 1,
+ "autoname": "PRO-.###",
+ "creation": "2026-06-26 09:58:27.453733",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "details_section",
+  "client_name",
+  "contact_person",
+  "phone_number",
+  "email",
+  "location",
+  "postal_code",
+  "country",
+  "user",
+  "column_break_qehl",
+  "status",
+  "priority",
+  "details",
+  "address",
+  "remarks",
+  "attachment",
+  "spoc",
+  "spoc_name",
+  "spoc_phone_number",
+  "column_break_aoqh",
+  "spoc_email",
+  "sme",
+  "sme_name",
+  "sme_phone_number",
+  "column_break_luvz",
+  "sme_email",
+  "section_break_lena",
+  "items",
+  "total_amount"
+ ],
+ "fields": [
+  {
+   "fieldname": "details_section",
+   "fieldtype": "Section Break",
+   "label": "Details"
+  },
+  {
+   "fieldname": "client_name",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Client Name",
+   "options": "Customer",
+   "reqd": 1
+  },
+  {
+   "fieldname": "contact_person",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Contact Person"
+  },
+  {
+   "fieldname": "phone_number",
+   "fieldtype": "Data",
+   "label": "Phone Number"
+  },
+  {
+   "fieldname": "email",
+   "fieldtype": "Data",
+   "label": "Email"
+  },
+  {
+   "fieldname": "location",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Location",
+   "options": "Location"
+  },
+  {
+   "fieldname": "postal_code",
+   "fieldtype": "Data",
+   "label": "Postal Code"
+  },
+  {
+   "fieldname": "country",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Country",
+   "options": "Country"
+  },
+  {
+   "fieldname": "column_break_qehl",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "priority",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Priority",
+   "options": "HD Ticket Priority"
+  },
+  {
+   "fieldname": "address",
+   "fieldtype": "Small Text",
+   "label": "Address"
+  },
+  {
+   "fieldname": "remarks",
+   "fieldtype": "Small Text",
+   "label": "Remarks"
+  },
+  {
+   "fieldname": "attachment",
+   "fieldtype": "Attach",
+   "label": "Attachment"
+  },
+  {
+   "default": "Open",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Status",
+   "options": "\nOpen\nPending\nApproved\nClosed"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "spoc",
+   "fieldtype": "Section Break",
+   "hidden": 1,
+   "label": "SPOC (Single Point of Contact)"
+  },
+  {
+   "fieldname": "spoc_name",
+   "fieldtype": "Link",
+   "label": "SPOC Name",
+   "options": "Employee"
+  },
+  {
+   "fieldname": "spoc_phone_number",
+   "fieldtype": "Phone",
+   "label": "SPOC Phone Number"
+  },
+  {
+   "fieldname": "column_break_aoqh",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "spoc_email",
+   "fieldtype": "Data",
+   "label": "SPOC Email",
+   "options": "Email"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "sme",
+   "fieldtype": "Section Break",
+   "hidden": 1,
+   "label": "SME (Subject Matter Expert)"
+  },
+  {
+   "fieldname": "sme_name",
+   "fieldtype": "Link",
+   "label": "SME Name",
+   "options": "Employee"
+  },
+  {
+   "fieldname": "sme_phone_number",
+   "fieldtype": "Phone",
+   "label": "SME Phone Number"
+  },
+  {
+   "fieldname": "column_break_luvz",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "sme_email",
+   "fieldtype": "Data",
+   "label": "SME Email",
+   "options": "Email"
+  },
+  {
+   "fieldname": "section_break_lena",
+   "fieldtype": "Section Break",
+   "label": "Items"
+  },
+  {
+   "fieldname": "items",
+   "fieldtype": "Table",
+   "options": "Procurement Request Item"
+  },
+  {
+   "fieldname": "total_amount",
+   "fieldtype": "Currency",
+   "label": "Total Amount"
+  },
+  {
+   "fieldname": "details",
+   "fieldtype": "Data",
+   "label": "Requirement Details",
+   "reqd": 1
+  },
+  {
+   "fieldname": "user",
+   "fieldtype": "Link",
+   "label": "User",
+   "options": "User"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-07-06 15:05:21.827969",
+ "modified_by": "Administrator",
+ "module": "Procurement",
+ "name": "Procurement Request",
+ "naming_rule": "Expression",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}

@@ -133,13 +133,13 @@ frappe.query_reports["Project Schedule Report"] = {
 		frappe.query_report.refresh();
 		frappe.call({
 
-			"method": "teceze.teceze.report._project_health_report._project_health_report.get_user_image",
+			"method": "teceze.teceze.report.project_schedule_report.project_schedule_report.get_user_image",
 			callback: function (r) {
 				imgs = r.message
 			}
 		});
 		frappe.call({
-			"method": "teceze.teceze.report._project_health_report._project_health_report.get_status",
+			"method": "teceze.teceze.report.project_schedule_report.project_schedule_report.get_status",
 			callback: function (r) {
 				task_status = r.message
 			}

@@ -1,33 +1,30 @@
 {
  "actions": [],
  "allow_bulk_edit": 1,
- "allow_rename": 1,
- "autoname": "ER-.#####",
+ "autoname": "ENG-.###",
  "creation": "2026-06-23 15:33:05.130787",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
-  "name1",
+  "engineer_name",
+  "phone_number",
+  "email",
   "skills",
+  "project",
+  "column_break_qvzk",
   "experience",
+  "country",
   "location",
   "availability",
-  "project",
   "rating"
  ],
  "fields": [
   {
-   "fieldname": "name1",
-   "fieldtype": "Data",
-   "in_list_view": 1,
-   "label": "Name",
-   "reqd": 1
-  },
-  {
    "fieldname": "skills",
    "fieldtype": "Table MultiSelect",
    "label": "Skills",
-   "options": "Skill Items"
+   "options": "Skill Items",
+   "reqd": 1
   },
   {
    "fieldname": "experience",
@@ -36,30 +33,59 @@
   },
   {
    "fieldname": "location",
-   "fieldtype": "Data",
-   "label": "Location"
+   "fieldtype": "Link",
+   "label": "Location",
+   "options": "Location"
   },
   {
    "fieldname": "availability",
    "fieldtype": "Select",
    "label": "Availability",
-   "options": "Available\nOn-site\nAssigned\nLeave"
+   "options": "\nAvailable\nOn-site\nAssigned\nLeave\nEngaged\nHired"
   },
   {
    "fieldname": "project",
-   "fieldtype": "Data",
-   "label": "Project"
+   "fieldtype": "Link",
+   "label": "Project",
+   "options": "Project"
   },
   {
    "fieldname": "rating",
-   "fieldtype": "Float",
+   "fieldtype": "Rating",
    "label": "Rating"
+  },
+  {
+   "fieldname": "column_break_qvzk",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "country",
+   "fieldtype": "Data",
+   "label": "Country"
+  },
+  {
+   "fieldname": "engineer_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Name",
+   "reqd": 1
+  },
+  {
+   "fieldname": "email",
+   "fieldtype": "Data",
+   "label": "Email"
+  },
+  {
+   "fieldname": "phone_number",
+   "fieldtype": "Phone",
+   "label": "Phone Number",
+   "reqd": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-06-23 15:42:50.158650",
+ "modified": "2026-06-29 11:11:35.763415",
  "modified_by": "Administrator",
  "module": "Dispatch Model",
  "name": "Engineer Registry",

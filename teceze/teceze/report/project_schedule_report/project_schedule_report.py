@@ -109,7 +109,7 @@ def get_columns(filters):
                 "fieldtype": "Data", "options": "Employee", "width": 250, "align": "center"},
 
             {"label": "<b>custom_division</b>", "fieldname": "custom_division",
-                "fieldtype": "Data", "width": 180, "align": "center"},
+                "fieldtype": "Data", "width": 180, "align": "center", "hidden":1},
         ]
         if filters['project']:
             project_data = frappe.db.sql("""SELECT month(expected_start_date) as start_month,month(expected_end_date) as end_month,expected_start_date,expected_end_date,
@@ -770,7 +770,7 @@ def getColumn(tag_fil,en_var):
             "fieldtype": "Data", "width": 180, "align": "center"},
         
         {"label": "<b>Division</b>", "fieldname": "custom_division",
-            "fieldtype": "Data", "width": 110, "align": "center"},
+            "fieldtype": "Data", "width": 110, "align": "center", "hidden":1},
         
         {"label": "<b>Priority</b>", "fieldname": "priority",
             "fieldtype": "Data", "width": 70, "align": "center"},

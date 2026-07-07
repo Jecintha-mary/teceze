@@ -1221,7 +1221,7 @@
   "raw_printing": 0,
   "report": "General Ledger",
   "show_section_headings": 0,
-  "standard": "Yes"
+  "standard": "No"
  },
  {
   "absolute_value": 0,
@@ -1255,7 +1255,7 @@
   "raw_printing": 0,
   "report": "Accounts Receivable",
   "show_section_headings": 0,
-  "standard": "Yes"
+  "standard": "No"
  },
  {
   "absolute_value": 0,
@@ -1289,7 +1289,7 @@
   "raw_printing": 0,
   "report": "Accounts Payable",
   "show_section_headings": 0,
-  "standard": "Yes"
+  "standard": "No"
  },
  {
   "absolute_value": 0,
@@ -1323,7 +1323,7 @@
   "raw_printing": 0,
   "report": "Accounts Receivable Summary",
   "show_section_headings": 0,
-  "standard": "Yes"
+  "standard": "No"
  },
  {
   "absolute_value": 0,
@@ -1357,7 +1357,7 @@
   "raw_printing": 0,
   "report": "Accounts Payable Summary",
   "show_section_headings": 0,
-  "standard": "Yes"
+  "standard": "No"
  },
  {
   "absolute_value": 0,
@@ -1391,7 +1391,7 @@
   "raw_printing": 0,
   "report": "Balance Sheet",
   "show_section_headings": 0,
-  "standard": "Yes"
+  "standard": "No"
  },
  {
   "absolute_value": 0,
@@ -1425,7 +1425,7 @@
   "raw_printing": 0,
   "report": "Profit and Loss Statement",
   "show_section_headings": 0,
-  "standard": "Yes"
+  "standard": "No"
  },
  {
   "absolute_value": 0,
@@ -1459,7 +1459,7 @@
   "raw_printing": 0,
   "report": "Cash Flow",
   "show_section_headings": 0,
-  "standard": "Yes"
+  "standard": "No"
  },
  {
   "absolute_value": 0,
@@ -1493,7 +1493,7 @@
   "raw_printing": 0,
   "report": "Trial Balance",
   "show_section_headings": 0,
-  "standard": "Yes"
+  "standard": "No"
  },
  {
   "absolute_value": 0,

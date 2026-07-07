@@ -50,6 +50,8 @@ app_license = "mit"
 doctype_js = {
     "Employee" : ["public/js/employee.js"],
     "Leave Application" : ["public/js/leave_application.js"],
+	"Project" : ["public/js/project.js"],
+	"Quotation" : ["public/js/quotation.js"],
 
 }
 doctype_list_js = {
@@ -60,12 +62,20 @@ doc_events = {
         "autoname": ["teceze.teceze.overrides.employee.autoname"],
 		"validate": ["teceze.teceze.overrides.employee.validate"],
         "onload": ["teceze.teceze.overrides.employee.onload"],
+		"on_update": "teceze.teceze.overrides.employee.on_update"
         # "after_insert": ["teceze.teceze.overrides.employee.after_insert"],
     },
     "Leave Ledger Entry": {
         "after_insert": ["teceze.teceze.overrides.leave_ledger_entry.after_insert"],
+    },
+	"Sales Order": {
+    "on_submit": ["teceze.procurement.doctype.procurement_request.procurement_request.update_sales_order"]
+	},
+	"Procurement Request": {
+        "onload": ["teceze.procurement.doctype.procurement_request.procurement_request.onload"]
     }
 }
+
 # Svg Icons
 # ------------------
 # include app icons in desk
@@ -299,7 +309,7 @@ fixtures = [
    	"Workflow Action Master",
    	"Workflow State",
    	"Role",
-   	"Workspace",
+   	# "Workspace",
 	"Print Format",
    	"Custom DocPerm",
    	"Report",

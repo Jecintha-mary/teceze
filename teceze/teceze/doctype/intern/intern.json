@@ -1,0 +1,403 @@
+{
+ "actions": [],
+ "allow_bulk_edit": 1,
+ "allow_rename": 1,
+ "autoname": "naming_series:",
+ "creation": "2026-06-24 17:30:14.857173",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "basic_details_section",
+  "naming_series",
+  "full_name",
+  "employment_status",
+  "work_mail_id",
+  "column_break_znjo",
+  "location",
+  "department",
+  "company_details_section",
+  "company",
+  "mentor_id",
+  "mentor_name",
+  "mentor_mail_id",
+  "column_break_kyqb",
+  "designation",
+  "manager_id",
+  "manager_name",
+  "manager_mail_id",
+  "tab_break_zrbs",
+  "personal_information_section",
+  "gender",
+  "date_of_birth",
+  "qualification",
+  "tab_3_tab",
+  "contact_section",
+  "personal_mail_id",
+  "contact_number",
+  "address_section",
+  "current_address",
+  "emergency_contact_section",
+  "emergency_contact_person",
+  "emergency_contact_number",
+  "relation",
+  "internship_details_tab",
+  "joining_date",
+  "internship_end_date",
+  "conversion_date",
+  "column_break_tcqc",
+  "internship_period",
+  "internship_extension_date",
+  "stipend_details_section",
+  "stipend_structure",
+  "variable_pay",
+  "fixed_pay",
+  "bank_details_tab",
+  "identity_section",
+  "aadhar_number",
+  "pan_number",
+  "bank_details_section",
+  "bank_name",
+  "ac_holder_name",
+  "column_break_abyc",
+  "ac_number",
+  "ifsc_code",
+  "tab_6_tab",
+  "exit_date",
+  "reason_for_exit"
+ ],
+ "fields": [
+  {
+   "fieldname": "full_name",
+   "fieldtype": "Data",
+   "label": "Full Name"
+  },
+  {
+   "fieldname": "column_break_znjo",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "location",
+   "fieldtype": "Link",
+   "label": "Location",
+   "options": "Location"
+  },
+  {
+   "fieldname": "employment_status",
+   "fieldtype": "Select",
+   "label": "Employment Status",
+   "options": "Active\nInactive\nExited\nTerminated\nConverted to Full Time"
+  },
+  {
+   "fieldname": "qualification",
+   "fieldtype": "Data",
+   "label": "Qualification"
+  },
+  {
+   "fieldname": "work_mail_id",
+   "fieldtype": "Data",
+   "label": "Work Mail ID"
+  },
+  {
+   "fieldname": "mentor_id",
+   "fieldtype": "Link",
+   "label": "Mentor",
+   "options": "Employee"
+  },
+  {
+   "fetch_from": "mentor_id.employee_name",
+   "fieldname": "mentor_name",
+   "fieldtype": "Data",
+   "label": "Mentor Name",
+   "options": "Name"
+  },
+  {
+   "fieldname": "manager_id",
+   "fieldtype": "Link",
+   "label": "Manager",
+   "options": "Employee"
+  },
+  {
+   "fetch_from": "manager_id.employee_name",
+   "fieldname": "manager_name",
+   "fieldtype": "Data",
+   "label": "Manager Name",
+   "options": "Name"
+  },
+  {
+   "fieldname": "gender",
+   "fieldtype": "Link",
+   "label": "Gender",
+   "options": "Gender"
+  },
+  {
+   "fieldname": "date_of_birth",
+   "fieldtype": "Date",
+   "label": "Date Of Birth"
+  },
+  {
+   "fieldname": "contact_number",
+   "fieldtype": "Data",
+   "label": "Contact Number",
+   "options": "Phone"
+  },
+  {
+   "fieldname": "emergency_contact_person",
+   "fieldtype": "Data",
+   "label": "Emergency Contact Name"
+  },
+  {
+   "fieldname": "emergency_contact_number",
+   "fieldtype": "Data",
+   "label": "Emergency Contact Number",
+   "options": "Phone"
+  },
+  {
+   "fieldname": "relation",
+   "fieldtype": "Data",
+   "label": "Relation"
+  },
+  {
+   "fieldname": "current_address",
+   "fieldtype": "Small Text",
+   "label": "Current Address"
+  },
+  {
+   "fieldname": "personal_mail_id",
+   "fieldtype": "Data",
+   "label": "Personal Mail ID"
+  },
+  {
+   "fieldname": "aadhar_number",
+   "fieldtype": "Data",
+   "label": "Aadhar Number"
+  },
+  {
+   "fieldname": "pan_number",
+   "fieldtype": "Data",
+   "label": "PAN Number"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company"
+  },
+  {
+   "fieldname": "joining_date",
+   "fieldtype": "Date",
+   "label": "Joining Date"
+  },
+  {
+   "fieldname": "internship_period",
+   "fieldtype": "Data",
+   "label": "Internship Period(in months)"
+  },
+  {
+   "fieldname": "internship_end_date",
+   "fieldtype": "Date",
+   "label": "Internship End Date"
+  },
+  {
+   "fieldname": "stipend_structure",
+   "fieldtype": "Data",
+   "label": "Stipend Structure"
+  },
+  {
+   "fieldname": "internship_extension_date",
+   "fieldtype": "Date",
+   "label": "Internship Extension Date"
+  },
+  {
+   "fieldname": "conversion_date",
+   "fieldtype": "Date",
+   "label": "Conversion Date"
+  },
+  {
+   "fieldname": "exit_date",
+   "fieldtype": "Date",
+   "label": "Exit Date"
+  },
+  {
+   "fieldname": "basic_details_section",
+   "fieldtype": "Section Break",
+   "label": "Basic Details"
+  },
+  {
+   "fieldname": "tab_break_zrbs",
+   "fieldtype": "Tab Break",
+   "label": "Personal Information"
+  },
+  {
+   "fieldname": "personal_information_section",
+   "fieldtype": "Section Break",
+   "label": "Personal Information"
+  },
+  {
+   "fieldname": "tab_3_tab",
+   "fieldtype": "Tab Break",
+   "label": "Address & Contact "
+  },
+  {
+   "fieldname": "internship_details_tab",
+   "fieldtype": "Tab Break",
+   "label": "Internship Details"
+  },
+  {
+   "fieldname": "bank_details_tab",
+   "fieldtype": "Tab Break",
+   "label": "Bank details"
+  },
+  {
+   "fieldname": "bank_name",
+   "fieldtype": "Data",
+   "label": "Bank Name"
+  },
+  {
+   "fieldname": "ac_holder_name",
+   "fieldtype": "Data",
+   "label": "A/C Holder Name"
+  },
+  {
+   "fieldname": "ac_number",
+   "fieldtype": "Data",
+   "label": "A/C Number"
+  },
+  {
+   "fieldname": "ifsc_code",
+   "fieldtype": "Data",
+   "label": "IFSC Code"
+  },
+  {
+   "fieldname": "identity_section",
+   "fieldtype": "Section Break",
+   "label": "Identity"
+  },
+  {
+   "fieldname": "bank_details_section",
+   "fieldtype": "Section Break",
+   "label": "Bank Details"
+  },
+  {
+   "fieldname": "tab_6_tab",
+   "fieldtype": "Tab Break",
+   "label": "Exit"
+  },
+  {
+   "fieldname": "reason_for_exit",
+   "fieldtype": "Small Text",
+   "label": "Reason For Exit"
+  },
+  {
+   "fieldname": "contact_section",
+   "fieldtype": "Section Break",
+   "label": "Contact"
+  },
+  {
+   "fieldname": "column_break_tcqc",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_abyc",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "address_section",
+   "fieldtype": "Section Break",
+   "label": "Address"
+  },
+  {
+   "fieldname": "emergency_contact_section",
+   "fieldtype": "Section Break",
+   "label": "Emergency Contact"
+  },
+  {
+   "fieldname": "company_details_section",
+   "fieldtype": "Section Break",
+   "label": "Company Details"
+  },
+  {
+   "fieldname": "column_break_kyqb",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "stipend_details_section",
+   "fieldtype": "Section Break",
+   "label": "Stipend Details"
+  },
+  {
+   "fieldname": "variable_pay",
+   "fieldtype": "Data",
+   "label": "Variable Pay"
+  },
+  {
+   "fieldname": "fixed_pay",
+   "fieldtype": "Data",
+   "label": "Fixed Pay"
+  },
+  {
+   "fieldname": "designation",
+   "fieldtype": "Link",
+   "label": "Designation",
+   "options": "Designation"
+  },
+  {
+   "fieldname": "department",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Department",
+   "options": "Department"
+  },
+  {
+   "fetch_from": "mentor_id.company_email",
+   "fieldname": "mentor_mail_id",
+   "fieldtype": "Data",
+   "label": "Mentor Mail ID",
+   "options": "Email"
+  },
+  {
+   "fetch_from": "manager_id.company_email",
+   "fieldname": "manager_mail_id",
+   "fieldtype": "Data",
+   "label": "Manager Mail ID",
+   "options": "Email"
+  },
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Series",
+   "no_copy": 1,
+   "options": "INT-",
+   "set_only_once": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-07-01 10:39:11.797285",
+ "modified_by": "Administrator",
+ "module": "Teceze",
+ "name": "Intern",
+ "naming_rule": "By \"Naming Series\" field",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "full_name"
+}

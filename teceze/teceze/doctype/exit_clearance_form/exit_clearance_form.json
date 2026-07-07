@@ -1,0 +1,473 @@
+{
+ "actions": [],
+ "allow_bulk_edit": 1,
+ "allow_rename": 1,
+ "autoname": "Exit-.####",
+ "creation": "2026-07-01 12:39:43.223185",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "employee_id",
+  "employee_name",
+  "department",
+  "employee_email",
+  "employee_phone",
+  "column_break_qbct",
+  "data_of_joined",
+  "date_of_resignation",
+  "resignation_effective_date",
+  "reason_for_leaving",
+  "others",
+  "department_clearances_hod_tab",
+  "knowledge_transfer_completed",
+  "files_and_other_documents_handover",
+  "column_break_hohm",
+  "suppliervendor_details_handover_if_applicable",
+  "tasks__transfer_to",
+  "section_break_qgds",
+  "remarks",
+  "it_department_tab",
+  "employee_number_removed",
+  "email_converteddeactivated",
+  "mail_forwarded",
+  "column_break_zjkl",
+  "remove_door_access",
+  "remove_from_email_groups",
+  "passwords_deactivated",
+  "finance_department_tab",
+  "pending_payments",
+  "any_deductions",
+  "travel_advances",
+  "personalemployee_loans",
+  "all_expence_reimbursements",
+  "mobileinternet_bills_outstandings",
+  "notice_period_deduction",
+  "column_break_hajf",
+  "amount",
+  "deduction_amount",
+  "advance_amount",
+  "loan_amount",
+  "expence_reimbursement_amount",
+  "mobileinternet_bill_amount",
+  "notice_deduction_amount",
+  "admin_department_tab",
+  "mobile_phone",
+  "mobile_sim_card",
+  "internet_donglerouter",
+  "laptop_charger",
+  "mouse",
+  "monitor",
+  "laptop_stand",
+  "column_break_atlt",
+  "keyboard",
+  "laptop",
+  "vehicle_provided",
+  "other_deviceslogistics",
+  "extention_cord",
+  "id_card",
+  "insurance_card",
+  "hr_department_tab",
+  "date_of_resignation_letter",
+  "comments",
+  "accepted_on",
+  "resignation_acceptance",
+  "service_letter"
+ ],
+ "fields": [
+  {
+   "fetch_from": "employee_id.employee_name",
+   "fieldname": "employee_name",
+   "fieldtype": "Data",
+   "label": "Employee Name",
+   "options": "Employee"
+  },
+  {
+   "fieldname": "employee_id",
+   "fieldtype": "Data",
+   "label": "Employee ID",
+   "options": "Employee"
+  },
+  {
+   "fetch_from": "employee_id.department",
+   "fieldname": "department",
+   "fieldtype": "Data",
+   "label": "Department"
+  },
+  {
+   "fieldname": "column_break_qbct",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "employee_id.date_of_joining",
+   "fieldname": "data_of_joined",
+   "fieldtype": "Data",
+   "label": "Data Of Joined"
+  },
+  {
+   "fieldname": "date_of_resignation",
+   "fieldtype": "Date",
+   "label": "Date Of Resignation"
+  },
+  {
+   "fieldname": "reason_for_leaving",
+   "fieldtype": "Select",
+   "label": "Reason For Leaving",
+   "options": "\nRetirement\nResignation\nTermination\nEnd of Contract\nOthers"
+  },
+  {
+   "fieldname": "resignation_effective_date",
+   "fieldtype": "Date",
+   "label": "Resignation Effective Date"
+  },
+  {
+   "fieldname": "department_clearances_hod_tab",
+   "fieldtype": "Tab Break",
+   "label": "Department Clearances HOD"
+  },
+  {
+   "fieldname": "knowledge_transfer_completed",
+   "fieldtype": "Select",
+   "label": "Knowledge Transfer Completed",
+   "options": "\nYes\nNo"
+  },
+  {
+   "fieldname": "files_and_other_documents_handover",
+   "fieldtype": "Select",
+   "label": "Files and other documents handover",
+   "options": "\nYes\nNo"
+  },
+  {
+   "fieldname": "suppliervendor_details_handover_if_applicable",
+   "fieldtype": "Select",
+   "label": "Supplier/Vendor details handover (if applicable)",
+   "options": "\nYes\nNo"
+  },
+  {
+   "fieldname": "tasks__transfer_to",
+   "fieldtype": "Link",
+   "label": "Tasks  Transfer To",
+   "options": "Employee"
+  },
+  {
+   "fieldname": "remarks",
+   "fieldtype": "Small Text",
+   "label": "Remarks"
+  },
+  {
+   "fieldname": "it_department_tab",
+   "fieldtype": "Tab Break",
+   "label": "IT Department"
+  },
+  {
+   "fieldname": "employee_number_removed",
+   "fieldtype": "Select",
+   "label": "Employee Number Removed",
+   "options": "\nYes\nNo"
+  },
+  {
+   "fieldname": "email_converteddeactivated",
+   "fieldtype": "Select",
+   "label": "Email Converted/Deactivated",
+   "options": "\nYes\nNo"
+  },
+  {
+   "fieldname": "remove_from_email_groups",
+   "fieldtype": "Select",
+   "label": "Remove from Email groups",
+   "options": "\nYes\nNo"
+  },
+  {
+   "fieldname": "remove_door_access",
+   "fieldtype": "Select",
+   "label": "Remove Door Access",
+   "options": "\nYes\nNo"
+  },
+  {
+   "fieldname": "passwords_deactivated",
+   "fieldtype": "Select",
+   "label": "Passwords deactivated",
+   "options": "\nYes\nNo"
+  },
+  {
+   "depends_on": "eval:doc.reason_for_leaving==\"Others\"",
+   "fieldname": "others",
+   "fieldtype": "Data",
+   "label": "Others"
+  },
+  {
+   "fieldname": "finance_department_tab",
+   "fieldtype": "Tab Break",
+   "label": "Finance Department"
+  },
+  {
+   "fieldname": "pending_payments",
+   "fieldtype": "Select",
+   "label": "Pending Payments",
+   "options": "\nYes\nNo"
+  },
+  {
+   "fieldname": "any_deductions",
+   "fieldtype": "Select",
+   "label": "Any Deductions",
+   "options": "\nYes\nNo"
+  },
+  {
+   "fieldname": "travel_advances",
+   "fieldtype": "Select",
+   "label": "Travel Advances",
+   "options": "\nYes\nNo"
+  },
+  {
+   "fieldname": "personalemployee_loans",
+   "fieldtype": "Select",
+   "label": "Personal/Employee Loans",
+   "options": "\nYes\nNo"
+  },
+  {
+   "fieldname": "all_expence_reimbursements",
+   "fieldtype": "Select",
+   "label": "All expence Reimbursements",
+   "options": "\nYes\nNo"
+  },
+  {
+   "fieldname": "mobileinternet_bills_outstandings",
+   "fieldtype": "Select",
+   "label": "Mobile/Internet Bills Outstandings",
+   "options": "\nYes\nNo"
+  },
+  {
+   "fieldname": "notice_period_deduction",
+   "fieldtype": "Select",
+   "label": "Notice period deduction",
+   "options": "\nYes\nNo"
+  },
+  {
+   "fieldname": "column_break_hajf",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:doc.pending_payments==\"Yes\"",
+   "fieldname": "amount",
+   "fieldtype": "Data",
+   "label": "Pending Amount"
+  },
+  {
+   "depends_on": "eval:doc.any_deductions==\"Yes\"",
+   "fieldname": "deduction_amount",
+   "fieldtype": "Data",
+   "label": "Deduction Amount"
+  },
+  {
+   "depends_on": "eval:doc.travel_advances==\"Yes\"",
+   "fieldname": "advance_amount",
+   "fieldtype": "Data",
+   "label": "Travel Advance Amount"
+  },
+  {
+   "depends_on": "eval:doc.personalemployee_loans==\"Yes\"",
+   "fieldname": "loan_amount",
+   "fieldtype": "Data",
+   "label": "Loan Amount"
+  },
+  {
+   "depends_on": "eval:doc.all_expence_reimbursements==\"Yes\"",
+   "fieldname": "expence_reimbursement_amount",
+   "fieldtype": "Data",
+   "label": "Expence Reimbursement Amount"
+  },
+  {
+   "depends_on": "eval:doc.mobileinternet_bills_outstandings==\"Yes\"",
+   "fieldname": "mobileinternet_bill_amount",
+   "fieldtype": "Data",
+   "label": "Mobile/Internet Bill Amount"
+  },
+  {
+   "depends_on": "eval:doc.notice_period_deduction==\"Yes\"",
+   "fieldname": "notice_deduction_amount",
+   "fieldtype": "Data",
+   "label": "Notice deduction Amount"
+  },
+  {
+   "fieldname": "admin_department_tab",
+   "fieldtype": "Tab Break",
+   "label": "Admin Department"
+  },
+  {
+   "fieldname": "mobile_phone",
+   "fieldtype": "Select",
+   "label": "Mobile Phone ",
+   "options": "\nCollected\nNot collected\nNot Issued"
+  },
+  {
+   "fieldname": "mobile_sim_card",
+   "fieldtype": "Select",
+   "label": "Mobile SIM card",
+   "options": "\nCollected\nNot collected\nNot Issued"
+  },
+  {
+   "fieldname": "internet_donglerouter",
+   "fieldtype": "Select",
+   "label": "Internet Dongle/Router",
+   "options": "\nCollected\nNot collected\nNot Issued"
+  },
+  {
+   "fieldname": "laptop_charger",
+   "fieldtype": "Select",
+   "label": "Laptop Charger",
+   "options": "\nCollected\nNot collected\nNot Issued"
+  },
+  {
+   "fieldname": "column_break_atlt",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "mouse",
+   "fieldtype": "Select",
+   "label": "Mouse",
+   "options": "\nCollected\nNot collected\nNot Issued"
+  },
+  {
+   "fieldname": "monitor",
+   "fieldtype": "Select",
+   "label": "Monitor",
+   "options": "\nCollected\nNot collected\nNot Issued"
+  },
+  {
+   "fieldname": "laptop_stand",
+   "fieldtype": "Select",
+   "label": "Laptop Stand",
+   "options": "\nCollected\nNot collected\nNot Issued"
+  },
+  {
+   "fieldname": "keyboard",
+   "fieldtype": "Select",
+   "label": "Keyboard",
+   "options": "\nCollected\nNot collected\nNot Issued"
+  },
+  {
+   "fieldname": "laptop",
+   "fieldtype": "Select",
+   "label": "Laptop ",
+   "options": "\nCollected\nNot collected\nNot Issued"
+  },
+  {
+   "fieldname": "vehicle_provided",
+   "fieldtype": "Select",
+   "label": "Vehicle Provided",
+   "options": "\nCollected\nNot collected\nNot Issued"
+  },
+  {
+   "fieldname": "other_deviceslogistics",
+   "fieldtype": "Select",
+   "label": "Other devices/logistics",
+   "options": "\nCollected\nNot collected\nNot Issued"
+  },
+  {
+   "fieldname": "extention_cord",
+   "fieldtype": "Select",
+   "label": "Extention Cord",
+   "options": "\nCollected\nNot collected\nNot Issued"
+  },
+  {
+   "fieldname": "id_card",
+   "fieldtype": "Select",
+   "label": "ID card ",
+   "options": "\nCollected\nNot collected\nNot Issued"
+  },
+  {
+   "fieldname": "insurance_card",
+   "fieldtype": "Select",
+   "label": " Insurance Card",
+   "options": "\nCollected\nNot collected\nNot Issued"
+  },
+  {
+   "fieldname": "hr_department_tab",
+   "fieldtype": "Tab Break",
+   "label": "HR Department"
+  },
+  {
+   "fieldname": "date_of_resignation_letter",
+   "fieldtype": "Date",
+   "label": "Date of Resignation Letter "
+  },
+  {
+   "fieldname": "comments",
+   "fieldtype": "Small Text",
+   "label": "Comments"
+  },
+  {
+   "fieldname": "accepted_on",
+   "fieldtype": "Date",
+   "label": "Accepted On"
+  },
+  {
+   "fieldname": "resignation_acceptance",
+   "fieldtype": "Select",
+   "label": "Resignation Acceptance",
+   "options": "\nGiven\nNot Issued"
+  },
+  {
+   "fieldname": "service_letter",
+   "fieldtype": "Select",
+   "label": "Service Letter",
+   "options": "\nGiven\nNot Issued"
+  },
+  {
+   "fieldname": "mail_forwarded",
+   "fieldtype": "Select",
+   "label": "Whom mails Calls should be forwarded",
+   "options": "\nYes\nNo"
+  },
+  {
+   "fieldname": "column_break_hohm",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_qgds",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_zjkl",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "employee_id.personal_email",
+   "fieldname": "employee_email",
+   "fieldtype": "Data",
+   "label": "Employee Email(Persnal)"
+  },
+  {
+   "fieldname": "employee_phone",
+   "fieldtype": "Data",
+   "label": "Employee Contact No"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-07-02 12:56:01.971332",
+ "modified_by": "Administrator",
+ "module": "Teceze",
+ "name": "Exit Clearance Form",
+ "naming_rule": "Expression",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}

@@ -279,4 +279,21 @@ def credit_privilege_leave():
         )
 
         frappe.db.commit()
+ #dharshini        
+def on_update(doc, method):
+    if not doc.resignation_letter_date:
+        return
 
+    # Prevent duplicate Exit Clearance Forms
+    if frappe.db.exists("Exit Clearance Form", {"employee_id": doc.name}):
+        return
+
+    exit_doc = frappe.new_doc("Exit Clearance Form")
+    exit_doc.employee_id = doc.name
+    exit_doc.employee_name = doc.employee_name
+    exit_doc.date_of_resignation = doc.resignation_letter_date
+    exit_doc.data_of_joined = doc.date_of_joining
+    exit_doc.employee_phone = doc.cell_number
+    exit_doc.employee_email = doc.personal_email
+    exit_doc.department = doc.department
+    exit_doc.insert(ignore_permissions=True)

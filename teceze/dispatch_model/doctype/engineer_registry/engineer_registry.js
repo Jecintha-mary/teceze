@@ -10,20 +10,38 @@
 // For license information, please see license.txt
 
 
+// Copyright (c) 2026, Teceze Consultancy Pvt. Ltd.
+// For license information, please see license.txt
+
+// Copyright (c) 2026, Teceze Consultancy Pvt. Ltd.
+// For license information, please see license.txt
+
+// Copyright (c) 2026, Teceze Consultancy Pvt. Ltd.
+// For license information, please see license.txt
+
+// Copyright (c) 2026, Teceze Consultancy Pvt. Ltd.
+// For license information, please see license.txt
+
+
+// Copyright (c) 2026, Teceze Consultancy Pvt. Ltd.
+// For license information, please see license.txt
+
+
 frappe.ui.form.on("Engineer Registry", {
 
     validate(frm) {
 
 
-        // Name Validation
-        if (!frm.doc.name) {
+        // Engineer Name Validation
+
+        if (!frm.doc.engineer_name) {
 
             frappe.throw("Engineer Name is required");
 
         }
 
 
-        if (frm.doc.name.length < 3) {
+        if (frm.doc.engineer_name.length < 3) {
 
             frappe.throw(
                 "Engineer Name should contain minimum 3 characters"
@@ -34,7 +52,8 @@ frappe.ui.form.on("Engineer Registry", {
 
         let name_pattern = /^[A-Za-z ]+$/;
 
-        if (!name_pattern.test(frm.doc.name)) {
+
+        if (!name_pattern.test(frm.doc.engineer_name)) {
 
             frappe.throw(
                 "Engineer Name should contain only letters"
@@ -58,10 +77,25 @@ frappe.ui.form.on("Engineer Registry", {
 
         // Experience Validation
 
-        if (frm.doc.experience === null || frm.doc.experience === undefined) {
+        if (
+            frm.doc.experience === null ||
+            frm.doc.experience === undefined
+        ) {
 
             frappe.throw(
                 "Experience is required"
+            );
+
+        }
+
+
+        let experience_pattern = /^[0-9]+$/;
+
+
+        if (!experience_pattern.test(frm.doc.experience)) {
+
+            frappe.throw(
+                "Experience should contain only numbers"
             );
 
         }
@@ -88,6 +122,18 @@ frappe.ui.form.on("Engineer Registry", {
         }
 
 
+        let location_pattern = /^[A-Za-z ]+$/;
+
+
+        if (!location_pattern.test(frm.doc.location)) {
+
+            frappe.throw(
+                "Location should contain only letters"
+            );
+
+        }
+
+
 
         // Availability Validation
 
@@ -101,9 +147,28 @@ frappe.ui.form.on("Engineer Registry", {
 
 
 
+        // Project Validation
+
+        if (frm.doc.project) {
+
+            if (frm.doc.project.length < 2) {
+
+                frappe.throw(
+                    "Project name should contain minimum 2 characters"
+                );
+
+            }
+
+        }
+
+
+
         // Rating Validation
 
-        if (frm.doc.rating === null || frm.doc.rating === undefined) {
+        if (
+            frm.doc.rating === null ||
+            frm.doc.rating === undefined
+        ) {
 
             frappe.throw(
                 "Rating is required"
@@ -112,10 +177,26 @@ frappe.ui.form.on("Engineer Registry", {
         }
 
 
+
         if (frm.doc.rating < 0 || frm.doc.rating > 5) {
 
             frappe.throw(
                 "Rating should be between 0 and 5"
+            );
+
+        }
+
+
+
+        // Rating Decimal Validation
+
+        let rating_pattern = /^\d(\.\d)?$/;
+
+
+        if (!rating_pattern.test(frm.doc.rating)) {
+
+            frappe.throw(
+                "Rating should have maximum one decimal place (Example: 4.8)"
             );
 
         }
