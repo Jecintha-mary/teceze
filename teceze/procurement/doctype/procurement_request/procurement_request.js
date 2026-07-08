@@ -34,6 +34,18 @@ frappe.ui.form.on("Procurement Request Item", {
 
 });
 
+//dharshini
+frappe.ui.form.on("Procurement Request", {
+    setup(frm) {
+        frm.set_query("client_name", function () {
+            return {
+                filters: {
+                    custom_is_p2p_customer: 1
+                }
+            };
+        });
+    }
+});
 
 function calculate_amount(frm, cdt, cdn) {
 

@@ -33,12 +33,14 @@
   "tab_3_tab",
   "contact_section",
   "personal_mail_id",
+  "column_break_inpb",
   "contact_number",
   "address_section",
   "current_address",
   "emergency_contact_section",
   "emergency_contact_person",
   "emergency_contact_number",
+  "column_break_cnck",
   "relation",
   "internship_details_tab",
   "joining_date",
@@ -48,12 +50,14 @@
   "internship_period",
   "internship_extension_date",
   "stipend_details_section",
-  "stipend_structure",
   "variable_pay",
   "fixed_pay",
+  "column_break_dunc",
+  "stipend_structure",
   "bank_details_tab",
   "identity_section",
   "aadhar_number",
+  "column_break_rplz",
   "pan_number",
   "bank_details_section",
   "bank_name",
@@ -69,6 +73,7 @@
   {
    "fieldname": "full_name",
    "fieldtype": "Data",
+   "in_list_view": 1,
    "label": "Full Name"
   },
   {
@@ -78,12 +83,15 @@
   {
    "fieldname": "location",
    "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Location",
    "options": "Location"
   },
   {
    "fieldname": "employment_status",
    "fieldtype": "Select",
+   "in_list_view": 1,
    "label": "Employment Status",
    "options": "Active\nInactive\nExited\nTerminated\nConverted to Full Time"
   },
@@ -179,6 +187,7 @@
   {
    "fieldname": "company",
    "fieldtype": "Link",
+   "in_list_view": 1,
    "label": "Company",
    "options": "Company"
   },
@@ -337,6 +346,7 @@
   {
    "fieldname": "designation",
    "fieldtype": "Link",
+   "in_list_view": 1,
    "label": "Designation",
    "options": "Designation"
   },
@@ -365,16 +375,33 @@
   {
    "fieldname": "naming_series",
    "fieldtype": "Select",
+   "hidden": 1,
    "label": "Series",
    "no_copy": 1,
    "options": "INT-",
    "set_only_once": 1
+  },
+  {
+   "fieldname": "column_break_inpb",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_cnck",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_dunc",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_rplz",
+   "fieldtype": "Column Break"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-07-01 10:39:11.797285",
+ "modified": "2026-07-07 14:45:57.941598",
  "modified_by": "Administrator",
  "module": "Teceze",
  "name": "Intern",

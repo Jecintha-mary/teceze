@@ -22,7 +22,9 @@ def get_items():
                 "item_group",
                 "custom_price",
                 "custom_stock",
-                "custom_item_image"
+                "custom_item_image",
+                "custom_mfg",
+                "custom_mpn"
             ],
             ignore_permissions=True,
             order_by="item_name asc"
@@ -35,11 +37,11 @@ def get_items():
 
             data.append({
 
-                "id": item.item_code,
-
                 "item_code": item.item_code,
 
-                "name": item.item_name,
+                "mfg" : item.custom_mfg,
+
+                "mpn" : item.custom_mpn,
 
                 "category": item.item_group,
 

@@ -56,7 +56,7 @@ class ProcurementRequest(Document):
 		# ticket.custom_sme_name = self.sme_name
 		# ticket.custom_sme_phone_number = self.sme_phone_number
 		# ticket.custom_sme_email = self.sme_email
-		# ticket.insert(ignore_permissions=True)
+		#ticket.insert(ignore_permissions=True)
 
 #dharshini(to trigger sales order id in Pr Form )
 def update_sales_order(doc, method):
@@ -74,18 +74,34 @@ def update_sales_order(doc, method):
         )
 #Updating Both lead status and so status
 def onload(doc, method):
+
+    lead_names = list({row.lead for row in doc.items if row.lead})
+
+    so_names = list({row.sales_order for row in doc.items if row.sales_order})
+
+    lead_status_map = {
+        d.name: d.status
+        for d in frappe.get_all(
+            "Lead",
+            filters={"name": ["in", lead_names]},
+            fields=["name", "status"]
+        )
+    }
+
+    so_status_map = {
+        d.name: d.status
+        for d in frappe.get_all(
+            "Sales Order",
+            filters={"name": ["in", so_names]},
+            fields=["name", "status"]
+        )
+    }
+
+    # Update UI
     for row in doc.items:
 
         if row.lead:
-            row.lead_status = frappe.db.get_value(
-                "Lead",
-                row.lead,
-                "status"
-            )
+            row.lead_status = lead_status_map.get(row.lead)
 
         if row.sales_order:
-            row.so_status = frappe.db.get_value(
-                "Sales Order",
-                row.sales_order,
-                "status"
-            )
+            row.so_status = so_status_map.get(row.sales_order)

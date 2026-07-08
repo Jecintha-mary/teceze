@@ -181,6 +181,7 @@
    "read_only": 1
   },
   {
+   "fetch_from": "sales_order.status",
    "fieldname": "so_status",
    "fieldtype": "Data",
    "label": "SO Status"
@@ -222,7 +223,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-07-07 12:10:11.697347",
+ "modified": "2026-07-07 15:21:26.757981",
  "modified_by": "Administrator",
  "module": "Procurement",
  "name": "Procurement Request Item",
