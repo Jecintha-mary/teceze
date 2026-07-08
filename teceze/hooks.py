@@ -309,7 +309,7 @@ fixtures = [
    	"Workflow Action Master",
    	"Workflow State",
    	"Role",
-   	# "Workspace",
+   	"Workspace",
 	"Print Format",
    	"Custom DocPerm",
    	"Report",
