@@ -314,7 +314,8 @@ fixtures = [
    	"Custom DocPerm",
    	"Report",
 	"Number Card",
-	"Web Form"
+	"Web Form",
+	"Desktop Icon"
 ]
 
 
