@@ -1,3 +1,4 @@
+//Kazana
 frappe.ui.form.on("Procurement Request", {
 
     refresh(frm) {
@@ -91,31 +92,70 @@ function update_procurement_status(frm) {
         return;
     }
 
-    if (statuses.every(status => status === "Submitted")) {
+    // All Closed
+    if (statuses.every(status => status === "Closed")) {
 
         frm.set_value("status", "Closed");
 
     }
 
+    // All Rejected
+    else if (statuses.every(status => status === "Rejected")) {
+
+        frm.set_value("status", "Rejected");
+
+    }
+
+    // All Approved
     else if (statuses.every(status => status === "Approved")) {
 
         frm.set_value("status", "Approved");
 
     }
 
+    // All Quoted
+    else if (statuses.every(status => status === "Quoted")) {
+
+        frm.set_value("status", "Quoted");
+
+    }
+
+    // All Submitted
+    else if (statuses.every(status => status === "Submitted")) {
+
+        frm.set_value("status", "Submitted");
+
+    }
+
+    // Any Open item
     else if (statuses.includes("Open")) {
 
         frm.set_value("status", "Open");
 
     }
 
-    else if (
-        statuses.includes("Submitted") ||
-        statuses.includes("Quoted") ||
-        statuses.includes("Approved")
-    ) {
+    // Mixed statuses
+    else if (statuses.includes("Submitted")) {
 
-        frm.set_value("status", "Pending");
+        frm.set_value("status", "Submitted");
+
+    }
+
+    else if (statuses.includes("Quoted")) {
+
+        frm.set_value("status", "Quoted");
+
+    }
+
+    else if (statuses.includes("Approved")) {
+
+        frm.set_value("status", "Approved");
+
+    }
+
+    else if (statuses.includes("Rejected")) {
+
+        frm.set_value("status", "Rejected");
 
     }
 

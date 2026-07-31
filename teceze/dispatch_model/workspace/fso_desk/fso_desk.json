@@ -1,0 +1,72 @@
+{
+ "app": "teceze",
+ "charts": [
+  {
+   "chart_name": "Ticket Pipeline",
+   "label": "Ticket Pipeline Chart"
+  },
+  {
+   "chart_name": "SLA Distribution",
+   "label": "SLA Distribution"
+  }
+ ],
+ "content": "[{\"id\":\"RNSSIpIC6O\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Total Tickets\",\"col\":4}},{\"id\":\"sI6Gps7c4g\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Pending Review\",\"col\":4}},{\"id\":\"HcHci1Yz67\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"In Progress\",\"col\":4}},{\"id\":\"_L8ffXnSLY\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Completed\",\"col\":4}},{\"id\":\"evhBn2rFbX\",\"type\":\"chart\",\"data\":{\"chart_name\":\"Ticket Pipeline Chart\",\"col\":12}},{\"id\":\"kVEIphCrKB\",\"type\":\"chart\",\"data\":{\"chart_name\":\"SLA Distribution\",\"col\":12}},{\"id\":\"_C85FLvlj4\",\"type\":\"custom_block\",\"data\":{\"custom_block_name\":\"Recent Tickets\",\"col\":12}},{\"id\":\"nrmzVSrXU4\",\"type\":\"custom_block\",\"data\":{\"custom_block_name\":\"Engineer Workload\",\"col\":12}},{\"id\":\"gz_JdpyDzM\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Assigned Tickets\",\"col\":4}},{\"id\":\"Z5x_BQnOCQ\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Unassigned Tickets\",\"col\":4}}]",
+ "creation": "2026-07-08 12:29:14.344025",
+ "custom_blocks": [
+  {
+   "custom_block_name": "Recent Tickets",
+   "label": "Recent Tickets"
+  },
+  {
+   "custom_block_name": "Engineer Workload",
+   "label": "Engineer Workload"
+  }
+ ],
+ "docstatus": 0,
+ "doctype": "Workspace",
+ "hide_custom": 0,
+ "idx": 0,
+ "indicator_color": "green",
+ "is_hidden": 0,
+ "label": "FSO Desk",
+ "link_type": "DocType",
+ "links": [],
+ "modified": "2026-07-08 14:54:39.017222",
+ "modified_by": "Administrator",
+ "module": "Dispatch Model",
+ "name": "FSO Desk",
+ "number_cards": [
+  {
+   "label": "Assigned Tickets",
+   "number_card_name": "Assigned Tickets"
+  },
+  {
+   "label": "Total Tickets",
+   "number_card_name": "Total Tickets-1"
+  },
+  {
+   "label": "Unassigned Tickets",
+   "number_card_name": "Unassigned Tickets"
+  },
+  {
+   "label": "Pending Review",
+   "number_card_name": "Pending Review"
+  },
+  {
+   "label": "In Progress",
+   "number_card_name": "In Progress"
+  },
+  {
+   "label": "Completed",
+   "number_card_name": "Completed"
+  }
+ ],
+ "owner": "Administrator",
+ "public": 1,
+ "quick_lists": [],
+ "roles": [],
+ "sequence_id": 0.0,
+ "shortcuts": [],
+ "title": "FSO Desk",
+ "type": "Workspace"
+}

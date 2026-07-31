@@ -114,13 +114,12 @@
    "label": "Attachment"
   },
   {
-   "default": "Open",
    "fieldname": "status",
    "fieldtype": "Select",
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Status",
-   "options": "\nOpen\nPending\nApproved\nClosed"
+   "options": "\nOpen\nSubmitted\nQuoted\nApproved\nClosed\nRejected"
   },
   {
    "collapsible": 1,
@@ -196,8 +195,7 @@
   {
    "fieldname": "details",
    "fieldtype": "Data",
-   "label": "Requirement Details",
-   "reqd": 1
+   "label": "Requirement Details"
   },
   {
    "fieldname": "user",
@@ -208,8 +206,14 @@
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
- "links": [],
- "modified": "2026-07-06 15:05:21.827969",
+ "links": [
+  {
+   "group": "Lead",
+   "link_doctype": "Lead",
+   "link_fieldname": "custom_procurement_id"
+  }
+ ],
+ "modified": "2026-07-21 17:36:02.808296",
  "modified_by": "Administrator",
  "module": "Procurement",
  "name": "Procurement Request",

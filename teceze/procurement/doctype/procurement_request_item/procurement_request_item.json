@@ -121,7 +121,7 @@
    "fieldname": "status",
    "fieldtype": "Select",
    "label": "Status",
-   "options": "\nOpen\nSubmitted\nQuoted\nApproved"
+   "options": "\nOpen\nSubmitted\nQuoted\nApproved\nClosed\nRejected"
   },
   {
    "collapsible": 1,
@@ -212,6 +212,7 @@
    "label": "Lead Status"
   },
   {
+   "fetch_from": "item_code.custom_price",
    "fieldname": "unit_price",
    "fieldtype": "Currency",
    "in_list_view": 1,
@@ -223,7 +224,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-07-07 15:21:26.757981",
+ "modified": "2026-07-09 15:12:11.074823",
  "modified_by": "Administrator",
  "module": "Procurement",
  "name": "Procurement Request Item",

@@ -1,0 +1,320 @@
+/* =====================================================
+   Employee Attendance Dashboard — light theme
+===================================================== */
+
+.attendance-container{
+    max-width:1100px;
+    margin:30px auto;
+    padding:20px;
+    font-family:Inter, "Segoe UI", sans-serif;
+    color:#1f272e;
+}
+
+/* =====================================================
+   Header
+===================================================== */
+
+.attendance-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    margin-bottom:24px;
+}
+
+.header-left{
+    display:flex;
+    align-items:center;
+    gap:16px;
+}
+
+.header-left h2{
+    margin:0;
+    font-size:32px;
+    font-weight:700;
+    color:#1f272e;
+}
+
+#current-date{
+    margin:0;
+    color:#1f272e;
+    font-size:14px;
+    align-self:flex-start;
+}
+
+/* =====================================================
+   Status Badge (used in header, next to title)
+===================================================== */
+
+.status-badge{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    padding:6px 16px;
+    border-radius:30px;
+    font-size:14px;
+    font-weight:600;
+}
+
+.status-dot{
+    width:8px;
+    height:8px;
+    border-radius:50%;
+}
+
+.status-in{
+    background:#ddf5e1;
+    color:#1f9d55;
+}
+.status-in .status-dot{
+    background:#1f9d55;
+}
+
+.status-out{
+    background:#e6f1fb;
+    color:#0c447c;
+}
+.status-out .status-dot{
+    background:#2490ef;
+}
+
+.status-none{
+    background:#fdecec;
+    color:#c0392b;
+}
+.status-none .status-dot{
+    background:#e05c5c;
+}
+
+/* =====================================================
+   Cards
+===================================================== */
+
+.attendance-card,
+.history-card{
+    background:#ffffff;
+    border:1px solid #e3e5e8;
+    border-radius:16px;
+    padding:28px 30px;
+    box-shadow:none;
+}
+
+/* =====================================================
+   Profile row (avatar + name + location + timer)
+===================================================== */
+
+.profile-section{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+
+.profile-left{
+    display:flex;
+    align-items:center;
+    gap:18px;
+}
+
+.avatar{
+    width:60px;
+    height:60px;
+    border-radius:50%;
+    background:#e6f1fb;
+    color:#0c447c;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    font-size:24px;
+    font-weight:600;
+    flex-shrink:0;
+}
+
+.profile-left h3{
+    margin:0;
+    font-size:22px;
+    font-weight:600;
+    color:#1f272e;
+}
+
+.profile-left p{
+    margin:4px 0 0;
+    color:#68737d;
+    font-size:14px;
+}
+
+/* Working timer, top-right of the profile row */
+.clock-box{
+    text-align:right;
+    background:transparent;
+    padding:0;
+    box-shadow:none;
+}
+
+.clock-box small{
+    display:block;
+    color:#1f272e;
+    font-size:12px;
+    letter-spacing:.3px;
+}
+
+#live-timer{
+    margin:4px 0 0;
+    font-size:26px;
+    font-weight:600;
+    color:#1f272e;
+}
+
+/* =====================================================
+   Divider
+===================================================== */
+
+.divider{
+    height:1px;
+    background:#e3e5e8;
+    margin:22px 0;
+}
+
+/* =====================================================
+   Rows
+===================================================== */
+
+
+.attendance-row{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:14px 0;
+    border-bottom:1px solid #f1f2f4;
+}
+
+.attendance-row:last-child{
+    border-bottom:none;
+}
+
+.attendance-row span{
+    color:#1f272e;
+    font-size:14px;
+    font-weight:500;
+}
+
+.attendance-row strong{
+    font-size:14px;
+    font-weight:600;
+    color:#1f272e;
+}
+
+/* =====================================================
+   Button
+===================================================== */
+
+.button-area{
+    margin-top:20px;
+    text-align:center;
+}
+
+#attendance_btn{
+    width:auto;
+    min-width:160px;
+    padding:0 28px;
+    height:42px;
+    border-radius:8px;
+    border:none;
+    font-size:14px;
+    font-weight:600;
+    background:#2490ef;
+    color:#ffffff;
+    transition:.2s;
+}
+
+#attendance_btn:hover{
+    background:#1b7fda;
+}
+
+/* =====================================================
+   History
+===================================================== */
+
+.history-card{
+    margin-top:24px;
+    padding:24px 30px;
+}
+
+.history-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:16px;
+}
+
+.history-header h4{
+    margin:0;
+    font-size:18px;
+    font-weight:700;
+    color:#1f272e;
+}
+
+.attendance-table{
+    margin:0;
+    color:#1f272e;
+}
+
+.attendance-table thead{
+    background:transparent;
+}
+
+.attendance-table th{
+    padding:10px 12px;
+    font-weight:600;
+    color:#1f272e;
+    font-size:13px;
+    border-bottom:1px solid #e3e5e8;
+}
+
+.attendance-table td{
+    padding:14px 12px;
+    vertical-align:middle;
+    font-size:14px;
+    border-bottom:1px solid #f1f2f4;
+    color:#1f272e;
+}
+
+.attendance-table tbody tr:last-child td{
+    border-bottom:none;
+}
+
+.attendance-table tbody tr:hover{
+    background:#f7f8fa;
+}
+
+/* =====================================================
+   Responsive
+===================================================== */
+
+@media(max-width:768px){
+
+    .attendance-header{
+        flex-direction:column;
+        align-items:flex-start;
+        gap:12px;
+    }
+
+    .header-left{
+        flex-wrap:wrap;
+    }
+
+    .profile-section{
+        flex-direction:column;
+        align-items:flex-start;
+        gap:16px;
+    }
+
+    .clock-box{
+        text-align:left;
+    }
+
+    .attendance-row{
+        flex-direction:column;
+        align-items:flex-start;
+        gap:4px;
+    }
+
+}

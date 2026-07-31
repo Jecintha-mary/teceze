@@ -143,7 +143,7 @@ frappe.ui.form.on('Leave Application', {
                 break;
             case "Casual Leave":
                 if(frm.doc.from_date && frm.doc.to_date && frm.doc.leave_type == "Casual Leave" && frm.doc.employee){
-                    if (frm.doc.total_leave_days > 2) { 
+                    if (frm.doc.total_leave_days > 10) { 
                         frm.doc.from_date = "";
                         frm.doc.to_date = "";
                         frm.doc.total_leave_days = "";
@@ -155,7 +155,7 @@ frappe.ui.form.on('Leave Application', {
             break;
             case "Sick Leave":
                 if(frm.doc.from_date && frm.doc.to_date && frm.doc.leave_type  == "Sick Leave" && frm.doc.employee){
-                    if (frm.doc.total_leave_days > 2) {        
+                    if (frm.doc.total_leave_days > 10) {        
                         frm.doc.from_date = "";
                         frm.doc.to_date = "";
                         cur_frm.refresh_fields()

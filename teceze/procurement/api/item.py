@@ -34,7 +34,14 @@ def get_items():
         data = []
 
         for item in items:
-
+            file = frappe.db.get_value(
+                "File",
+                {
+                    "attached_to_doctype": "Item",
+                    "attached_to_name":  item.item_code
+                },
+                "file_url"
+            )
             data.append({
 
                 "item_code": item.item_code,
@@ -49,7 +56,7 @@ def get_items():
 
                 "stock": item.custom_stock or 0,
                 
-                "image": item.custom_item_image
+                "image": file
 
             })
 
@@ -122,7 +129,9 @@ def get_item(item_code):
                 "item_group",
                 "custom_price",
                 "custom_stock",
-                "custom_item_image"
+                "custom_item_image",
+                "custom_mfg",
+                "custom_mpn"
             ],
             ignore_permissions=True
         )
@@ -143,7 +152,15 @@ def get_item(item_code):
             return
 
         item = item[0]
-
+        file = frappe.db.get_value(
+            "File",
+            {
+                "attached_to_doctype": "Item",
+                "attached_to_name": item.item_name
+            },
+            "file_url"
+        )
+        frappe.log_error("file",str(file))
         frappe.local.response["http_status_code"] = 200
 
         frappe.response.update({
@@ -152,14 +169,16 @@ def get_item(item_code):
 
             "data": {
 
-                "id": item.item_code,
-                "name": item.item_name,
+                "item_code": item.item_name,
+                "mfg" : item.custom_mfg,
+                "mpn" : item.custom_mpn,
                 "category": item.item_group,
                 "price": item.custom_price,
                 "stock": item.custom_stock,
-                "image": item.custom_item_image
+                "image": file
 
             },
+
 
             "statusCode": 200,
 

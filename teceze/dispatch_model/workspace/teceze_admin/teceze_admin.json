@@ -1,0 +1,87 @@
+{
+ "app": "teceze",
+ "charts": [],
+ "content": "[{\"id\":\"XaKWrLVAaF\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Visit Helpdesk\",\"col\":3}},{\"id\":\"ChBUuxOX0n\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"QS5tWer-8E\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"EbS3YROHB7\",\"type\":\"card\",\"data\":{\"card_name\":\"Dispatch Request\",\"col\":4}}]",
+ "creation": "2026-07-08 14:59:01.737506",
+ "custom_blocks": [],
+ "docstatus": 0,
+ "doctype": "Workspace",
+ "hide_custom": 0,
+ "idx": 0,
+ "indicator_color": "green",
+ "is_hidden": 0,
+ "label": "Teceze Admin",
+ "link_type": "DocType",
+ "links": [
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Dispatch Request",
+   "link_count": 4,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Client",
+   "link_count": 0,
+   "link_to": "Client",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Engineer Registry",
+   "link_count": 0,
+   "link_to": "Engineer Registry",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Project",
+   "link_count": 0,
+   "link_to": "Project",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "HD Ticket",
+   "link_count": 0,
+   "link_to": "HD Ticket",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  }
+ ],
+ "modified": "2026-07-08 15:03:46.797854",
+ "modified_by": "Administrator",
+ "module": "Dispatch Model",
+ "name": "Teceze Admin",
+ "number_cards": [],
+ "owner": "Administrator",
+ "public": 1,
+ "quick_lists": [],
+ "roles": [],
+ "sequence_id": 0.0,
+ "shortcuts": [
+  {
+   "color": "Grey",
+   "doc_view": "List",
+   "label": "Visit Helpdesk",
+   "type": "URL",
+   "url": "/helpdesk/home"
+  }
+ ],
+ "title": "Teceze Admin",
+ "type": "Workspace"
+}

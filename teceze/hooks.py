@@ -26,17 +26,20 @@ app_license = "mit"
 
 # include js, css files in header of desk.html
 # app_include_css = "/assets/teceze/css/teceze.css"
-# app_include_js = "/assets/teceze/js/teceze.js"
+# app_include_js ="/assets/teceze/js/teceze.js"
+	
 
 # include js, css files in header of web template
 # web_include_css = "/assets/teceze/css/teceze.css"
 # web_include_js = "/assets/teceze/js/teceze.js"
 
+
 # include custom scss in every website theme (without file extension ".scss")
 # website_theme_scss = "teceze/public/scss/website"
 
+
 # include js, css files in header of web form
-# webform_include_js = {"doctype": "public/js/doctype.js"}
+#webform_include_js = {"doctype": "public/css/doctype.js"}
 # webform_include_css = {"doctype": "public/css/doctype.css"}
 
 # include js in page
@@ -47,15 +50,20 @@ app_license = "mit"
 # doctype_list_js = {"doctype" : "public/js/doctype_list.js"}
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
 # doctype_calendar_js = {"doctype" : "public/js/doctype_calendar.js"}
+override_whitelisted_methods = {
+    "erpnext.crm.doctype.lead.lead.make_quotation":
+        "teceze.teceze.overrides.leaditems.make_quotation"
+}
 doctype_js = {
     "Employee" : ["public/js/employee.js"],
     "Leave Application" : ["public/js/leave_application.js"],
 	"Project" : ["public/js/project.js"],
 	"Quotation" : ["public/js/quotation.js"],
+	"Salary Structure Assignment" : ["public/js/salary_structure_assignment.js"],
 
 }
 doctype_list_js = {
-    "Employee Checkin": "public/js/employee_checkin_list.js"
+    # "Employee Checkin": "public/js/employee_checkin_list.js"
 }
 doc_events = {
 	"Employee": {
@@ -71,9 +79,27 @@ doc_events = {
 	"Sales Order": {
     "on_submit": ["teceze.procurement.doctype.procurement_request.procurement_request.update_sales_order"]
 	},
-	"Procurement Request": {
-        "onload": ["teceze.procurement.doctype.procurement_request.procurement_request.onload"]
+	# "Procurement Request": {
+    #     "onload": ["teceze.procurement.doctype.procurement_request.procurement_request.onload"]
+    # },
+	# "Attendance Request": {
+    #     "validate": "teceze.overrides.attendance_regularization.validate",
+    #     "before_save": "teceze.overrides.attendance_regularization.before_save"
+    # },
+	"Job Offer":{
+		"validate":"teceze.teceze.overrides.job_offer.validate",
+		"on_submit": "teceze.teceze.overrides.job_offer.send_offer_email"
+	},
+	"Salary Structure Assignment": {
+        "validate": ["teceze.teceze.overrides.salary_assignment.validate"]
     }
+
+}
+
+extend_doctype_class = {
+    "Salary Slip": [
+        "teceze.teceze.overrides.salary_slip.CustomSalarySlip"
+    ]
 }
 
 # Svg Icons
@@ -196,6 +222,9 @@ doc_events = {
 # }
 
 scheduler_events = {
+	"hourly": [
+        "teceze.api.employee_attendance.auto_checkout_open_sessions",
+    ],
     "daily": [
         "teceze.teceze.overrides.employee.credit_privilege_leave",
         # "teceze.teceze.overrides.employee.expire_comp_off_leave"

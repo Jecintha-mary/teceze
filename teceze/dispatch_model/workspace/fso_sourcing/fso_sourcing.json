@@ -1,0 +1,72 @@
+{
+ "app": "teceze",
+ "charts": [
+  {
+   "chart_name": "Ticket Pipeline",
+   "label": "Ticket Pipeline"
+  },
+  {
+   "chart_name": "SLA Distribution",
+   "label": "SLA Distribution"
+  }
+ ],
+ "content": "[{\"id\":\"b7RTsbrp2r\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">Welcome to the Fso Sourcing workspace</span>\",\"col\":12}},{\"id\":\"J80DDVjFDt\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Total tickets\",\"col\":3}},{\"id\":\"Mh3NdYZr-4\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"In Progress\",\"col\":3}},{\"id\":\"54Bp4XSbXY\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Pending Review\",\"col\":3}},{\"id\":\"912SJ2L6DV\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Completed\",\"col\":3}},{\"id\":\"jdaI-ghMJG\",\"type\":\"chart\",\"data\":{\"chart_name\":\"Ticket Pipeline\",\"col\":12}},{\"id\":\"RS9c2qmnxT\",\"type\":\"chart\",\"data\":{\"chart_name\":\"SLA Distribution\",\"col\":12}},{\"id\":\"Lq8RCN8QiW\",\"type\":\"custom_block\",\"data\":{\"custom_block_name\":\"Recent Tickets\",\"col\":12}},{\"id\":\"Jyrx0iep_2\",\"type\":\"custom_block\",\"data\":{\"custom_block_name\":\"Engineer Workload\",\"col\":12}},{\"id\":\"0op6-X92z4\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Assigned Tickets\",\"col\":4}},{\"id\":\"IWWEMRV-iG\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Unassigned Tickets\",\"col\":4}}]",
+ "creation": "2026-07-08 16:33:46.770967",
+ "custom_blocks": [
+  {
+   "custom_block_name": "Recent Tickets",
+   "label": "Recent Tickets"
+  },
+  {
+   "custom_block_name": "Engineer Workload",
+   "label": "Engineer Workload"
+  }
+ ],
+ "docstatus": 0,
+ "doctype": "Workspace",
+ "hide_custom": 0,
+ "idx": 0,
+ "indicator_color": "green",
+ "is_hidden": 0,
+ "label": "Fso Sourcing",
+ "link_type": "DocType",
+ "links": [],
+ "modified": "2026-07-08 16:59:36.510044",
+ "modified_by": "Administrator",
+ "module": "Dispatch Model",
+ "name": "Fso Sourcing",
+ "number_cards": [
+  {
+   "label": "Total tickets",
+   "number_card_name": "Total Tickets-1"
+  },
+  {
+   "label": "Completed",
+   "number_card_name": "Completed"
+  },
+  {
+   "label": "Assigned Tickets",
+   "number_card_name": "Assigned Tickets"
+  },
+  {
+   "label": "In Progress",
+   "number_card_name": "In Progress"
+  },
+  {
+   "label": "Unassigned Tickets",
+   "number_card_name": "Unassigned Tickets"
+  },
+  {
+   "label": "Pending Review",
+   "number_card_name": "Pending Review"
+  }
+ ],
+ "owner": "Administrator",
+ "public": 1,
+ "quick_lists": [],
+ "roles": [],
+ "sequence_id": 0.0,
+ "shortcuts": [],
+ "title": "Fso Sourcing",
+ "type": "Workspace"
+}

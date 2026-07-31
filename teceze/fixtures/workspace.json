@@ -8965,7 +8965,7 @@
   "is_hidden": 0,
   "label": "Welcome Workspace",
   "link_to": null,
-  "link_type": null,
+  "link_type": "Workspace",
   "links": [],
   "modified": "2023-07-28 20:15:32.222029",
   "module": "Core",
@@ -8979,7 +8979,7 @@
   "sequence_id": 22.0,
   "shortcuts": [],
   "title": "Welcome Workspace",
-  "type": null
+  "type": "Workspace"
  },
  {
   "app": "erpnext",

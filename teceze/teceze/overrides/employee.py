@@ -22,6 +22,8 @@ def autoname(doc,method):
     )
 
     country_code = (country_code or "").upper()
+    if doc.employment_type=="Engineer":
+        prefix=(settings.engineer_prefix or "").upper()
     series = f"{prefix}-{country_code}-.{series}" 
     doc.name = make_autoname(series)
 
@@ -43,7 +45,8 @@ def onload(doc, method):
     date_calculation_for_employee(doc)
 
 def after_insert(doc,method):
-    create_leave_allocations(doc) 
+    pass
+    # create_leave_allocations(doc) 
 
 def date_calculation_for_employee(doc):
     #Calculate employee age from date of birth--dharshini

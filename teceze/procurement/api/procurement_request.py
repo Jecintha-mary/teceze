@@ -492,7 +492,7 @@ import frappe
 
 
 @frappe.whitelist(allow_guest=True,methods=["GET"])
-def get_recent_procurement_requests(client_name):
+def get_recent_procurement_requests():
 
     try:
 
@@ -501,9 +501,6 @@ def get_recent_procurement_requests(client_name):
 
         requests = frappe.get_all(
             "Procurement Request",
-            filters={
-                "client_name": client_name
-            },
             fields=[
                 "name",
                 "creation",
