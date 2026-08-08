@@ -8,9 +8,12 @@ frappe.ui.form.on("Employee", {
         frm.set_query('designation', function() {
             return {
                 filters: {
-                    custom_department: frm.doc.department
-                }
-            };
+            custom_department: frm.doc.department
+            },
+            or_filters: {
+                custom_department: 'All Departments'
+            }
+                };
         });
     },
    
