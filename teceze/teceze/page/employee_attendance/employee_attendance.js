@@ -258,7 +258,6 @@ function render_timer(base, checkIn) {
     const timer = _format_hms(totalSeconds);
 
     $("#live-timer").text(timer);
-    $("#working_hours").text(timer);
 
 }
 // Convert Seconds to HH:MM:SS Format
@@ -396,7 +395,7 @@ function load_status() {
                 if (data.status === "CHECKED OUT") {
 
                     $("#live-timer").text(_format_hms(parseInt(data.previous_seconds || 0)));
-                    $("#working_hours").text(_format_hms(parseInt(data.previous_seconds || 0)));
+                    $("#working_hours").text(data.working_hours || 0);
 
                 }
 

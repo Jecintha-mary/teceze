@@ -56,6 +56,7 @@ override_whitelisted_methods = {
 }
 doctype_js = {
     "Employee" : ["public/js/employee.js"],
+	"Attendance Request": ["public/js/attendance_request.js"],
     "Leave Application" : ["public/js/leave_application.js"],
 	"Project" : ["public/js/project.js"],
 	"Quotation" : ["public/js/quotation.js"],
@@ -86,6 +87,10 @@ doc_events = {
     #     "validate": "teceze.overrides.attendance_regularization.validate",
     #     "before_save": "teceze.overrides.attendance_regularization.before_save"
     # },
+	"Attendance Request": {
+        "validate": ["teceze.api.attendance_regularization.validate_regularization_limit"]
+    },
+
 	"Job Offer":{
 		"validate":"teceze.teceze.overrides.job_offer.validate",
 		"on_submit": "teceze.teceze.overrides.job_offer.send_offer_email"

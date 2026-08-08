@@ -163,8 +163,9 @@ def validate_employee_location(
         user_lon
     )
 
-    allowed_radius = float(location.area or 500)
-
+    allowed_radius = float(location.custom_attendance_radius or 500)
+    if location.custom_attendance_radius_uom == "KM":
+        allowed_radius = allowed_radius * 1000
     if distance > allowed_radius:
 
         frappe.throw(_(f"You are outside your assigned Work Location.\n\n"
@@ -358,28 +359,10 @@ def auto_checkout(last_log):
         checkout.db_set("shift", resolved_shift, update_modified=False)
         checkout.shift = resolved_shift
 
-    if checkout.shift:
-
-        logs = get_session_logs(
-            employee=employee,
-            session_start_time=session_start,
-            session_end_time=checkout.time,
-        )
-        shift_doc = frappe.get_doc("Shift Type", checkout.shift)
-
-        working_hours, in_time, out_time = calculate_working_hours(
-            logs,
-            shift_doc.determine_check_in_and_check_out,
-            shift_doc.working_hours_calculation_based_on,
-        )
-
-        checkout.custom_working_hours = round(working_hours, 2)
-
-    else:
-        # No shift could be resolved at all - fall back to a plain
-        # elapsed-time calculation rather than leaving this blank.
-        checkout.custom_working_hours = round(elapsed_since_in / 3600, 2)
-
+    working_seconds = total_seconds
+    if working_seconds > SESSION_RESET_SECONDS:
+        working_seconds = SESSION_RESET_SECONDS
+    checkout.custom_working_hours = round(working_seconds / 3600,2)
     checkout.save(ignore_permissions=True)
     frappe.db.commit()
 
@@ -771,20 +754,9 @@ def employee_checkin(employee, log_type, latitude=None, longitude=None):
         # ==================================================
         # WORKING HOURS
         # ==================================================
-        logs = get_session_logs(
-            employee=employee,
-            session_start_time=session_start,
-            session_end_time=checkout.time,
-        )
-        shift_doc = frappe.get_doc("Shift Type", checkout.shift)
-
-        working_hours, in_time, out_time = calculate_working_hours(
-            logs,
-            shift_doc.determine_check_in_and_check_out,
-            shift_doc.working_hours_calculation_based_on,
-        )
-
-        checkout.custom_working_hours = round(working_hours, 2)
+        working_seconds = total_seconds
+        working_hours = round(working_seconds / 3600,2)
+        checkout.custom_working_hours = working_hours
         checkout.save(
             ignore_permissions=True
         )
