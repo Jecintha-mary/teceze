@@ -1,1 +1,33 @@
-[]
+[
+ {
+  "cards": [
+   {
+    "card": "Total Procurement Requests"
+   },
+   {
+    "card": "Quotations Awaiting Action"
+   },
+   {
+    "card": "Active Orders"
+   },
+   {
+    "card": "Total Invoices Due"
+   }
+  ],
+  "chart_options": null,
+  "charts": [
+   {
+    "chart": null,
+    "width": "Half"
+   }
+  ],
+  "dashboard_name": "P2P Dashboard",
+  "docstatus": 0,
+  "doctype": "Dashboard",
+  "is_default": 0,
+  "is_standard": 0,
+  "modified": "2026-07-17 18:14:05.301570",
+  "module": null,
+  "name": "P2P Dashboard"
+ }
+]

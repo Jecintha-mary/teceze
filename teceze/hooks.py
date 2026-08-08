@@ -349,7 +349,8 @@ fixtures = [
    	"Report",
 	"Number Card",
 	"Web Form",
-	"Desktop Icon"
+	"Desktop Icon",
+	"Workspace"
 ]
 
 
