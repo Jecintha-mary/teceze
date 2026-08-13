@@ -10,6 +10,53 @@ frappe.pages["employee_attendance"].on_page_load = function (wrapper) {
     let attendance_calendar = null;
     let attendance_calendar_filters = [];
 
+    // =========================================================
+    // ASSOCIATE MEMBERS - DISPLAY CAP
+    // =========================================================
+
+    const MAX_VISIBLE_ASSOCIATES = 5;
+
+    // =========================================================
+    // LEFT COLUMN / CALENDAR HEIGHT SYNC
+    //
+    // The Associate Members card needs its bottom edge to line up
+    // with the calendar card's bottom edge. CSS Grid's align-items
+    // stretch can't do this reliably because FullCalendar sets its
+    // own height via JS *after* the initial layout - so instead we
+    // measure the calendar card directly and mirror its height onto
+    // .attendance-left. A ResizeObserver keeps this in sync any time
+    // the calendar's rendered height changes (month with 6 weeks vs
+    // 5, Month/Week/Day view switch, window resize, etc).
+    // =========================================================
+
+    let calendar_height_observer = null;
+
+    const LEFT_RIGHT_STACK_BREAKPOINT = 850;
+
+    // =========================================================
+    // CALENDAR EVENT STATUS COLORS
+    //
+    // FullCalendar renders every event chip with the same default
+    // styling regardless of what it says ("Present", "Absent",
+    // "On Leave", "Half Day", "Holiday" all looked identical). This
+    // watches the calendar container and repaints each event chip
+    // to match the legend colors, keyed off the chip's own text.
+    // =========================================================
+
+    let calendar_events_observer = null;
+
+    const CALENDAR_STATUS_CLASS_MAP = [
+        { match: "half day", className: "cal-event-halfday" },
+        { match: "present", className: "cal-event-present" },
+        { match: "absent", className: "cal-event-absent" },
+        { match: "leave", className: "cal-event-leave" },
+        { match: "holiday", className: "cal-event-holiday" }
+    ];
+
+    const CALENDAR_STATUS_CLASSNAMES =
+        CALENDAR_STATUS_CLASS_MAP
+            .map(function (entry) { return entry.className; });
+
 
     // =========================================================
     // CREATE PAGE
@@ -286,8 +333,21 @@ frappe.pages["employee_attendance"].on_page_load = function (wrapper) {
 
                     <div class="card members-card">
 
-                        <div class="members-card-title">
-                            Associate Members
+                        <div class="members-card-header">
+
+                            <div class="members-card-title">
+                                Associate Members
+                            </div>
+
+                            <a
+                                href="#"
+                                id="view_all_members"
+                                class="view-all-link">
+
+                                View All
+
+                            </a>
+
                         </div>
 
                         <div id="associate_members_list" class="members-list">
@@ -376,6 +436,17 @@ frappe.pages["employee_attendance"].on_page_load = function (wrapper) {
                                 </span>
 
                                 Holiday
+
+                            </span>
+
+
+                            <span class="legend-item">
+
+                                <span
+                                    class="legend-dot legend-halfday">
+                                </span>
+
+                                Half Day
 
                             </span>
 
@@ -671,8 +742,12 @@ frappe.pages["employee_attendance"].on_page_load = function (wrapper) {
     // =========================================================
     // ASSOCIATE MEMBERS CARD
     //
+    // Only the first MAX_VISIBLE_ASSOCIATES rows are rendered so
+    // the card can never grow taller than the calendar beside it.
     // Clicking a member routes to the "Employee Leave and
-    // Permission" report filtered to that employee.
+    // Permission" report filtered to that employee. Clicking
+    // "View All" (top right of the card) routes to the same
+    // report with no filter, showing every record.
     // =========================================================
 
     function load_associate_members() {
@@ -704,7 +779,10 @@ frappe.pages["employee_attendance"].on_page_load = function (wrapper) {
                     return;
                 }
 
-                r.message.forEach(function (m) {
+                const visible_members =
+                    r.message.slice(0, MAX_VISIBLE_ASSOCIATES);
+
+                visible_members.forEach(function (m) {
 
                     const initial = (m.employee_name || "?").charAt(0).toUpperCase();
 
@@ -760,6 +838,34 @@ frappe.pages["employee_attendance"].on_page_load = function (wrapper) {
         });
 
     }
+
+
+    // =========================================================
+    // VIEW ALL ASSOCIATE MEMBERS
+    // =========================================================
+
+    $(document)
+        .off(
+            "click.employeeAttendance",
+            "#view_all_members"
+        );
+
+
+    $(document)
+        .on(
+            "click.employeeAttendance",
+            "#view_all_members",
+            function (e) {
+
+                e.preventDefault();
+
+                frappe.set_route(
+                    "query-report",
+                    "Employee Leave and Permission"
+                );
+
+            }
+        );
 
 
     // =========================================================
@@ -1048,6 +1154,17 @@ frappe.pages["employee_attendance"].on_page_load = function (wrapper) {
                                 .find(".calendar-loading")
                                 .remove();
 
+
+                            // Start watching the calendar card's
+                            // height so Associate Members can match
+                            // its bottom edge once it settles.
+                            watch_calendar_height();
+
+                            // Start watching for event chips so
+                            // Present / Absent / Leave / Half Day /
+                            // Holiday each get their own color.
+                            watch_calendar_event_colors();
+
                         },
                         500
                     );
@@ -1061,6 +1178,10 @@ frappe.pages["employee_attendance"].on_page_load = function (wrapper) {
                         function () {
 
                             resize_attendance_calendar();
+
+                            sync_left_column_height();
+
+                            colorize_calendar_events();
 
                         },
                         1200
@@ -1171,6 +1292,210 @@ frappe.pages["employee_attendance"].on_page_load = function (wrapper) {
             );
 
         }
+
+    }
+
+
+    // =========================================================
+    // SYNC LEFT COLUMN HEIGHT TO CALENDAR HEIGHT
+    //
+    // Mirrors the calendar card's actual rendered height onto
+    // .attendance-left. Once that inline height is set, the flex
+    // rules on .members-card / .members-list (see CSS) take over
+    // and let Associate Members grow to fill the leftover space -
+    // so its bottom edge lands on the calendar's bottom edge.
+    // =========================================================
+
+    function sync_left_column_height() {
+
+        const calendarCard =
+            document.querySelector(".attendance-calendar-card");
+
+        const leftCol =
+            document.querySelector(".attendance-left");
+
+        if (!calendarCard || !leftCol) {
+            return;
+        }
+
+        // Below the stacking breakpoint the two columns are no
+        // longer side by side, so there's nothing to match -
+        // release the inline height and let it size naturally.
+        if (window.innerWidth <= LEFT_RIGHT_STACK_BREAKPOINT) {
+
+            leftCol.style.height = "";
+
+            return;
+
+        }
+
+        leftCol.style.height =
+            calendarCard.offsetHeight + "px";
+
+    }
+
+
+    // =========================================================
+    // WATCH THE CALENDAR CARD FOR HEIGHT CHANGES
+    //
+    // FullCalendar sets its own height via JS well after our
+    // initial render, and that height can also change later
+    // (a 6-week month vs a 5-week month, Month/Week/Day toggle,
+    // window resize). A ResizeObserver catches all of those
+    // automatically instead of us guessing at timeouts.
+    // =========================================================
+
+    function watch_calendar_height() {
+
+        const calendarCard =
+            document.querySelector(".attendance-calendar-card");
+
+        if (!calendarCard) {
+            return;
+        }
+
+        if (calendar_height_observer) {
+
+            calendar_height_observer.disconnect();
+
+        }
+
+        if (typeof ResizeObserver === "undefined") {
+
+            // Very old browser fallback - at least sync once.
+            sync_left_column_height();
+
+            return;
+
+        }
+
+        calendar_height_observer =
+            new ResizeObserver(function () {
+
+                sync_left_column_height();
+
+            });
+
+        calendar_height_observer.observe(calendarCard);
+
+        // Run once immediately too, don't wait for the first
+        // observed change.
+        sync_left_column_height();
+
+    }
+
+
+    // =========================================================
+    // COLORIZE ONE EVENT CHIP BASED ON ITS STATUS TEXT
+    // =========================================================
+
+    function colorize_calendar_event(eventEl) {
+
+        const text =
+            (eventEl.textContent || "")
+                .trim()
+                .toLowerCase();
+
+        eventEl.classList.remove.apply(
+            eventEl.classList,
+            CALENDAR_STATUS_CLASSNAMES
+        );
+
+        for (let i = 0; i < CALENDAR_STATUS_CLASS_MAP.length; i++) {
+
+            const entry = CALENDAR_STATUS_CLASS_MAP[i];
+
+            if (text.indexOf(entry.match) !== -1) {
+
+                eventEl.classList.add(entry.className);
+
+                return;
+
+            }
+
+        }
+
+    }
+
+
+    // =========================================================
+    // COLORIZE ALL CURRENTLY RENDERED EVENT CHIPS
+    //
+    // Covers the different DOM structures FullCalendar uses across
+    // Month / Week / Day / List views.
+    // =========================================================
+
+    function colorize_calendar_events() {
+
+        const container =
+            document.getElementById("attendance-calendar");
+
+        if (!container) {
+            return;
+        }
+
+        const events =
+            container.querySelectorAll(
+                ".fc-event, .fc-daygrid-event, .fc-list-event"
+            );
+
+        events.forEach(function (eventEl) {
+
+            colorize_calendar_event(eventEl);
+
+        });
+
+    }
+
+
+    // =========================================================
+    // WATCH THE CALENDAR FOR EVENT CHIPS BEING (RE)RENDERED
+    //
+    // The calendar rebuilds its event chips whenever the month
+    // changes, the view switches (Month/Week/Day), or data is
+    // refetched after a check-in/out. A MutationObserver catches
+    // all of those so the status colors stay correct without us
+    // hooking into every individual FullCalendar callback.
+    // =========================================================
+
+    function watch_calendar_event_colors() {
+
+        const container =
+            document.getElementById("attendance-calendar");
+
+        if (!container) {
+            return;
+        }
+
+        if (calendar_events_observer) {
+
+            calendar_events_observer.disconnect();
+
+        }
+
+        if (typeof MutationObserver === "undefined") {
+
+            colorize_calendar_events();
+
+            return;
+
+        }
+
+        calendar_events_observer =
+            new MutationObserver(function () {
+
+                colorize_calendar_events();
+
+            });
+
+        calendar_events_observer.observe(
+            container,
+            { childList: true, subtree: true }
+        );
+
+        // Run once immediately too, don't wait for the first
+        // observed mutation.
+        colorize_calendar_events();
 
     }
 
@@ -2364,6 +2689,12 @@ frappe.pages["employee_attendance"].on_page_load = function (wrapper) {
 
                 resize_attendance_calendar();
 
+                // Handles crossing the LEFT_RIGHT_STACK_BREAKPOINT
+                // (mobile <-> desktop layout) - the ResizeObserver
+                // only fires on the calendar card's own size
+                // changing, not on the breakpoint switch itself.
+                sync_left_column_height();
+
             }
         );
 
@@ -2379,6 +2710,22 @@ frappe.pages["employee_attendance"].on_page_load = function (wrapper) {
             stopWorkingTimer();
 
             attendance_calendar = null;
+
+            if (calendar_height_observer) {
+
+                calendar_height_observer.disconnect();
+
+                calendar_height_observer = null;
+
+            }
+
+            if (calendar_events_observer) {
+
+                calendar_events_observer.disconnect();
+
+                calendar_events_observer = null;
+
+            }
 
             $(window)
                 .off(

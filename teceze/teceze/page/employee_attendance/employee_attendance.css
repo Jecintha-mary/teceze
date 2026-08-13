@@ -132,6 +132,12 @@
     display: flex;
     flex-direction: column;
     gap: 24px;
+    /* height is NOT set here - CSS grid stretch can't track the
+       calendar's real height because FullCalendar sets it via JS
+       after initial layout. JS (sync_left_column_height, in the
+       .js file) measures the rendered calendar card and sets an
+       explicit inline px height on this element instead - that's
+       what lets Associate Members grow to match the bottom edge. */
 }
 
 .attendance-right {
@@ -378,6 +384,22 @@
 
 .members-card {
     padding: 20px 22px;
+    /* fill whatever vertical space is left in the stretched left
+       column, after the attendance card and manager card take
+       their natural (content) height - this is what makes the
+       card's bottom edge land on the calendar's bottom edge */
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.members-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 14px;
+    flex-shrink: 0;
 }
 
 .members-card-title {
@@ -386,13 +408,17 @@
     color: #68737d;
     text-transform: uppercase;
     letter-spacing: 0.4px;
-    margin-bottom: 14px;
 }
 
 .members-list {
     display: flex;
     flex-direction: column;
     gap: 4px;
+    /* grow to fill the card, scroll internally instead of the old
+       hard max-height cutoff (which sliced through the last row) */
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
 }
 
 .member-row {
@@ -575,6 +601,63 @@
 .legend-absent { background: #e05c5c; }
 .legend-leave { background: #2490ef; }
 .legend-holiday { background: #9aa2a9; }
+.legend-halfday { background: #f2b23d; }
+
+
+/* =========================================================
+   CALENDAR EVENT CHIP COLORS
+   Matches the legend dots above. Applied via JS
+   (colorize_calendar_events) based on each event chip's status
+   text, since FullCalendar renders every event with identical
+   default styling otherwise.
+========================================================= */
+
+#attendance-calendar .cal-event-present {
+    background-color: #ddf5e1 !important;
+    border-color: #1f9d55 !important;
+    color: #1f9d55 !important;
+}
+
+#attendance-calendar .cal-event-absent {
+    background-color: #fdecec !important;
+    border-color: #e05c5c !important;
+    color: #c0392b !important;
+}
+
+#attendance-calendar .cal-event-leave {
+    background-color: #e6f1fb !important;
+    border-color: #2490ef !important;
+    color: #0c447c !important;
+}
+
+#attendance-calendar .cal-event-holiday {
+    background-color: #eceff1 !important;
+    border-color: #9aa2a9 !important;
+    color: #4a4a4a !important;
+}
+
+#attendance-calendar .cal-event-halfday {
+    background-color: #fff4de !important;
+    border-color: #f2b23d !important;
+    color: #b7791f !important;
+}
+
+/* FullCalendar nests a dot + title inside each chip in most
+   month-view builds - force those to inherit rather than keep
+   their own default color so the whole chip reads as one color. */
+#attendance-calendar .cal-event-present .fc-event-title,
+#attendance-calendar .cal-event-present .fc-daygrid-event-dot,
+#attendance-calendar .cal-event-absent .fc-event-title,
+#attendance-calendar .cal-event-absent .fc-daygrid-event-dot,
+#attendance-calendar .cal-event-leave .fc-event-title,
+#attendance-calendar .cal-event-leave .fc-daygrid-event-dot,
+#attendance-calendar .cal-event-holiday .fc-event-title,
+#attendance-calendar .cal-event-holiday .fc-daygrid-event-dot,
+#attendance-calendar .cal-event-halfday .fc-event-title,
+#attendance-calendar .cal-event-halfday .fc-daygrid-event-dot {
+    color: inherit !important;
+    border-color: currentColor !important;
+}
 
 
 /* =========================================================
@@ -682,6 +765,16 @@
         display: grid !important;
         grid-template-columns: 1fr !important;
         gap: 20px;
+    }
+    /* single column now - the JS height sync (sync_left_column_height)
+       already skips setting an inline height below 850px, so
+       .attendance-left falls back to its natural content height here */
+    .members-card {
+        flex: 0 0 auto;
+    }
+    .members-list {
+        flex: 0 0 auto;
+        max-height: 320px;
     }
     .attendance-calendar-card { min-height: 500px; }
 }

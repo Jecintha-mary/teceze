@@ -1,6 +1,7 @@
 {
  "actions": [],
  "allow_bulk_edit": 1,
+ "allow_import": 1,
  "autoname": "field:company_name",
  "creation": "2026-06-24 12:59:39.255334",
  "doctype": "DocType",
@@ -30,14 +31,12 @@
    "fieldname": "contact_person",
    "fieldtype": "Data",
    "in_list_view": 1,
-   "label": "Contact Person",
-   "reqd": 1
+   "label": "Contact Person"
   },
   {
    "fieldname": "phone_number",
    "fieldtype": "Phone",
-   "label": "Phone Number",
-   "reqd": 1
+   "label": "Phone Number"
   },
   {
    "fieldname": "column_break_nytk",
@@ -48,8 +47,7 @@
    "fieldtype": "Select",
    "in_list_view": 1,
    "label": "Industry",
-   "options": "\nIT Services\nBanking & Finance\nHealthcare\nManufacturing\nRetail\nTelecom\nGovernment",
-   "reqd": 1
+   "options": "\nIT Services\nBanking & Finance\nHealthcare\nManufacturing\nRetail\nTelecom\nGovernment"
   },
   {
    "fieldname": "email_address",
@@ -74,14 +72,13 @@
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Location",
-   "options": "Location",
-   "reqd": 1
+   "options": "Location"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-08-06 12:04:43.793545",
+ "modified": "2026-08-13 17:05:03.182053",
  "modified_by": "Administrator",
  "module": "Dispatch Model",
  "name": "Client",
