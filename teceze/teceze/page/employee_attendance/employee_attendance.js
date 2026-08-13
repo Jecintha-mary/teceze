@@ -253,6 +253,53 @@ frappe.pages["employee_attendance"].on_page_load = function (wrapper) {
 
                     </div>
 
+
+                    <!-- ================================================= -->
+                    <!-- REPORTING MANAGER CARD -->
+                    <!-- ================================================= -->
+
+                    <div class="card manager-card">
+
+                        <div class="manager-card-title">
+                            Reporting Manager
+                        </div>
+
+                        <div class="manager-row" id="manager_row">
+
+                            <div class="avatar avatar-small" id="manager_avatar">
+                                --
+                            </div>
+
+                            <div class="manager-info">
+                                <strong id="manager_name">Loading...</strong>
+                                <span id="manager_status" class="member-status">--</span>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- ================================================= -->
+                    <!-- ASSOCIATE MEMBERS CARD -->
+                    <!-- ================================================= -->
+
+                    <div class="card members-card">
+
+                        <div class="members-card-title">
+                            Associate Members
+                        </div>
+
+                        <div id="associate_members_list" class="members-list">
+
+                            <div class="text-muted text-center" style="padding:16px;">
+                                Loading...
+                            </div>
+
+                        </div>
+
+                    </div>
+
                 </div>
 
 
@@ -528,6 +575,20 @@ frappe.pages["employee_attendance"].on_page_load = function (wrapper) {
 
 
                 // -------------------------------------------------
+                // LOAD REPORTING MANAGER
+                // -------------------------------------------------
+
+                load_reporting_manager();
+
+
+                // -------------------------------------------------
+                // LOAD ASSOCIATE MEMBERS
+                // -------------------------------------------------
+
+                load_associate_members();
+
+
+                // -------------------------------------------------
                 // LOAD FRAPPE CALENDAR
                 // -------------------------------------------------
 
@@ -540,6 +601,159 @@ frappe.pages["employee_attendance"].on_page_load = function (wrapper) {
                 frappe.msgprint(
                     "Unable to load employee information."
                 );
+
+            }
+
+        });
+
+    }
+
+
+    // =========================================================
+    // REPORTING MANAGER CARD
+    // =========================================================
+
+    function load_reporting_manager() {
+
+        if (!employee) {
+            return;
+        }
+
+        frappe.call({
+
+            method: "teceze.api.employee_attendance.get_reporting_manager_status",
+
+            args: { employee: employee },
+
+            callback: function (r) {
+
+                const card = $(".manager-card");
+
+                if (!r.message) {
+
+                    // No reporting manager assigned — hide the card
+                    // rather than show a confusing empty state.
+                    card.hide();
+                    return;
+                }
+
+                card.show();
+
+                const m = r.message;
+
+                $("#manager_avatar").text(
+                    (m.employee_name || "?").charAt(0).toUpperCase()
+                );
+
+                $("#manager_name").text(
+                    `${m.name} - ${m.employee_name}`
+                );
+
+                const status_class =
+                    m.status === "IN" ? "status-in-text" : "status-out-text";
+
+                $("#manager_status")
+                    .text(m.status_label)
+                    .removeClass("status-in-text status-out-text")
+                    .addClass(status_class);
+
+            },
+
+            error: function () {
+                $(".manager-card").hide();
+            }
+
+        });
+
+    }
+
+
+    // =========================================================
+    // ASSOCIATE MEMBERS CARD
+    //
+    // Clicking a member routes to the "Employee Leave and
+    // Permission" report filtered to that employee.
+    // =========================================================
+
+    function load_associate_members() {
+
+        if (!employee) {
+            return;
+        }
+
+        frappe.call({
+
+            method: "teceze.api.employee_attendance.get_associate_members",
+
+            args: { employee: employee },
+
+            callback: function (r) {
+
+                const list = $("#associate_members_list");
+
+                list.empty();
+
+                if (!r.message || r.message.length === 0) {
+
+                    list.append(`
+                        <div class="text-muted text-center" style="padding:16px;">
+                            No associate members found
+                        </div>
+                    `);
+
+                    return;
+                }
+
+                r.message.forEach(function (m) {
+
+                    const initial = (m.employee_name || "?").charAt(0).toUpperCase();
+
+                    const status_class =
+                        m.status === "IN" ? "status-in-text" : "status-out-text";
+
+                    const row = $(`
+                        <div class="member-row">
+                            <div class="avatar avatar-small">
+                                ${frappe.utils.escape_html(initial)}
+                            </div>
+                            <div class="member-info">
+                                <strong>
+                                    ${frappe.utils.escape_html(m.name)} -
+                                    ${frappe.utils.escape_html(m.employee_name)}
+                                </strong>
+                                <span class="member-status ${status_class}">
+                                    ${frappe.utils.escape_html(m.status_label)}
+                                </span>
+                            </div>
+                        </div>
+                    `);
+
+                    row.on("click", function () {
+
+                        frappe.route_options = {
+                            employee: m.name
+                        };
+
+                        frappe.set_route(
+                            "query-report",
+                            "Employee Leave and Permission"
+                        );
+
+                    });
+
+                    list.append(row);
+
+                });
+
+            },
+
+            error: function () {
+
+                $("#associate_members_list").html(`
+                    <div class="text-muted text-center" style="padding:16px;">
+                        Unable to load associate members
+                    </div>
+                `);
 
             }
 
@@ -2077,6 +2291,14 @@ frappe.pages["employee_attendance"].on_page_load = function (wrapper) {
 
                                     // Refresh history
                                     load_recent_attendance();
+
+
+                                    // Refresh reporting manager /
+                                    // associate member statuses too,
+                                    // since our own status just changed
+                                    load_reporting_manager();
+
+                                    load_associate_members();
 
 
                                     // Refresh calendar

@@ -1,0 +1,85 @@
+{
+ "app": "teceze",
+ "charts": [
+  {
+   "chart_name": "PR Status",
+   "label": "PR Status"
+  }
+ ],
+ "content": "[{\"id\":\"dmuI7KHxnH\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Total Procurement Requests\",\"col\":3}},{\"id\":\"3qgkKt8DOO\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Quotations Awaiting \",\"col\":3}},{\"id\":\"6wCOwQstkC\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Active Orders\",\"col\":3}},{\"id\":\"V5013yIIrf\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Total Invoices Due\",\"col\":3}},{\"id\":\"jADEG6Qh6F\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"FtmokkaHeg\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Item Catalogue\",\"col\":4}},{\"id\":\"ey0A3PhPNf\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Procurement Request\",\"col\":4}},{\"id\":\"gtYAq8AJfq\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"View Invoice\",\"col\":4}},{\"id\":\"TKHGlBJIU4\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"CZi7DdmR72\",\"type\":\"chart\",\"data\":{\"chart_name\":\"PR Status\",\"col\":12}},{\"id\":\"WEstEczYA-\",\"type\":\"custom_block\",\"data\":{\"custom_block_name\":\"Recent Procurement Requests\",\"col\":12}},{\"id\":\"76wkQHAQhs\",\"type\":\"custom_block\",\"data\":{\"custom_block_name\":\"Recent Invoice\",\"col\":12}}]",
+ "creation": "2026-08-13 11:05:50.868759",
+ "custom_blocks": [
+  {
+   "custom_block_name": "Recent Procurement Requests",
+   "label": "Recent Procurement Requests"
+  },
+  {
+   "custom_block_name": "Recent Invoice",
+   "label": "Recent Invoice"
+  }
+ ],
+ "docstatus": 0,
+ "doctype": "Workspace",
+ "hide_custom": 0,
+ "idx": 0,
+ "indicator_color": "green",
+ "is_hidden": 0,
+ "label": "P2P",
+ "link_type": "DocType",
+ "links": [],
+ "modified": "2026-08-13 12:41:32.524014",
+ "modified_by": "Administrator",
+ "module": "Teceze",
+ "name": "P2P",
+ "number_cards": [
+  {
+   "label": "Total Procurement Requests",
+   "number_card_name": "Total Procurement Requests"
+  },
+  {
+   "label": "Quotations Awaiting ",
+   "number_card_name": "Quotations Awaiting Action"
+  },
+  {
+   "label": "Active Orders",
+   "number_card_name": "Active Orders"
+  },
+  {
+   "label": "Total Invoices Due",
+   "number_card_name": "Total Invoices Due"
+  }
+ ],
+ "owner": "Administrator",
+ "public": 1,
+ "quick_lists": [],
+ "roles": [],
+ "sequence_id": 0.0,
+ "shortcuts": [
+  {
+   "color": "Grey",
+   "doc_view": "List",
+   "label": "Item Catalogue",
+   "link_to": "Item",
+   "stats_filter": "[]",
+   "type": "DocType"
+  },
+  {
+   "color": "Grey",
+   "doc_view": "List",
+   "label": "View Invoice",
+   "link_to": "Sales Invoice",
+   "stats_filter": "[]",
+   "type": "DocType"
+  },
+  {
+   "color": "Grey",
+   "doc_view": "List",
+   "label": "Procurement Request",
+   "link_to": "Procurement Request",
+   "stats_filter": "[]",
+   "type": "DocType"
+  }
+ ],
+ "title": "P2P",
+ "type": "Workspace"
+}

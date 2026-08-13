@@ -15,63 +15,6 @@ tf = TimezoneFinder()
 SESSION_EXPIRE_SECONDS = 18 * 60 * 60     # Resume allowed only within 18 hours
 SESSION_RESET_SECONDS = 24 * 60 * 60      # 24 hour hard cap for continuous open sessions
 
-PRIYA_EMPLOYEE = "TCZ-IN-0376"
-PRIYA_EMAIL = "priya.ramesh@teceze.com"
-
-
-def send_priya_checkin_reminder():
-    employee = frappe.db.get_value(
-        "Employee",
-        PRIYA_EMPLOYEE,
-        ["status", "company_email"],
-        as_dict=True,
-    )
-    if not employee or employee.status != "Active":
-        return
-
-    current_time = now_datetime()
-    for shift_date in (current_time.date(), (current_time - timedelta(days=1)).date()):
-        shift_name = get_employee_shift_for_date(PRIYA_EMPLOYEE, shift_date)
-        if not shift_name:
-            continue
-
-        shift = frappe.db.get_value(
-            "Shift Type", shift_name, ["start_time", "end_time"], as_dict=True
-        )
-        if not shift or shift.start_time is None or shift.end_time is None:
-            continue
-
-        shift_start = get_shift_datetime(shift_date, shift.start_time)
-        shift_end = get_shift_datetime(shift_date, shift.end_time)
-        if shift_end <= shift_start:
-            shift_end += timedelta(days=1)
-
-        if not shift_start <= current_time <= shift_end:
-            continue
-
-        has_checked_in = frappe.db.exists(
-            "Employee Checkin",
-            {
-                "employee": PRIYA_EMPLOYEE,
-                "time": ["between", [shift_start, current_time]],
-            },
-        )
-        if has_checked_in:
-            return
-
-        frappe.sendmail(
-            # recipients=[employee.company_email or PRIYA_EMAIL],
-            recipients=[PRIYA_EMAIL],
-            subject="Check-in reminder",
-            message=(
-                "Dear Priya,<br><br>"
-                "You are currently within your shift time, but no check-in has been recorded. "
-                "Kindly check in.<br><br>Thank you."
-            ),
-            delayed=False,
-        )
-        return
-
 
 # ==========================================================
 # Distance Calculation
@@ -897,3 +840,126 @@ def get_recent_attendance(employee=None):
     attendance.reverse()
 
     return attendance[:7]
+
+
+# ==========================================================
+# Simple Checkin Status Helper (display-only)
+#
+# NOT the same as get_today_status() in employee_login.py -
+# that one drives the live session timer and 24h-cap logic
+# for the CURRENTLY LOGGED-IN user. This helper just looks
+# at each employee's most recent Employee Checkin log to show
+# a quick In/Out badge for OTHER employees (Reporting Manager
+# card, Associate Members list), and deliberately doesn't
+# duplicate the session/resume/cap logic above.
+# ==========================================================
+
+def _get_simple_checkin_status(employee):
+
+    last_log = frappe.get_all(
+        "Employee Checkin",
+        filters={"employee": employee},
+        fields=["log_type"],
+        order_by="time desc, creation desc",
+        limit=1,
+    )
+
+    if not last_log:
+        return {"status": "NOT_CHECKED_IN", "label": "Not Checked In"}
+
+    if last_log[0].log_type == "IN":
+        return {"status": "IN", "label": "In"}
+
+    return {"status": "OUT", "label": "Out"}
+
+
+# ==========================================================
+# Reporting Manager Status
+#
+# Powers the "Reporting Manager" card on the Employee
+# Attendance page. Returns None (not an error) when the
+# employee has no reports_to set, so the frontend can just
+# hide the card.
+# ==========================================================
+
+@frappe.whitelist()
+def get_reporting_manager_status(employee=None):
+
+    if not employee:
+        frappe.throw(_("Employee is required."))
+
+    reports_to = frappe.db.get_value("Employee", employee, "reports_to")
+
+    if not reports_to:
+        return None
+
+    manager = frappe.db.get_value(
+        "Employee",
+        reports_to,
+        ["name", "employee_name", "designation"],
+        as_dict=True,
+    )
+
+    if not manager:
+        return None
+
+    status = _get_simple_checkin_status(manager.name)
+
+    return {
+        "name": manager.name,
+        "employee_name": manager.employee_name,
+        "designation": manager.designation,
+        "status": status["status"],
+        "status_label": status["label"],
+    }
+
+
+# ==========================================================
+# Associate Members
+#
+# Powers the "Associate Members" card - colleagues in the
+# same department as `employee`, excluding the employee
+# themself. Each entry includes a quick IN/OUT status; the
+# frontend routes clicks to the Employee Leave and Permission
+# report filtered to that employee.
+# ==========================================================
+
+@frappe.whitelist()
+def get_associate_members(employee=None):
+
+    if not employee:
+        frappe.throw(_("Employee is required."))
+
+    department = frappe.db.get_value("Employee", employee, "department")
+
+    filters = {"status": "Active"}
+
+    if department:
+        filters["department"] = department
+
+    members = frappe.get_all(
+        "Employee",
+        filters=filters,
+        fields=["name", "employee_name", "designation"],
+        order_by="employee_name asc",
+        limit_page_length=20,
+    )
+
+    result = []
+
+    for m in members:
+
+        if m.name == employee:
+            continue
+
+        status = _get_simple_checkin_status(m.name)
+
+        result.append({
+            "name": m.name,
+            "employee_name": m.employee_name,
+            "designation": m.designation,
+            "status": status["status"],
+            "status_label": status["label"],
+        })
+
+    return result

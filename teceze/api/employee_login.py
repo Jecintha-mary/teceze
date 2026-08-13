@@ -29,7 +29,8 @@ def employee_login(username, password):
                 "employee_name",
                 "custom_work_location",
                 "status",
-                "employment_type"
+                "employment_type",
+                "designation",
             ],
             as_dict=True
         )
@@ -73,7 +74,8 @@ def get_logged_employee():
             "employee_name",
             "custom_work_location",
             "status",
-            "employment_type"
+            "employment_type",
+            "designation",
         ],
         as_dict=True
     )
@@ -85,6 +87,7 @@ def get_logged_employee():
         "name": employee.name,
         "employee_name": employee.employee_name,
         "employee_location": employee.custom_work_location,
+        "designation": employee.designation,
         "status": employee.status,
         "employment_type": employee.employment_type
     }

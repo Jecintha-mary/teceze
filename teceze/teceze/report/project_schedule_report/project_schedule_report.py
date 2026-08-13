@@ -30,8 +30,6 @@ def execute(filters=None):
 
             else:
                 columns = getColumn(filters.get('show_tags'),filters.get('en_var'))
-                # project_name = frappe.db.get_value(
-                #     'Project', project, 'project_name')
                 if project:
                     project_name = frappe.db.get_list("Project",filters={"name":project},fields={"project_name","percent_complete"})
                 val = json.dumps({'project': project})
@@ -41,12 +39,6 @@ def execute(filters=None):
                                         <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
                                         </svg></span>''' % (val)
 
-                # project_dic = {'subject': project_name,
-                #             'task': project + '&nbsp &nbsp' + button}
-                
-                # project_dic = {'subject': project_name,
-                #                'task': '<a href="' + frappe.utils.get_url() + '/app/project/' + project + '"' + 'target="_blank"' + '>' + project + '</a>' + '&nbsp &nbsp' + button}
-                
                 
                 if project_name:
                     project_dic = {'subject': project_name[0]['project_name'],"prog_bar":get_progress_bar(project_name[0]['percent_complete']),
@@ -62,16 +54,11 @@ def execute(filters=None):
                     sum_count.append(item['count'])
 
                 type_count.append({'status': 'Total', 'count': sum(sum_count)})
-                # report_summary = get_report_summary(type_count, tot_logged_hours, tot_expec_hrs, project,
-                # filters.hide_dates)
                 data.insert(0, project_dic)
                 total_pos = len(data)-1
-                # frappe.msgprint(str(project_dic)+"-project_dic['expected_hrs']")
-                # frappe.msgprint(str(data[total_pos]['expected_hrs'])+"-data[total_pos]['expected_hrs']")
                 project_dic['expected_hrs'] = data[total_pos].get('expected_hrs')
                 project_dic['hrs'] = data[total_pos].get('hrs')
                 data.pop()
-                # frappe.log_error("data",str)
                 return columns, data, message
         else:
             return columns, data, message
@@ -127,18 +114,6 @@ def get_columns(filters):
                            "fieldtype": "data", "width": 90, "align": "center"}
                     columns.append(col)
 
-        # for d in range(project_data['start_month'],project_data['end_month']):
-        #     filter_year = str(project_data['start_year'])
-        #     filter_year = filter_year[2:]
-        #     if d=='Jan' or d=='Feb' or d=='Mar':
-        #         filter_year = str(int(filter_year)+1)
-        #         month_label_name = d+' '+filter_year
-        #     month_label_name = months[d]+' '+filter_year
-        #     month_field = months[d]
-        #     columns.append(
-        #         {"label": month_label_name, "fieldname": month_field.lower(),
-        #         "fieldtype": "Link", "options": "Employee", "width": 130, "align": "center"},
-        #     )
         columns.append({"label": "<b>Total</b>", "fieldname": "tot",
                         "fieldtype": "Float", "width": 100, "align": "center"},)
         return columns
@@ -215,7 +190,6 @@ def grouping_data(input_list, parameter, filters):
 
 
 def get_messages() -> str:
-    # <span style="color:#ff8844;border-left: 2px solid;padding-right: 10px; padding-left: 10px;"><span style="color:#ff8844; opacity: 1.0;"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-plus-circle" viewBox="0 0 16 16"><path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/><path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/></svg> Add QC Defect</span>
     message = ""
     message += f"""
     <span style="color:darkviolet">Legend : </span>
@@ -224,7 +198,6 @@ def get_messages() -> str:
     <span style="color:#2f9d58;border-left: 2px solid;padding-right: 10px; padding-left: 10px;"><span style="color:#2f9d58; opacity: 1.0;"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"fill="currentColor" class="bi bi-plus-circle" viewBox="0 0 16 16"><path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/><path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/></svg>  New Child Task </span></span>
     """
     return message
-# end
 
 
 def get_data(project):
@@ -291,11 +264,6 @@ def get_data(project):
                                     <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
                                     <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
                                     </svg></span>''' % (val)
-                    # button2 = f'''<span data='%s' title="Add QC Defect" style="color:#ff8844" onclick='add_qc_defect(this.getAttribute("data"))'><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
-                    #                 fill="currentColor" class="bi bi-plus-circle" viewBox="0 0 16 16">
-                    #                 <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
-                    #                 <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
-                    #                 </svg></span>''' % (val)
                     p['task'] = p['task'] + '&nbsp &nbsp' + button
                 else:
                     val = json.dumps({'project': project, 'task': p['task']})
@@ -310,7 +278,6 @@ def get_data(project):
                 {'indent': 0, 'subject': '<b>' + 'Total' + '</b>', 'hrs': '<b>' + str(total_hours) + '</b>',
                  'expected_hrs': '<b>' + str(tot_expec_hrs) + '</b>',"is_parent_project":1})
 
-            # par_child_data = sorted(par_child_data, key=lambda d: d['subject'])
     return par_child_data, total_hours, tot_expec_hrs
 
 
@@ -376,8 +343,6 @@ def main(list1):
                     
                     new_dic[b]['prog_bar'] = get_progress_bar(new_dic[b].get('progress'))
                     new_dic[b]['is_parent'] = 0
-                    # frappe.msgprint(str(new_dic[b]))
-                    #added for least and most date for parent
                     if count == 1:
                         parent_position = i + pos + 1
                         parent_position = parent_position-1
@@ -385,10 +350,8 @@ def main(list1):
                         pass
                     else:
                         temp_dict.append(new_dic[b])
-                    #end 
                     new_list.insert(i + pos + 1, new_dic[b])
                       
-#------------------------new changes------------------------------------------------------------------------------------------
                 if new_list[parent_position]['parent_task']:
                     parent_pos = get_pos(new_list, new_list[parent_position]['parent_task'])
                     if parent_pos:
@@ -434,7 +397,6 @@ def main(list1):
                     if parent_status:
                         new_list[parent_position]['status'] = parent_status
                 
-#------------------------new changes end -----------------------------------------------------------------------------------------------------
 
     N = 0
     while (len(new_list) < len(list1)) and (N < 6):
@@ -460,49 +422,8 @@ def main(list1):
                     new_list.insert(i + 1, val)
 
         N += 1
-        # Sort by jeci
-        # new_list=(sorted(new_list, key=lambda i: i['subject']))
     
 
-    # if new_list:
-    #     parentChildMap = {}
-    #     for b in new_list:
-    #         if b.get('parent_task')=='None' or b.get('parent_task')=='' or b.get('parent_task')==None:
-    #             if b.get('task'):
-    #                 parentChildMap[b['task']]=[]
-    #                 parentChildMap[b['task']].append(b)
-
-    #         if b.get('parent_task') and b.get("parent_task")!="None" and b.get('parent_task') !='' and b.get('parent_task') !=None:
-    #             if b['parent_task'] in parentChildMap:
-    #                 parentChildMap[b['parent_task']].append(b)
-    #             else:
-    #                 parentChildMap[b['parent_task']] = []
-    #                 parentChildMap[b['parent_task']].append(b)
-
-    #     final_dict = []
-    #     for d in parentChildMap:
-    #         if len(parentChildMap[d])>0:
-    #             second_dict = {}
-    #             for g in parentChildMap[d]:
-    #                 second_dict.setdefault(g['indent'] or None, []).append(g)
-
-    #             # print(second_dict)
-    #             for l in second_dict:
-    #                 if l==None:
-    #                     for bn in second_dict[l]:
-    #                         final_dict.append(bn)
-
-    #                 else:
-    #                     new_list=(sorted(second_dict[l], key=lambda i: i['subject']))
-    #                     for hn in new_list:
-    #                         final_dict.append(hn)
-    #                         if parentChildMap[hn]:
-    #                             for jh in parentChildMap[hn]:
-    #                                 final_dict.append(jh)
-    #                             del parentChildMap[hn]
-    # if final_dict:
-    #     # del final_dict[0]
-    #     return final_dict, total, tot_expected_hrs
     return new_list, total, tot_expected_hrs
 
 
@@ -512,10 +433,6 @@ def get_progress_bar(width):
     prog_bar += '<span class="ellipsis" title="'+ str(width)+'% Completed">'
     prog_bar +=	'<a class="filterable ellipsis" data-filter="per_ordered,=,">'
     prog_bar +=	'<div class="progress" style="margin: 0px;">'
-    # if width==100.0:
-    #     prog_bar +=	'<div class="progress-bar progress-bar-success" role="progressbar" aria-valuenow="" aria-valuemin="0" aria-valuemax="100" style="width:'+ str(width)+'%;opacity:0.4;background-color:#2693ec !important">'
-    # else:
-    #     prog_bar +=	'<div class="progress-bar progress-bar-success" role="progressbar" aria-valuenow="" aria-valuemin="0" aria-valuemax="100" style="width:'+ str(width)+'%;background-color:#2693ec !important">'
     
     if width==100.0:
         prog_bar +=	'<div class="progress-bar progress-bar-success" role="progressbar" aria-valuenow="" aria-valuemin="0" aria-valuemax="100" style="width:'+ str(width)+'%;opacity:0.3;">'
