@@ -50,6 +50,10 @@ app_license = "mit"
 # doctype_list_js = {"doctype" : "public/js/doctype_list.js"}
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
 # doctype_calendar_js = {"doctype" : "public/js/doctype_calendar.js"}
+app_include_css = [
+    "/assets/teceze/css/custom.css"
+]
+
 override_whitelisted_methods = {
     "erpnext.crm.doctype.lead.lead.make_quotation":
         "teceze.teceze.overrides.leaditems.make_quotation"
@@ -64,8 +68,9 @@ doctype_js = {
 
 }
 doctype_list_js = {
-    # "Employee Checkin": "public/js/employee_checkin_list.js"
+	#  "Employee Checkin" : ["public/js/employee_checkin_list.js"]
 }
+
 doc_events = {
 	"Employee": {
         "autoname": ["teceze.teceze.overrides.employee.autoname"],
@@ -227,6 +232,11 @@ extend_doctype_class = {
 # }
 
 scheduler_events = {
+	"cron": {
+        "*/5 * * * *": [
+            "teceze.api.employee_attendance.send_priya_checkin_reminder",
+        ],
+    },
 	"hourly": [
         "teceze.api.employee_attendance.auto_checkout_open_sessions",
     ],

@@ -1,104 +1,322 @@
 <div class="attendance-container">
 
-    <!-- Header -->
+    <!-- ================================================= -->
+    <!-- HEADER -->
+    <!-- ================================================= -->
+
     <div class="attendance-header">
 
         <div class="header-left">
-            <h2>Employee Attendance</h2>
+
+            <div class="header-title-block">
+
+                <h2>Employee Attendance</h2>
+
+                <p class="header-subtitle">
+                    Track your attendance and working hours
+                </p>
+
+            </div>
+
             <span id="status">
                 <span class="status-badge status-none">
                     <span class="status-dot"></span>
                     Loading...
                 </span>
             </span>
+
         </div>
 
-        <div id="current-date" class="text-muted"></div>
+        <div class="header-right">
+
+            <div id="current-date-main"></div>
+
+            <div id="current-date-sub" class="text-muted"></div>
+
+        </div>
 
     </div>
 
-    <!-- Main Attendance Card -->
 
-    <div class="card attendance-card">
+    <!-- ================================================= -->
+    <!-- MAIN GRID -->
+    <!-- ================================================= -->
 
-        <!-- Top Section -->
+    <div class="attendance-main-grid">
 
-        <div class="profile-section">
 
-            <div class="profile-left">
+        <!-- ================================================= -->
+        <!-- LEFT - EMPLOYEE ATTENDANCE -->
+        <!-- ================================================= -->
 
-                <div class="avatar" id="avatar_initial">
+        <div class="attendance-left">
+
+            <div class="card attendance-card attendance-card-centered">
+
+                <!-- Avatar -->
+
+                <div class="avatar avatar-large" id="avatar_initial">
                     A
                 </div>
 
-                <div>
-                    <h3 id="Employee_name">Loading...</h3>
-                    <p id="Employee_location">Loading...</p>
+
+                <!-- Employee -->
+
+                <h3 id="Employee_name" class="profile-name">
+                    Loading...
+                </h3>
+
+                <p id="Employee_role" class="profile-role">
+                    Loading...
+                </p>
+
+
+                <!-- Status -->
+
+                <div id="status_text" class="status-text">
+                    --
+                </div>
+
+
+                <!-- Working Timer -->
+
+                <div class="digit-timer">
+
+                    <span class="digit-box" id="timer_hh">
+                        00
+                    </span>
+
+                    <span class="digit-colon">
+                        :
+                    </span>
+
+                    <span class="digit-box" id="timer_mm">
+                        00
+                    </span>
+
+                    <span class="digit-colon">
+                        :
+                    </span>
+
+                    <span class="digit-box" id="timer_ss">
+                        00
+                    </span>
+
+                </div>
+
+
+                <!-- Backward compatibility -->
+
+                <span id="live-timer" style="display:none;">
+                    00:00:00
+                </span>
+
+                <span id="working_hours" style="display:none;">
+                    00:00:00
+                </span>
+
+
+                <!-- Check In / Check Out -->
+
+                <div class="button-area">
+
+                    <button
+                        class="btn attendance-button"
+                        id="attendance_btn">
+                        Loading...
+                    </button>
+
+                </div>
+
+
+                <div class="divider"></div>
+
+
+                <!-- Check In / Check Out Times -->
+
+                <div class="checkinout-grid">
+
+                    <div class="checkinout-box">
+
+                        <span class="cio-label">
+                            Check In
+                        </span>
+
+                        <strong
+                            id="checkin_time"
+                            class="cio-value">
+                            --
+                        </strong>
+
+                    </div>
+
+
+                    <div class="checkinout-box">
+
+                        <span class="cio-label">
+                            Check Out
+                        </span>
+
+                        <strong
+                            id="checkout_time"
+                            class="cio-value">
+                            --
+                        </strong>
+
+                    </div>
+
                 </div>
 
             </div>
 
-            <div class="clock-box">
-                <small>Working Timer</small>
-                <h3 id="live-timer">00:00:00</h3>
-            </div>
-
         </div>
 
-        <div class="divider"></div>
 
-        <!-- Attendance Details -->
+        <!-- ================================================= -->
+        <!-- RIGHT - FRAPPE CALENDAR -->
+        <!-- ================================================= -->
 
-        <div class="attendance-details">
+        <div class="attendance-right">
 
-            <div class="attendance-row">
-                <span>Check In</span>
-                <strong id="checkin_time">--</strong>
+            <div class="card attendance-calendar-card">
+
+                <div class="attendance-calendar-header">
+
+                    <h4>
+                        Attendance Calendar
+                    </h4>
+
+                </div>
+
+
+                <!-- IMPORTANT:
+                     Leave this EMPTY.
+                     Frappe Calendar will render here.
+                -->
+
+                <div
+                    id="attendance-calendar"
+                    class="attendance-calendar-container">
+                </div>
+
+
+                <!-- Legend -->
+
+                <div class="calendar-legend">
+
+                    <span class="legend-item">
+
+                        <span
+                            class="legend-dot legend-present">
+                        </span>
+
+                        Present
+
+                    </span>
+
+
+                    <span class="legend-item">
+
+                        <span
+                            class="legend-dot legend-absent">
+                        </span>
+
+                        Absent
+
+                    </span>
+
+
+                    <span class="legend-item">
+
+                        <span
+                            class="legend-dot legend-leave">
+                        </span>
+
+                        Leave
+
+                    </span>
+
+
+                    <span class="legend-item">
+
+                        <span
+                            class="legend-dot legend-holiday">
+                        </span>
+
+                        Holiday
+
+                    </span>
+
+                </div>
+
             </div>
 
-            <div class="attendance-row">
-                <span>Check Out</span>
-                <strong id="checkout_time">--</strong>
-            </div>
-
-            <div class="attendance-row">
-                <span>Working Hours</span>
-                <strong id="working_hours">00:00:00</strong>
-            </div>
-
-        </div>
-
-        <!-- Button -->
-
-        <div class="button-area">
-            <button class="btn" id="attendance_btn">Loading...</button>
         </div>
 
     </div>
 
-    <!-- History Card -->
+
+    <!-- ================================================= -->
+    <!-- RECENT ATTENDANCE -->
+    <!-- ================================================= -->
 
     <div class="card history-card">
 
         <div class="history-header">
-            <h4>Recent Attendance</h4>
+
+            <h4>
+                Recent Attendance
+            </h4>
+
+            <a
+                href="#"
+                id="view_all_attendance"
+                class="view-all-link">
+                View All
+            </a>
+
         </div>
+
 
         <table class="table attendance-table">
 
             <thead>
+
                 <tr>
-                    <th>Date</th>
-                    <th>Check In</th>
-                    <th>Check Out</th>
-                    <th>Hours</th>
+
+                    <th>
+                        Date
+                    </th>
+
+                    <th>
+                        Check In
+                    </th>
+
+                    <th>
+                        Check Out
+                    </th>
+
+                    <th>
+                        Hours
+                    </th>
+
                 </tr>
+
             </thead>
 
+
             <tbody id="attendance_history">
+
                 <tr>
-                    <td colspan="4" class="text-center">Loading...</td>
+
+                    <td
+                        colspan="4"
+                        class="text-center">
+                        Loading...
+                    </td>
+
                 </tr>
+
             </tbody>
 
         </table>

@@ -15,6 +15,63 @@ tf = TimezoneFinder()
 SESSION_EXPIRE_SECONDS = 18 * 60 * 60     # Resume allowed only within 18 hours
 SESSION_RESET_SECONDS = 24 * 60 * 60      # 24 hour hard cap for continuous open sessions
 
+PRIYA_EMPLOYEE = "TCZ-IN-0376"
+PRIYA_EMAIL = "priya.ramesh@teceze.com"
+
+
+def send_priya_checkin_reminder():
+    employee = frappe.db.get_value(
+        "Employee",
+        PRIYA_EMPLOYEE,
+        ["status", "company_email"],
+        as_dict=True,
+    )
+    if not employee or employee.status != "Active":
+        return
+
+    current_time = now_datetime()
+    for shift_date in (current_time.date(), (current_time - timedelta(days=1)).date()):
+        shift_name = get_employee_shift_for_date(PRIYA_EMPLOYEE, shift_date)
+        if not shift_name:
+            continue
+
+        shift = frappe.db.get_value(
+            "Shift Type", shift_name, ["start_time", "end_time"], as_dict=True
+        )
+        if not shift or shift.start_time is None or shift.end_time is None:
+            continue
+
+        shift_start = get_shift_datetime(shift_date, shift.start_time)
+        shift_end = get_shift_datetime(shift_date, shift.end_time)
+        if shift_end <= shift_start:
+            shift_end += timedelta(days=1)
+
+        if not shift_start <= current_time <= shift_end:
+            continue
+
+        has_checked_in = frappe.db.exists(
+            "Employee Checkin",
+            {
+                "employee": PRIYA_EMPLOYEE,
+                "time": ["between", [shift_start, current_time]],
+            },
+        )
+        if has_checked_in:
+            return
+
+        frappe.sendmail(
+            # recipients=[employee.company_email or PRIYA_EMAIL],
+            recipients=[PRIYA_EMAIL],
+            subject="Check-in reminder",
+            message=(
+                "Dear Priya,<br><br>"
+                "You are currently within your shift time, but no check-in has been recorded. "
+                "Kindly check in.<br><br>Thank you."
+            ),
+            delayed=False,
+        )
+        return
+
 
 # ==========================================================
 # Distance Calculation
