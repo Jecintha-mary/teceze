@@ -232,11 +232,9 @@ extend_doctype_class = {
 # }
 
 scheduler_events = {
-	"cron": {
-        "*/5 * * * *": [
-            "teceze.api.employee_attendance.send_priya_checkin_reminder",
-        ],
-    },
+	# "cron": {
+       
+    # },
 	"hourly": [
         "teceze.api.employee_attendance.auto_checkout_open_sessions",
     ],
