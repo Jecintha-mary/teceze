@@ -685,16 +685,20 @@
   "link_to": "Organization",
   "link_type": "Workspace Sidebar",
   "logo_url": null,
-  "modified": "2026-02-24 17:59:39.885360",
+  "modified": "2026-08-14 14:41:53.354332",
   "name": "Organization",
   "parent_icon": "",
   "restrict_removal": 0,
-  "roles": [],
+  "roles": [
+   {
+    "role": "Administrator"
+   }
+  ],
   "sidebar": null,
   "standard": 1
  },
  {
-  "app": null,
+  "app": "teceze",
   "bg_color": "gray",
   "docstatus": 0,
   "doctype": "Desktop Icon",
@@ -707,16 +711,16 @@
   "link_to": null,
   "link_type": "Workspace Sidebar",
   "logo_url": null,
-  "modified": "2026-08-13 14:31:34.106484",
+  "modified": "2026-08-14 17:26:56.848144",
   "name": "FSO Desk",
   "parent_icon": "Teceze Dispatch",
   "restrict_removal": 0,
   "roles": [],
   "sidebar": null,
-  "standard": 0
+  "standard": 1
  },
  {
-  "app": null,
+  "app": "teceze",
   "bg_color": "gray",
   "docstatus": 0,
   "doctype": "Desktop Icon",
@@ -729,13 +733,13 @@
   "link_to": "Client Portal",
   "link_type": "Workspace Sidebar",
   "logo_url": null,
-  "modified": "2026-08-13 14:31:34.052363",
+  "modified": "2026-08-14 17:27:32.710379",
   "name": "Client Portal",
   "parent_icon": "Teceze Dispatch",
   "restrict_removal": 0,
   "roles": [],
   "sidebar": null,
-  "standard": 0
+  "standard": 1
  },
  {
   "app": null,
@@ -782,7 +786,7 @@
   "standard": 0
  },
  {
-  "app": null,
+  "app": "teceze",
   "bg_color": "gray",
   "docstatus": 0,
   "doctype": "Desktop Icon",
@@ -795,13 +799,17 @@
   "link_to": null,
   "link_type": "Workspace Sidebar",
   "logo_url": null,
-  "modified": "2026-08-13 13:11:52.059121",
+  "modified": "2026-08-14 14:47:24.295783",
   "name": "P2P",
   "parent_icon": null,
   "restrict_removal": 0,
-  "roles": [],
+  "roles": [
+   {
+    "role": "Administrator"
+   }
+  ],
   "sidebar": null,
-  "standard": 0
+  "standard": 1
  },
  {
   "app": "erpnext",
@@ -839,11 +847,15 @@
   "link_to": "Quality",
   "link_type": "Workspace Sidebar",
   "logo_url": null,
-  "modified": "2026-01-01 20:07:01.239523",
+  "modified": "2026-08-14 14:42:19.847967",
   "name": "Quality",
   "parent_icon": "ERPNext",
   "restrict_removal": 0,
-  "roles": [],
+  "roles": [
+   {
+    "role": "Administrator"
+   }
+  ],
   "sidebar": null,
   "standard": 1
  },
@@ -883,11 +895,15 @@
   "link_to": "Projects",
   "link_type": "Workspace Sidebar",
   "logo_url": null,
-  "modified": "2026-01-01 20:07:01.226383",
+  "modified": "2026-08-14 14:45:41.810033",
   "name": "Projects",
   "parent_icon": "ERPNext",
   "restrict_removal": 0,
-  "roles": [],
+  "roles": [
+   {
+    "role": "Administrator"
+   }
+  ],
   "sidebar": null,
   "standard": 1
  },
@@ -949,11 +965,15 @@
   "link_to": "Buying",
   "link_type": "Workspace Sidebar",
   "logo_url": null,
-  "modified": "2026-01-01 20:07:01.196163",
+  "modified": "2026-08-14 14:41:15.254226",
   "name": "Buying",
   "parent_icon": "ERPNext",
   "restrict_removal": 0,
-  "roles": [],
+  "roles": [
+   {
+    "role": "Administrator"
+   }
+  ],
   "sidebar": null,
   "standard": 1
  },
@@ -971,11 +991,15 @@
   "link_to": "Selling",
   "link_type": "Workspace Sidebar",
   "logo_url": null,
-  "modified": "2026-01-01 20:07:01.189446",
+  "modified": "2026-08-14 14:42:41.497948",
   "name": "Selling",
   "parent_icon": "ERPNext",
   "restrict_removal": 0,
-  "roles": [],
+  "roles": [
+   {
+    "role": "Administrator"
+   }
+  ],
   "sidebar": null,
   "standard": 1
  },
@@ -993,11 +1017,15 @@
   "link_to": "",
   "link_type": "Workspace Sidebar",
   "logo_url": null,
-  "modified": "2026-01-27 17:04:04.351402",
+  "modified": "2026-08-14 14:41:33.688925",
   "name": "Accounting",
   "parent_icon": "",
   "restrict_removal": 0,
-  "roles": [],
+  "roles": [
+   {
+    "role": "Administrator"
+   }
+  ],
   "sidebar": null,
   "standard": 1
  },
@@ -1279,11 +1307,15 @@
   "link_to": null,
   "link_type": "External",
   "logo_url": "/assets/hrms/images/frappe-hr-logo.svg",
-  "modified": "2026-01-09 17:29:44.070361",
+  "modified": "2026-08-14 14:40:51.054965",
   "name": "Frappe HR",
   "parent_icon": null,
   "restrict_removal": 0,
-  "roles": [],
+  "roles": [
+   {
+    "role": "Administrator"
+   }
+  ],
   "sidebar": null,
   "standard": 1
  },
@@ -1332,7 +1364,7 @@
   "standard": 1
  },
  {
-  "app": null,
+  "app": "teceze",
   "bg_color": "gray",
   "docstatus": 0,
   "doctype": "Desktop Icon",
@@ -1345,13 +1377,17 @@
   "link_to": null,
   "link_type": "Workspace Sidebar",
   "logo_url": null,
-  "modified": "2026-07-10 11:41:02.533804",
+  "modified": "2026-08-14 17:26:30.037458",
   "name": "Teceze Dispatch",
   "parent_icon": null,
   "restrict_removal": 0,
-  "roles": [],
+  "roles": [
+   {
+    "role": "Administrator"
+   }
+  ],
   "sidebar": null,
-  "standard": 0
+  "standard": 1
  },
  {
   "app": null,
@@ -1398,7 +1434,7 @@
   "standard": 0
  },
  {
-  "app": null,
+  "app": "teceze",
   "bg_color": "gray",
   "docstatus": 0,
   "doctype": "Desktop Icon",
@@ -1411,13 +1447,17 @@
   "link_to": "Teceze",
   "link_type": "Workspace Sidebar",
   "logo_url": null,
-  "modified": "2026-08-13 14:05:24.128972",
+  "modified": "2026-08-14 17:36:23.918969",
   "name": "Teceze",
   "parent_icon": null,
   "restrict_removal": 0,
-  "roles": [],
+  "roles": [
+   {
+    "role": "Administrator"
+   }
+  ],
   "sidebar": "Teceze",
-  "standard": 0
+  "standard": 1
  },
  {
   "app": "crm",
@@ -1442,7 +1482,7 @@
   "standard": 0
  },
  {
-  "app": null,
+  "app": "teceze",
   "bg_color": "gray",
   "docstatus": 0,
   "doctype": "Desktop Icon",
@@ -1455,16 +1495,16 @@
   "link_to": null,
   "link_type": "Workspace Sidebar",
   "logo_url": null,
-  "modified": "2026-08-13 17:16:37.355442",
+  "modified": "2026-08-14 17:36:38.694151",
   "name": "Reports",
   "parent_icon": "Teceze HR",
   "restrict_removal": 0,
   "roles": [],
   "sidebar": null,
-  "standard": 0
+  "standard": 1
  },
  {
-  "app": null,
+  "app": "teceze",
   "bg_color": "gray",
   "docstatus": 0,
   "doctype": "Desktop Icon",
@@ -1477,13 +1517,17 @@
   "link_to": null,
   "link_type": "Workspace Sidebar",
   "logo_url": null,
-  "modified": "2026-08-13 16:41:25.724565",
+  "modified": "2026-08-14 14:40:14.057016",
   "name": "Teceze CRM",
   "parent_icon": null,
   "restrict_removal": 0,
-  "roles": [],
+  "roles": [
+   {
+    "role": "Administrator"
+   }
+  ],
   "sidebar": null,
-  "standard": 0
+  "standard": 1
  },
  {
   "app": "teceze",
