@@ -1,13 +1,13 @@
 {
  "app": "teceze",
  "charts": [],
- "content": "[]",
- "creation": "2026-08-13 16:05:03.996737",
+ "content": "[{\"id\":\"V8qGngEySy\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Reports</b></span>\",\"col\":12}},{\"id\":\"-Sa9ZbIW1G\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"yMrYNqTHDp\",\"type\":\"card\",\"data\":{\"card_name\":\"Attendance And Leaves\",\"col\":4}},{\"id\":\"dtrAg5kNob\",\"type\":\"card\",\"data\":{\"card_name\":\"Project Management\",\"col\":4}},{\"id\":\"IqpL4ui-KC\",\"type\":\"card\",\"data\":{\"card_name\":\"Payroll\",\"col\":4}}]",
+ "creation": "2026-08-13 18:03:02.323943",
  "custom_blocks": [],
  "docstatus": 0,
  "doctype": "Workspace",
  "hide_custom": 0,
- "idx": 0,
+ "idx": 1,
  "indicator_color": "green",
  "is_hidden": 0,
  "label": "Reports",
@@ -17,7 +17,7 @@
    "hidden": 0,
    "is_query_report": 0,
    "label": "Attendance And Leaves",
-   "link_count": 0,
+   "link_count": 4,
    "link_type": "DocType",
    "onboard": 0,
    "type": "Card Break"
@@ -25,17 +25,16 @@
   {
    "hidden": 0,
    "is_query_report": 1,
-   "label": "heck In/Check Out",
+   "label": "Check In/Check Out ",
    "link_count": 0,
    "link_to": "Employee Checkin Out Report",
    "link_type": "Report",
    "onboard": 0,
-   "report_ref_doctype": "Employee Checkin",
    "type": "Link"
   },
   {
    "hidden": 0,
-   "is_query_report": 1,
+   "is_query_report": 0,
    "label": "Employee Leave Balance",
    "link_count": 0,
    "link_to": "Employee Leave Balance Report",
@@ -46,8 +45,8 @@
   },
   {
    "hidden": 0,
-   "is_query_report": 1,
-   "label": "Employee Leave and Permission",
+   "is_query_report": 0,
+   "label": "Employee Leave Permission",
    "link_count": 0,
    "link_to": "Employee Leave and Permission",
    "link_type": "Report",
@@ -57,7 +56,7 @@
   },
   {
    "hidden": 0,
-   "is_query_report": 1,
+   "is_query_report": 0,
    "label": "Monthly Attendance Report",
    "link_count": 0,
    "link_to": "Monthly Attendance Report",
@@ -69,8 +68,8 @@
   {
    "hidden": 0,
    "is_query_report": 0,
-   "label": "Projects Management",
-   "link_count": 0,
+   "label": "Project Management",
+   "link_count": 1,
    "link_type": "DocType",
    "onboard": 0,
    "type": "Card Break"
@@ -78,19 +77,18 @@
   {
    "hidden": 0,
    "is_query_report": 1,
-   "label": "Project Schedule Report",
+   "label": "Project Schedule",
    "link_count": 0,
    "link_to": "Project Schedule Report",
    "link_type": "Report",
    "onboard": 0,
-   "report_ref_doctype": "Project",
    "type": "Link"
   },
   {
    "hidden": 0,
    "is_query_report": 0,
    "label": "Payroll",
-   "link_count": 0,
+   "link_count": 1,
    "link_type": "DocType",
    "onboard": 0,
    "type": "Card Break"
@@ -103,11 +101,10 @@
    "link_to": "Salary Structure Assignment",
    "link_type": "Report",
    "onboard": 0,
-   "report_ref_doctype": "Salary Structure Assignment",
    "type": "Link"
   }
  ],
- "modified": "2026-08-13 17:31:18.162381",
+ "modified": "2026-08-14 12:23:10.337642",
  "modified_by": "Administrator",
  "module": "Teceze",
  "name": "Reports",

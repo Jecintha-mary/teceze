@@ -937,7 +937,7 @@ def get_associate_members(employee=None):
     if department:
         filters["department"] = department
 
-    members = frappe.get_all(
+    members = frappe.get_list(
         "Employee",
         filters=filters,
         fields=["name", "employee_name", "designation"],

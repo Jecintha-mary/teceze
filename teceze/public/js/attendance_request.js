@@ -36,6 +36,26 @@ frappe.ui.form.on("Attendance Request", {
 	},
 
 	employee(frm) {
+		if (!frm.doc.custom_reporting_manager) {
+            frm.set_value("custom_reporting_manager", "");
+            return;
+        }
+
+        frappe.db.get_value(
+            "User",
+            frm.doc.custom_reporting_manager,
+            "full_name"
+        ).then(r => {
+
+            if (r.message && r.message.full_name) {
+                frm.set_value(
+                    "custom_user_name",
+                    r.message.full_name
+                );
+            }
+
+        });
+
 
 		if (frm.doc.employee && frm.doc.from_date && !frm.doc.shift) {
 			frm.trigger("set_employee_shift");

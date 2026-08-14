@@ -284,9 +284,6 @@ def create_leave_application(
 ):
     try:
 
-        # ---------------------------------------------------------
-        # 1. Validate Employee
-        # ---------------------------------------------------------
 
         if not employee:
             return_error(

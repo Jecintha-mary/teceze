@@ -1,0 +1,24 @@
+{
+ "app": "teceze",
+ "bg_color": "gray",
+ "creation": "2026-08-13 18:02:17.874460",
+ "docstatus": 0,
+ "doctype": "Desktop Icon",
+ "hidden": 0,
+ "icon_image": "https://dzvvsqwqeo85o.cloudfront.net/teceze/2026/08/13/Desktop Icon/FK0Q1Q0A_p2p-icon.svg",
+ "icon_type": "Link",
+ "idx": 0,
+ "label": "P2P",
+ "link_type": "Workspace Sidebar",
+ "modified": "2026-08-14 14:47:24.295783",
+ "modified_by": "Administrator",
+ "name": "P2P",
+ "owner": "Administrator",
+ "restrict_removal": 0,
+ "roles": [
+  {
+   "role": "Administrator"
+  }
+ ],
+ "standard": 1
+}

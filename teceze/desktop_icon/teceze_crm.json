@@ -1,0 +1,24 @@
+{
+ "app": "teceze",
+ "bg_color": "gray",
+ "creation": "2026-08-13 18:02:19.180746",
+ "docstatus": 0,
+ "doctype": "Desktop Icon",
+ "hidden": 0,
+ "icon_image": "/api/method/frappe_s3_attachment.controller.generate_file?key=teceze/2026/08/13/File/TB7GR6ZD_OIP_1.svg&file_name=OIP 1.svg",
+ "icon_type": "Link",
+ "idx": 0,
+ "label": "Teceze CRM",
+ "link_type": "Workspace Sidebar",
+ "modified": "2026-08-14 14:40:14.057016",
+ "modified_by": "Administrator",
+ "name": "Teceze CRM",
+ "owner": "Administrator",
+ "restrict_removal": 0,
+ "roles": [
+  {
+   "role": "Administrator"
+  }
+ ],
+ "standard": 1
+}

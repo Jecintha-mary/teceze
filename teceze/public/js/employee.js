@@ -3,7 +3,6 @@
 
 frappe.ui.form.on("Employee", {
 	setup(frm) {
-        frm.set_value('designation', '');
 
         frm.set_query('designation', function() {
             return {
