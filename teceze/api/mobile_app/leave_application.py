@@ -271,8 +271,6 @@ def get_leave_application(employee=None, leave_application=None):
         frappe.local.response["data"] = None
 
 
-import frappe
-
 
 @frappe.whitelist(allow_guest=True)
 def create_leave_application(
@@ -284,126 +282,152 @@ def create_leave_application(
     half_day_date=None,
     description=None
 ):
-   
-
     try:
 
+        # ---------------------------------------------------------
+        # 1. Validate Employee
+        # ---------------------------------------------------------
+
         if not employee:
-            frappe.local.response["http_status_code"] = 400
-            frappe.local.response["success"] = False
-            frappe.local.response["status_code"] = 400
-            frappe.local.response["message"] = "Employee is required"
-            frappe.local.response["data"] = None
+            return_error(
+                400,
+                "Employee is required"
+            )
             return
+
+        # ---------------------------------------------------------
+        # 2. Validate Employee Exists
+        # ---------------------------------------------------------
+
+        employee_data = frappe.db.get_value(
+            "Employee",
+            employee,
+            [
+                "employee_name",
+                "company",
+                "department"
+            ],
+            as_dict=True
+        )
+
+        if not employee_data:
+            return_error(
+                404,
+                "Employee not found"
+            )
+            return
+
+        # ---------------------------------------------------------
+        # 3. Validate Leave Type
+        # ---------------------------------------------------------
 
         if not leave_type:
-            frappe.local.response["http_status_code"] = 400
-            frappe.local.response["success"] = False
-            frappe.local.response["status_code"] = 400
-            frappe.local.response["message"] = "Leave type is required"
-            frappe.local.response["data"] = None
+            return_error(
+                400,
+                "Leave type is required"
+            )
             return
 
+        if not frappe.db.exists(
+            "Leave Type",
+            leave_type
+        ):
+            return_error(
+                404,
+                "Leave type not found"
+            )
+            return
+
+        # ---------------------------------------------------------
+        # 4. Validate Dates
+        # ---------------------------------------------------------
+
         if not from_date:
-            frappe.local.response["http_status_code"] = 400
-            frappe.local.response["success"] = False
-            frappe.local.response["status_code"] = 400
-            frappe.local.response["message"] = "From date is required"
-            frappe.local.response["data"] = None
+            return_error(
+                400,
+                "From date is required"
+            )
             return
 
         if not to_date:
-            frappe.local.response["http_status_code"] = 400
-            frappe.local.response["success"] = False
-            frappe.local.response["status_code"] = 400
-            frappe.local.response["message"] = "To date is required"
-            frappe.local.response["data"] = None
+            return_error(
+                400,
+                "To date is required"
+            )
             return
-
-
-        employee_name = frappe.db.get_value(
-            "Employee",
-            employee,
-            "employee_name",
-            ignore_permissions=True
-        )
-
-        if not employee_name:
-            frappe.local.response["http_status_code"] = 404
-            frappe.local.response["success"] = False
-            frappe.local.response["status_code"] = 404
-            frappe.local.response["message"] = "Employee not found"
-            frappe.local.response["data"] = None
-            return
-
-
-        if not frappe.db.exists("Leave Type", leave_type):
-            frappe.local.response["http_status_code"] = 404
-            frappe.local.response["success"] = False
-            frappe.local.response["status_code"] = 404
-            frappe.local.response["message"] = "Leave type not found"
-            frappe.local.response["data"] = None
-            return
-
 
         if from_date > to_date:
-            frappe.local.response["http_status_code"] = 400
-            frappe.local.response["success"] = False
-            frappe.local.response["status_code"] = 400
-            frappe.local.response["message"] = (
+            return_error(
+                400,
                 "From date cannot be greater than to date"
             )
-            frappe.local.response["data"] = None
             return
 
+        # ---------------------------------------------------------
+        # 5. Validate Half Day
+        # ---------------------------------------------------------
 
         half_day = int(half_day or 0)
 
         if half_day not in (0, 1):
-            frappe.local.response["http_status_code"] = 400
-            frappe.local.response["success"] = False
-            frappe.local.response["status_code"] = 400
-            frappe.local.response["message"] = (
+            return_error(
+                400,
                 "Half day must be either 0 or 1"
             )
-            frappe.local.response["data"] = None
             return
 
-        if half_day and not half_day_date:
-            frappe.local.response["http_status_code"] = 400
-            frappe.local.response["success"] = False
-            frappe.local.response["status_code"] = 400
-            frappe.local.response["message"] = (
+        if half_day == 1 and not half_day_date:
+            return_error(
+                400,
                 "Half day date is required when half day is selected"
             )
-            frappe.local.response["data"] = None
             return
 
+        # ---------------------------------------------------------
+        # 6. Prepare Leave Application
+        # ---------------------------------------------------------
 
         leave_application = frappe.get_doc({
             "doctype": "Leave Application",
             "employee": employee,
+            "employee_name": employee_data.employee_name,
             "leave_type": leave_type,
             "from_date": from_date,
             "to_date": to_date,
             "half_day": half_day,
             "half_day_date": half_day_date if half_day else None,
-            "description": description
+            "description": description,
+            "company": employee_data.company
         })
 
+        # ---------------------------------------------------------
+        # 7. Insert
+        # ---------------------------------------------------------
 
         leave_application.insert(
             ignore_permissions=True
         )
 
+        # ---------------------------------------------------------
+        # IMPORTANT
+        #
+        # Do NOT submit here.
+        #
+        # docstatus = 0
+        #
+        # Your approval workflow can process this application.
+        # ---------------------------------------------------------
 
         frappe.db.commit()
 
+        # ---------------------------------------------------------
+        # 8. Response
+        # ---------------------------------------------------------
 
         data = {
             "name": leave_application.name,
             "employee": leave_application.employee,
-            "employee_name": employee_name,
+            "employee_name": employee_data.employee_name,
             "leave_type": leave_application.leave_type,
             "from_date": leave_application.from_date,
             "to_date": leave_application.to_date,
@@ -425,23 +449,14 @@ def create_leave_application(
         )
         frappe.local.response["data"] = data
 
-
-    except frappe.PermissionError:
-
-        frappe.db.rollback()
-
-        frappe.local.response["http_status_code"] = 403
-        frappe.local.response["success"] = False
-        frappe.local.response["status_code"] = 403
-        frappe.local.response["message"] = (
-            "You do not have permission to create leave application"
-        )
-        frappe.local.response["data"] = None
-
-
     except frappe.ValidationError as e:
 
         frappe.db.rollback()
+
+        frappe.log_error(
+            frappe.get_traceback(),
+            "Leave Application Validation Error"
+        )
 
         frappe.local.response["http_status_code"] = 400
         frappe.local.response["success"] = False
@@ -449,20 +464,43 @@ def create_leave_application(
         frappe.local.response["message"] = str(e)
         frappe.local.response["data"] = None
 
-
-    except Exception:
+    except frappe.PermissionError as e:
 
         frappe.db.rollback()
 
         frappe.log_error(
             frappe.get_traceback(),
+            "Leave Application Permission Error"
+        )
+
+        frappe.local.response["http_status_code"] = 403
+        frappe.local.response["success"] = False
+        frappe.local.response["status_code"] = 403
+        frappe.local.response["message"] = str(e)
+        frappe.local.response["data"] = None
+
+    except Exception as e:
+
+        frappe.db.rollback()
+
+        # Log complete traceback
+        frappe.log_error(
+            frappe.get_traceback(),
             "Create Leave Application API Error"
         )
 
+        # Return actual error temporarily for debugging
         frappe.local.response["http_status_code"] = 500
         frappe.local.response["success"] = False
         frappe.local.response["status_code"] = 500
-        frappe.local.response["message"] = (
-            "Unable to create leave application"
-        )
+        frappe.local.response["message"] = str(e)
         frappe.local.response["data"] = None
+
+
+def return_error(status_code, message):
+
+    frappe.local.response["http_status_code"] = status_code
+    frappe.local.response["success"] = False
+    frappe.local.response["status_code"] = status_code
+    frappe.local.response["message"] = message
+    frappe.local.response["data"] = None
