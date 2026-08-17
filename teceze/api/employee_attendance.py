@@ -100,7 +100,6 @@ def get_timezone_details(latitude, longitude):
 def get_checkin_address(latitude, longitude):
 
     try:
-
         geolocator = Nominatim(
             user_agent="employee_attendance"
         )
@@ -194,7 +193,6 @@ def get_employee_shift_for_date(employee, for_date):
         """,
         {"employee": employee, "for_date": for_date},
     )
-
     if rows:
         return rows[0][0]
 

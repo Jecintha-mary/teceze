@@ -1,0 +1,22 @@
+{
+ "app": "teceze",
+ "bg_color": "gray",
+ "creation": "2026-08-13 18:02:17.620036",
+ "docstatus": 0,
+ "doctype": "Desktop Icon",
+ "hidden": 0,
+ "icon_image": "https://dzvvsqwqeo85o.cloudfront.net/teceze/2026/08/13/Desktop Icon/1KAPSCHZ_sourcing.svg",
+ "icon_type": "Link",
+ "idx": 0,
+ "label": "FSO Sourcing",
+ "link_to": "Fso Sourcing",
+ "link_type": "Workspace Sidebar",
+ "modified": "2026-08-14 17:37:02.190779",
+ "modified_by": "Administrator",
+ "name": "FSO Sourcing",
+ "owner": "Administrator",
+ "parent_icon": "Teceze Dispatch",
+ "restrict_removal": 0,
+ "roles": [],
+ "standard": 1
+}

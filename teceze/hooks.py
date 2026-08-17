@@ -65,6 +65,7 @@ doctype_js = {
 	"Project" : ["public/js/project.js"],
 	"Quotation" : ["public/js/quotation.js"],
 	"Salary Structure Assignment" : ["public/js/salary_structure_assignment.js"],
+	"Timesheet" : ["public/js/timesheet.js"],
 
 }
 doctype_list_js = {
