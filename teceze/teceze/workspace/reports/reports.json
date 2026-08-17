@@ -1,7 +1,7 @@
 {
  "app": "teceze",
  "charts": [],
- "content": "[{\"id\":\"V8qGngEySy\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Reports</b></span>\",\"col\":12}},{\"id\":\"-Sa9ZbIW1G\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"yMrYNqTHDp\",\"type\":\"card\",\"data\":{\"card_name\":\"Attendance And Leaves\",\"col\":4}},{\"id\":\"dtrAg5kNob\",\"type\":\"card\",\"data\":{\"card_name\":\"Project Management\",\"col\":4}},{\"id\":\"IqpL4ui-KC\",\"type\":\"card\",\"data\":{\"card_name\":\"Payroll\",\"col\":4}}]",
+ "content": "[{\"id\":\"V8qGngEySy\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Reports</b></span>\",\"col\":12}},{\"id\":\"NqEjhLboBt\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Total Active Employees\",\"col\":4}},{\"id\":\"jaBW-TiCVU\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Inactive Employee\",\"col\":4}},{\"id\":\"Lo5mclHCTQ\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Total Engineers\",\"col\":4}},{\"id\":\"KKMiNtzV6i\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"India Employees\",\"col\":4}},{\"id\":\"LqnanZLrYQ\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"SriLanka Employees\",\"col\":4}},{\"id\":\"4NFSodhmXH\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"UK employees\",\"col\":4}},{\"id\":\"QPD9qOB0X6\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"US Employees\",\"col\":4}},{\"id\":\"tMeOthxE6g\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"China Employees\",\"col\":4}},{\"id\":\"MQl6Q5Tjb7\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Canada Employees\",\"col\":4}},{\"id\":\"yMrYNqTHDp\",\"type\":\"card\",\"data\":{\"card_name\":\"Attendance And Leaves\",\"col\":4}},{\"id\":\"dtrAg5kNob\",\"type\":\"card\",\"data\":{\"card_name\":\"Project Management\",\"col\":4}},{\"id\":\"IqpL4ui-KC\",\"type\":\"card\",\"data\":{\"card_name\":\"Payroll\",\"col\":4}}]",
  "creation": "2026-08-13 18:03:02.323943",
  "custom_blocks": [],
  "docstatus": 0,
@@ -104,11 +104,48 @@
    "type": "Link"
   }
  ],
- "modified": "2026-08-14 12:23:10.337642",
+ "modified": "2026-08-17 16:13:44.350082",
  "modified_by": "Administrator",
  "module": "Teceze",
  "name": "Reports",
- "number_cards": [],
+ "number_cards": [
+  {
+   "label": "India Employees",
+   "number_card_name": "India Employees"
+  },
+  {
+   "label": "Total Active Employees",
+   "number_card_name": "Active Employees-1"
+  },
+  {
+   "label": "SriLanka Employees",
+   "number_card_name": "SriLanka Employees"
+  },
+  {
+   "label": "Inactive Employee",
+   "number_card_name": "Inactive Employees"
+  },
+  {
+   "label": "UK employees",
+   "number_card_name": "UK employees"
+  },
+  {
+   "label": "Total Engineers",
+   "number_card_name": "Total Engineer"
+  },
+  {
+   "label": "US Employees",
+   "number_card_name": "US Employees"
+  },
+  {
+   "label": "China Employees",
+   "number_card_name": "China Employees"
+  },
+  {
+   "label": "Canada Employees",
+   "number_card_name": "Canada Employees"
+  }
+ ],
  "owner": "Administrator",
  "public": 1,
  "quick_lists": [],

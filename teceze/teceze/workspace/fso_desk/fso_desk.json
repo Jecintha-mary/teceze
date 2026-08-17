@@ -11,7 +11,7 @@
   }
  ],
  "content": "[{\"id\":\"RNSSIpIC6O\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Total Tickets\",\"col\":4}},{\"id\":\"sI6Gps7c4g\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Pending Review\",\"col\":4}},{\"id\":\"HcHci1Yz67\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"In Progress\",\"col\":4}},{\"id\":\"_L8ffXnSLY\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Completed\",\"col\":4}},{\"id\":\"evhBn2rFbX\",\"type\":\"chart\",\"data\":{\"chart_name\":\"Ticket Pipeline Chart\",\"col\":12}},{\"id\":\"kVEIphCrKB\",\"type\":\"chart\",\"data\":{\"chart_name\":\"SLA Distribution\",\"col\":12}},{\"id\":\"_C85FLvlj4\",\"type\":\"custom_block\",\"data\":{\"custom_block_name\":\"Recent Tickets\",\"col\":12}},{\"id\":\"nrmzVSrXU4\",\"type\":\"custom_block\",\"data\":{\"custom_block_name\":\"Engineer Workload\",\"col\":12}},{\"id\":\"gz_JdpyDzM\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Assigned Tickets\",\"col\":4}},{\"id\":\"Z5x_BQnOCQ\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Unassigned Tickets\",\"col\":4}}]",
- "creation": "2026-08-13 11:05:51.570127",
+ "creation": "2026-08-13 18:03:01.365971",
  "custom_blocks": [
   {
    "custom_block_name": "Recent Tickets",
@@ -31,7 +31,7 @@
  "label": "FSO Desk",
  "link_type": "DocType",
  "links": [],
- "modified": "2026-08-13 12:41:17.576041",
+ "modified": "2026-08-17 16:03:38.212817",
  "modified_by": "Administrator",
  "module": "Teceze",
  "name": "FSO Desk",
@@ -64,7 +64,11 @@
  "owner": "Administrator",
  "public": 1,
  "quick_lists": [],
- "roles": [],
+ "roles": [
+  {
+   "role": "System Manager"
+  }
+ ],
  "sequence_id": 0.0,
  "shortcuts": [],
  "title": "FSO Desk",
