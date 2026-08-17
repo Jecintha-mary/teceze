@@ -354,7 +354,7 @@ fixtures = [
    	"Role",
    	"Workspace",
 	"Print Format",
-   	# "Custom DocPerm",
+   	"Custom DocPerm",
    	"Report",
 	"Number Card",
 	"Web Form",
