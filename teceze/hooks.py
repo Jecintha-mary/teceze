@@ -86,13 +86,7 @@ doc_events = {
 	"Sales Order": {
     "on_submit": ["teceze.procurement.doctype.procurement_request.procurement_request.update_sales_order"]
 	},
-	# "Procurement Request": {
-    #     "onload": ["teceze.procurement.doctype.procurement_request.procurement_request.onload"]
-    # },
-	# "Attendance Request": {
-    #     "validate": "teceze.overrides.attendance_regularization.validate",
-    #     "before_save": "teceze.overrides.attendance_regularization.before_save"
-    # },
+	
 	"Attendance Request": {
         "validate": ["teceze.api.attendance_regularization.validate_regularization_limit"]
     },

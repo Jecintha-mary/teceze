@@ -178,20 +178,9 @@
    "link_type": "DocType",
    "show_arrow": 0,
    "type": "Link"
-  },
-  {
-   "child": 0,
-   "collapsible": 1,
-   "indent": 0,
-   "keep_closed": 0,
-   "label": "Expenses Claim",
-   "link_to": "Expense Claim",
-   "link_type": "DocType",
-   "show_arrow": 0,
-   "type": "Link"
   }
  ],
- "modified": "2026-08-17 14:26:29.067657",
+ "modified": "2026-08-17 18:12:51.126664",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "People",

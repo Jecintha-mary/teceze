@@ -1,125 +1,19 @@
 import frappe
 from frappe import _
 from frappe.utils import (now_datetime, get_datetime, time_diff_in_seconds, add_to_date)
-from datetime import datetime
+from datetime import datetime, timedelta
 from geopy.geocoders import Nominatim
 from timezonefinder import TimezoneFinder
 from zoneinfo import ZoneInfo
 from math import (radians, sin, cos, sqrt, atan2)
+from frappe import _dict
+from hrms.hr.doctype.employee_checkin.employee_checkin import calculate_working_hours
 import uuid
 
 tf = TimezoneFinder()
 
 SESSION_EXPIRE_SECONDS = 18 * 60 * 60     # Resume allowed only within 18 hours
 SESSION_RESET_SECONDS = 24 * 60 * 60      # 24 hour hard cap for continuous open sessions
-
-
-# ==========================================================
-# Current Logged-in Employee
-#
-# SECURITY:
-# The browser must never decide which Employee record is being
-# operated on. Employee identity is always derived from the
-# authenticated Frappe session.
-# ==========================================================
-
-def get_current_employee():
-    user = frappe.session.user
-
-    if not user or user == "Guest":
-        frappe.throw(_("Authentication required."))
-
-    employees = frappe.get_list(
-        "Employee",
-        filters={
-            "user_id": user,
-            "status": "Active",
-        },
-        fields=[
-            "name",
-            "employee_name",
-            "user_id",
-            "status",
-            "custom_work_location",
-            "designation",
-            "department",
-            "reports_to",
-            "default_shift",
-        ],
-        limit_page_length=1,
-    )
-
-    if not employees:
-        frappe.throw(_("No active Employee is mapped to the logged-in user."))
-
-    return employees[0]
-
-
-# ==========================================================
-# GPS Input Validation
-# ==========================================================
-
-def validate_gps_input(latitude, longitude, accuracy):
-    if latitude is None or longitude is None:
-        frappe.throw(_("Latitude and Longitude are required."))
-
-    if accuracy is None:
-        frappe.throw(_("GPS accuracy is required."))
-
-    try:
-        latitude = float(latitude)
-        longitude = float(longitude)
-        accuracy = float(accuracy)
-    except (TypeError, ValueError):
-        frappe.throw(_("Invalid GPS values."))
-
-    if not -90 <= latitude <= 90:
-        frappe.throw(_("Invalid latitude."))
-
-    if not -180 <= longitude <= 180:
-        frappe.throw(_("Invalid longitude."))
-
-    if accuracy < 0:
-        frappe.throw(_("Invalid GPS accuracy."))
-
-    return latitude, longitude, accuracy
-
-
-def get_gps_accuracy_threshold(location):
-    """
-    Preferred configuration field:
-        Location.custom_gps_accuracy_threshold
-
-    If that custom field is not present or is empty, use 100 meters.
-    """
-    threshold = 100.0
-
-    if location.meta.has_field("custom_gps_accuracy_threshold"):
-        configured = location.get("custom_gps_accuracy_threshold")
-        if configured not in (None, ""):
-            try:
-                threshold = float(configured)
-            except (TypeError, ValueError):
-                frappe.throw(_("Invalid GPS accuracy threshold configured."))
-
-    if threshold <= 0:
-        frappe.throw(_("GPS accuracy threshold must be greater than zero."))
-
-    return threshold
-
-
-def validate_gps_accuracy(location, accuracy):
-    threshold = get_gps_accuracy_threshold(location)
-
-    if accuracy > threshold:
-        frappe.throw(
-            _(
-                "GPS accuracy is too low for attendance. "
-                "Current accuracy: {0} meters. Required: {1} meters or better."
-            ).format(round(accuracy, 2), round(threshold, 2))
-        )
-
-    return threshold
 
 
 # ==========================================================
@@ -154,15 +48,15 @@ def calculate_distance(lat1, lon1, lat2, lon2):
 # Timezone Details
 # ==========================================================
 
-def get_timezone_details(latitude=None, longitude=None):
+def get_timezone_details(latitude, longitude):
 
-    employee_timezone = "UTC"
+    employee_timezone = tf.timezone_at(
+        lat=float(latitude),
+        lng=float(longitude)
+    )
 
-    if latitude is not None and longitude is not None:
-        employee_timezone = tf.timezone_at(
-            lat=float(latitude),
-            lng=float(longitude)
-        ) or "UTC"
+    if not employee_timezone:
+        employee_timezone = "UTC"
 
     utc_time = (
         now_datetime()
@@ -285,37 +179,25 @@ def validate_employee_location(
 # ==========================================================
 
 def get_employee_shift_for_date(employee, for_date):
-    assignments = frappe.get_list(
-        "Shift Assignment",
-        filters={
-            "employee": employee,
-            "docstatus": 1,
-            "start_date": ["<=", for_date],
-        },
-        or_filters=[
-            {"end_date": ["is", "not set"]},
-            {"end_date": ""},
-            {"end_date": [">=", for_date]},
-        ],
-        fields=["shift_type", "start_date", "end_date"],
-        order_by="start_date desc",
-        limit_page_length=1,
+
+    rows = frappe.db.sql(
+        """
+        SELECT shift_type
+        FROM `tabShift Assignment`
+        WHERE employee = %(employee)s
+          AND docstatus = 1
+          AND start_date <= %(for_date)s
+          AND (end_date IS NULL OR end_date = '' OR end_date >= %(for_date)s)
+        ORDER BY start_date DESC
+        LIMIT 1
+        """,
+        {"employee": employee, "for_date": for_date},
     )
+    if rows:
+        return rows[0][0]
 
-    if assignments and assignments[0].shift_type:
-        return assignments[0].shift_type
-
-    fallback = frappe.get_list(
-        "Employee",
-        filters={"name": employee},
-        fields=["default_shift"],
-        limit_page_length=1,
-    )
-
-    if fallback:
-        return fallback[0].default_shift
-
-    return None
+    # Fallback: Employee master's Default Shift field
+    return frappe.db.get_value("Employee", employee, "default_shift")
 
 
 # ==========================================================
@@ -332,20 +214,20 @@ def get_shift_datetime(date, time_delta):
 # ==========================================================
 
 def get_session_logs(employee, session_start_time, session_end_time):
-    logs = frappe.get_list(
+
+    log_names = frappe.get_all(
         "Employee Checkin",
         filters={
             "employee": employee,
-            "time": ["between", [session_start_time, session_end_time]],
+            "time": ["between", [session_start_time, session_end_time]]
         },
-        fields=["name"],
         order_by="time asc, creation asc",
-        limit_page_length=0,
+        pluck="name"
     )
 
     return [
-        frappe.get_doc("Employee Checkin", row.name)
-        for row in logs
+        frappe.get_doc("Employee Checkin", name)
+        for name in log_names
     ]
 
 
@@ -490,25 +372,28 @@ def auto_checkout(last_log):
 # ==========================================================
 
 def auto_checkout_open_sessions():
-    """
-    Scheduler-safe ORM implementation.
 
-    For each active employee, inspect only that employee's latest
-    Employee Checkin record. If the latest record is an IN and the
-    session has crossed the 24-hour cap, create the automatic OUT.
-    """
-    employees = frappe.get_list(
-        "Employee",
-        filters={"status": "Active"},
-        fields=["name"],
-        order_by="name asc",
-        limit_page_length=0,
+    open_logs = frappe.db.sql(
+        """
+        SELECT ec.name
+        FROM `tabEmployee Checkin` ec
+        INNER JOIN (
+            SELECT employee, MAX(time) AS max_time
+            FROM `tabEmployee Checkin`
+            GROUP BY employee
+        ) latest
+            ON latest.employee = ec.employee
+           AND latest.max_time = ec.time
+        WHERE ec.log_type = 'IN'
+        """,
+        as_dict=True,
     )
 
-    for employee_row in employees:
-        latest = frappe.get_list(
+    for row in open_logs:
+
+        rows = frappe.get_all(
             "Employee Checkin",
-            filters={"employee": employee_row.name},
+            filters={"name": row.name},
             fields=[
                 "name",
                 "employee",
@@ -522,17 +407,12 @@ def auto_checkout_open_sessions():
                 "longitude",
                 "custom_checkin_address",
             ],
-            order_by="time desc, creation desc",
-            limit_page_length=1,
         )
 
-        if not latest:
+        if not rows:
             continue
 
-        last_log = latest[0]
-
-        if last_log.log_type != "IN":
-            continue
+        last_log = rows[0]
 
         session_start = last_log.custom_session_start or last_log.time
 
@@ -551,87 +431,87 @@ def auto_checkout_open_sessions():
 # ==========================================================
 
 @frappe.whitelist()
-def employee_checkin(log_type, latitude=None, longitude=None, accuracy=None):
-    """
-    Employee self-service attendance endpoint.
+def employee_checkin(employee, log_type, latitude=None, longitude=None):
 
-    IMPORTANT:
-    - No employee ID is accepted from the browser.
-    - Employee identity comes from frappe.session.user.
-    - GPS accuracy is mandatory and validated server-side.
-    - Geofence validation is performed server-side.
-    - Reverse geocoding is deliberately NOT part of this critical path.
-    """
+    # ======================================================
+    # VALIDATION
+    # ======================================================
 
-    if log_type not in ("IN", "OUT"):
-        frappe.throw(_("Invalid Log Type."))
+    if not employee:
+        frappe.throw(_("Employee is required."))
 
-    employee_doc = get_current_employee()
-    employee = employee_doc.name
+    if not log_type:
+        frappe.throw(_("Log Type is required."))
 
-    latitude, longitude, accuracy = validate_gps_input(
-        latitude,
-        longitude,
-        accuracy,
+    if latitude is None or longitude is None:
+        frappe.throw(_("Latitude and Longitude are required."))
+
+    latitude = float(latitude)
+    longitude = float(longitude)
+
+    # ======================================================
+    # EMPLOYEE
+    # ======================================================
+
+    employee_doc = frappe.get_doc(
+        "Employee",
+        employee
     )
 
-    # Resolve the employee's work location through the authenticated
-    # employee record, never through a frontend employee parameter.
-    if not employee_doc.custom_work_location:
-        frappe.throw(_("Work Location is not assigned."))
-
-    location_rows = frappe.get_list(
-        "Location",
-        filters={"name": employee_doc.custom_work_location},
-        fields=[
-            "name",
-            "latitude",
-            "longitude",
-            "custom_attendance_radius",
-            "custom_attendance_radius_uom",
-        ],
-        limit_page_length=1,
-    )
-
-    if not location_rows:
-        frappe.throw(_("Assigned Work Location was not found."))
-
-    location = frappe.get_doc("Location", location_rows[0].name)
-
-    validate_gps_accuracy(location, accuracy)
+    # ======================================================
+    # LOCATION VALIDATION
+    # ======================================================
 
     distance = validate_employee_location(
         employee,
         latitude,
-        longitude,
+        longitude
     )
 
-    timezone_data = get_timezone_details(latitude, longitude)
+    # ======================================================
+    # TIMEZONE
+    # ======================================================
 
-    # Latest attendance record for the authenticated employee only.
-    latest_logs = frappe.get_list(
+    timezone_data = get_timezone_details(
+        latitude,
+        longitude
+    )
+
+    # ======================================================
+    # ADDRESS
+    # ======================================================
+
+    checkin_address = get_checkin_address(
+        latitude,
+        longitude
+    )
+
+    # ======================================================
+    # Fetch Latest Attendance Log
+    # ======================================================
+
+    last_log = frappe.get_all(
         "Employee Checkin",
-        filters={"employee": employee},
+        filters={
+            "employee": employee
+        },
         fields=[
             "name",
             "employee",
-            "employee_name",
             "log_type",
             "time",
             "shift",
             "custom_previous_seconds",
             "custom_session_start",
             "custom_session_id",
-            "latitude",
-            "longitude",
+            "latitude", "longitude",
             "custom_checkin_address",
-            "custom_gps_accuracy",
         ],
-        order_by="time desc, creation desc",
-        limit_page_length=1,
+        order_by="time desc, creation asc",
+        limit=1
     )
 
-    last_log = latest_logs[0] if latest_logs else None
+    last_log = last_log[0] if last_log else None
 
     # ======================================================
     # CHECK IN
@@ -639,183 +519,257 @@ def employee_checkin(log_type, latitude=None, longitude=None, accuracy=None):
 
     if log_type == "IN":
 
+        # ------------------------------------------
+        # Employee is currently checked IN (no checkout yet)
+        # ------------------------------------------
+
         if last_log and last_log.log_type == "IN":
+
             session_start = last_log.custom_session_start or last_log.time
             session_age = get_session_age(session_start)
 
             if session_age >= SESSION_RESET_SECONDS:
+
+                
                 auto_checkout(last_log)
                 session = start_new_session()
+
             else:
                 frappe.throw(_("Employee is already Checked In."))
 
+        # ------------------------------------------
+        # Employee last checked OUT - resume or start fresh
+        # ------------------------------------------
+
         elif last_log and last_log.log_type == "OUT":
+
             session_start = last_log.custom_session_start or last_log.time
             session_age = get_session_age(session_start)
 
             if session_age < SESSION_EXPIRE_SECONDS:
+                
                 session = resume_session(last_log)
             else:
                 session = start_new_session()
 
+        # ------------------------------------------
+        # No prior log at all
+        # ------------------------------------------
+
         else:
             session = start_new_session()
 
-        checkin = frappe.new_doc("Employee Checkin")
+        # ==================================================
+        # CREATE CHECK IN
+        # ==================================================
+
+        checkin = frappe.new_doc(
+            "Employee Checkin"
+        )
 
         checkin.employee = employee
-        checkin.employee_name = employee_doc.employee_name
+
+        checkin.employee_name = (
+            employee_doc.employee_name
+        )
+
         checkin.log_type = "IN"
+
         checkin.time = now_datetime()
+
         checkin.latitude = latitude
+
         checkin.longitude = longitude
-        checkin.custom_distance = round(distance, 2)
 
-        if checkin.meta.has_field("custom_gps_accuracy"):
-            checkin.custom_gps_accuracy = accuracy
+        checkin.custom_distance = round(
+            distance,
+            2
+        )
 
-        # Reverse geocoding is optional. We do not call Nominatim here.
-        if checkin.meta.has_field("custom_checkin_address"):
-            checkin.custom_checkin_address = "Address pending"
+        checkin.custom_checkin_address = (
+            checkin_address
+        )
 
         checkin.custom_previous_seconds = session["previous_seconds"]
         checkin.custom_session_start = session["session_start"]
         checkin.custom_session_id = session["session_id"]
-        checkin.custom_utc_time = timezone_data["utc_time"]
-        checkin.custom_employee_timezone = timezone_data["employee_timezone"]
-        checkin.custom_employee_local_time = timezone_data["employee_local_time"]
-        checkin.custom_company_timezone = timezone_data["company_timezone"]
-        checkin.custom_company_local_time = timezone_data["company_local_time"]
-
-        resolved_shift = get_employee_shift_for_date(
-            employee,
-            checkin.time.date(),
+        checkin.custom_utc_time = (
+            timezone_data["utc_time"]
         )
 
-        if resolved_shift:
-            checkin.shift = resolved_shift
+        checkin.custom_employee_timezone = (
+            timezone_data["employee_timezone"]
+        )
 
-        # This is an authenticated, server-authorized self-service
-        # operation. Keep permission bypass only here if the Employee
-        # role is not granted direct Employee Checkin create permission.
-        checkin.insert(ignore_permissions=True)
+        checkin.custom_employee_local_time = (
+            timezone_data["employee_local_time"]
+        )
+
+        checkin.custom_company_timezone = (
+            timezone_data["company_timezone"]
+        )
+
+        checkin.custom_company_local_time = (
+            timezone_data["company_local_time"]
+        )
+
+        
+        resolved_shift = get_employee_shift_for_date(
+            employee, checkin.time.date()
+        )
+
+        checkin.insert(
+            ignore_permissions=True
+        )
+
+        
+        if resolved_shift:
+            checkin.db_set("shift", resolved_shift, update_modified=False)
 
         frappe.db.commit()
 
         return {
             "success": True,
-            "message": _("Check In Successful"),
-            "distance": round(distance, 2),
-            "accuracy": round(accuracy, 2),
+            "message": _("Check In Successful")
         }
 
     # ======================================================
     # CHECK OUT
     # ======================================================
 
-    if not last_log:
-        frappe.throw(_("Please Check In first."))
+    elif log_type == "OUT":
 
-    if last_log.log_type != "IN":
-        frappe.throw(_("Employee has already Checked Out."))
+        if not last_log:
+            frappe.throw(_("Please Check In first."))
 
-    session_start = last_log.custom_session_start or last_log.time
-    current_time = now_datetime()
+        if last_log.log_type != "IN":
+            frappe.throw(_("Employee has already Checked Out."))
 
-    max_time = add_to_date(
-        session_start,
-        seconds=SESSION_RESET_SECONDS,
-    )
-    checkout_time = min(current_time, max_time)
+        session_start = last_log.custom_session_start or last_log.time
+        current_time = now_datetime()
 
-    elapsed_since_in = int(
-        time_diff_in_seconds(
-            checkout_time,
-            last_log.time,
-        )
-    )
+        
+        max_time = add_to_date(session_start, seconds=SESSION_RESET_SECONDS)
+        checkout_time = min(current_time, max_time)
 
-    if elapsed_since_in < 0:
-        elapsed_since_in = 0
-
-    previous_seconds = int(last_log.custom_previous_seconds or 0)
-
-    total_seconds = previous_seconds + elapsed_since_in
-
-    if total_seconds > SESSION_RESET_SECONDS:
-        total_seconds = SESSION_RESET_SECONDS
-
-    checkout = frappe.new_doc("Employee Checkin")
-
-    checkout.employee = employee
-    checkout.employee_name = employee_doc.employee_name
-    checkout.log_type = "OUT"
-    checkout.custom_auto_checkout = 0
-    checkout.time = checkout_time
-    checkout.latitude = latitude
-    checkout.longitude = longitude
-    checkout.custom_distance = round(distance, 2)
-
-    if checkout.meta.has_field("custom_gps_accuracy"):
-        checkout.custom_gps_accuracy = accuracy
-
-    if checkout.meta.has_field("custom_checkin_address"):
-        checkout.custom_checkin_address = "Address pending"
-
-    checkout.custom_previous_seconds = total_seconds
-    checkout.custom_session_start = session_start
-    checkout.custom_session_id = last_log.custom_session_id
-    checkout.custom_utc_time = timezone_data["utc_time"]
-    checkout.custom_employee_timezone = timezone_data["employee_timezone"]
-    checkout.custom_employee_local_time = timezone_data["employee_local_time"]
-    checkout.custom_company_timezone = timezone_data["company_timezone"]
-    checkout.custom_company_local_time = timezone_data["company_local_time"]
-
-    resolved_shift = last_log.shift or get_employee_shift_for_date(
-        employee,
-        checkout.time.date(),
-    )
-
-    if resolved_shift:
-        checkout.shift = resolved_shift
-
-    if not checkout.shift:
-        frappe.throw(
-            _(
-                "Shift not found. This employee has no Shift Assignment "
-                "covering today and no Default Shift set on their Employee "
-                "record - please assign one before checking out."
+        elapsed_since_in = int(
+            time_diff_in_seconds(
+                checkout_time,
+                last_log.time
             )
         )
 
-    working_hours = round(
-        min(total_seconds, SESSION_RESET_SECONDS) / 3600,
-        2,
-    )
+        if elapsed_since_in < 0:
+            elapsed_since_in = 0
 
-    checkout.custom_working_hours = working_hours
+        previous_seconds = last_log.custom_previous_seconds or 0
 
-    checkout.insert(ignore_permissions=True)
-
-    # HRMS may clear the shift during controller validation.
-    # Re-apply the already-authorized resolved shift through ORM.
-    if resolved_shift:
-        checkout.db_set(
-            "shift",
-            resolved_shift,
-            update_modified=False,
+        total_seconds = (
+            previous_seconds + elapsed_since_in
         )
-        checkout.shift = resolved_shift
 
-    frappe.db.commit()
+        if total_seconds > SESSION_RESET_SECONDS:
+            total_seconds = SESSION_RESET_SECONDS
 
-    return {
-        "success": True,
-        "message": _("Check Out Successful"),
-        "working_hours": working_hours,
-        "distance": round(distance, 2),
-        "accuracy": round(accuracy, 2),
-    }
+        # ==================================================
+        # CREATE CHECK OUT
+        # ==================================================
+
+        checkout = frappe.new_doc(
+            "Employee Checkin"
+        )
+
+        checkout.employee = employee
+
+        checkout.employee_name = (
+            employee_doc.employee_name
+        )
+
+        checkout.log_type = "OUT"
+        checkout.custom_auto_checkout = 0
+        checkout.time = checkout_time
+        checkout.latitude = latitude
+
+        checkout.longitude = longitude
+
+        checkout.custom_distance = round(
+            distance,
+            2
+        )
+
+        checkout.custom_checkin_address = (
+            checkin_address
+        )
+
+        checkout.custom_previous_seconds = (
+            total_seconds
+        )
+
+        checkout.custom_session_start = session_start
+        checkout.custom_session_id = last_log.custom_session_id
+
+        checkout.custom_utc_time = (
+            timezone_data["utc_time"]
+        )
+
+        checkout.custom_employee_timezone = (
+            timezone_data["employee_timezone"]
+        )
+
+        checkout.custom_employee_local_time = (
+            timezone_data["employee_local_time"]
+        )
+
+        checkout.custom_company_timezone = (
+            timezone_data["company_timezone"]
+        )
+
+        checkout.custom_company_local_time = (
+            timezone_data["company_local_time"]
+        )
+
+        
+        resolved_shift = last_log.shift or get_employee_shift_for_date(
+            employee, checkout.time.date()
+        )
+
+        checkout.insert(
+            ignore_permissions=True
+        )
+
+        
+        if resolved_shift:
+            checkout.db_set("shift", resolved_shift, update_modified=False)
+            checkout.shift = resolved_shift
+
+        if not checkout.shift:
+            frappe.throw(
+                _("Shift not found. This employee has no Shift Assignment "
+                  "covering today and no Default Shift set on their Employee "
+                  "record - please assign one before checking out.")
+            )
+
+        # ==================================================
+        # WORKING HOURS
+        # ==================================================
+        working_seconds = total_seconds
+        working_hours = round(working_seconds / 3600,2)
+        checkout.custom_working_hours = working_hours
+        checkout.save(
+            ignore_permissions=True
+        )
+
+        frappe.db.commit()
+
+        return {
+            "success": True,
+            "message": _("Check Out Successful"),
+            "working_hours": working_hours
+        }
+
+    else:
+
+        frappe.throw(_("Invalid Log Type."))
 
 
 # ==========================================================
@@ -823,50 +777,62 @@ def employee_checkin(log_type, latitude=None, longitude=None, accuracy=None):
 # ==========================================================
 
 @frappe.whitelist()
-@frappe.whitelist()
-def get_recent_attendance():
-    employee_doc = get_current_employee()
-    employee = employee_doc.name
+def get_recent_attendance(employee=None):
 
-    # Keep the query bounded. We need only a recent window for the
-    # dashboard, not the employee's entire attendance history.
-    logs = frappe.get_list(
+    filters = {}
+
+    if employee:
+        filters["employee"] = employee
+
+    logs = frappe.get_all(
         "Employee Checkin",
-        filters={"employee": employee},
+        filters=filters,
         fields=[
             "log_type",
             "time",
-            "custom_working_hours",
+            "custom_working_hours"
         ],
-        order_by="time desc, creation desc",
-        limit_page_length=100,
+        order_by="time asc, creation asc"
     )
-
-    # Restore chronological order for IN/OUT pairing.
-    logs.reverse()
 
     attendance = []
     current_in = None
 
     for log in logs:
+
+        # -------------------------
+        # Check In
+        # -------------------------
+
         if log.log_type == "IN":
             current_in = log
 
+        # -------------------------
+        # Check Out
+        # -------------------------
+
         elif log.log_type == "OUT" and current_in:
+
             attendance.append({
                 "date": current_in.time.strftime("%d %b %Y"),
                 "check_in": current_in.time.strftime("%I:%M %p"),
                 "check_out": log.time.strftime("%I:%M %p"),
-                "working_hours": log.custom_working_hours or 0,
+                "working_hours": log.custom_working_hours or 0
             })
+
             current_in = None
 
+    # ------------------------------------
+    # Employee Still Checked In
+    # ------------------------------------
+
     if current_in:
+
         attendance.append({
             "date": current_in.time.strftime("%d %b %Y"),
             "check_in": current_in.time.strftime("%I:%M %p"),
             "check_out": "--",
-            "working_hours": "--",
+            "working_hours": "--"
         })
 
     attendance.reverse()
@@ -915,26 +881,26 @@ def _get_simple_checkin_status(employee):
 # ==========================================================
 
 @frappe.whitelist()
-@frappe.whitelist()
-def get_reporting_manager_status():
-    employee_doc = get_current_employee()
+def get_reporting_manager_status(employee=None):
 
-    if not employee_doc.reports_to:
+    if not employee:
+        frappe.throw(_("Employee is required."))
+
+    reports_to = frappe.db.get_value("Employee", employee, "reports_to")
+
+    if not reports_to:
         return None
 
-    managers = frappe.get_list(
+    manager = frappe.db.get_value(
         "Employee",
-        filters={
-            "name": employee_doc.reports_to,
-        },
-        fields=["name", "employee_name", "designation"],
-        limit_page_length=1,
+        reports_to,
+        ["name", "employee_name", "designation"],
+        as_dict=True,
     )
 
-    if not managers:
+    if not manager:
         return None
 
-    manager = managers[0]
     status = _get_simple_checkin_status(manager.name)
 
     return {
@@ -957,15 +923,17 @@ def get_reporting_manager_status():
 # ==========================================================
 
 @frappe.whitelist()
-@frappe.whitelist()
-def get_associate_members():
-    employee_doc = get_current_employee()
-    employee = employee_doc.name
+def get_associate_members(employee=None):
+
+    if not employee:
+        frappe.throw(_("Employee is required."))
+
+    department = frappe.db.get_value("Employee", employee, "department")
 
     filters = {"status": "Active"}
 
-    if employee_doc.department:
-        filters["department"] = employee_doc.department
+    if department:
+        filters["department"] = department
 
     members = frappe.get_list(
         "Employee",
@@ -977,16 +945,17 @@ def get_associate_members():
 
     result = []
 
-    for member in members:
-        if member.name == employee:
+    for m in members:
+
+        if m.name == employee:
             continue
 
-        status = _get_simple_checkin_status(member.name)
+        status = _get_simple_checkin_status(m.name)
 
         result.append({
-            "name": member.name,
-            "employee_name": member.employee_name,
-            "designation": member.designation,
+            "name": m.name,
+            "employee_name": m.employee_name,
+            "designation": m.designation,
             "status": status["status"],
             "status_label": status["label"],
         })
