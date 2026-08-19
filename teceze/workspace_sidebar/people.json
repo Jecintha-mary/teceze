@@ -33,7 +33,7 @@
   {
    "child": 1,
    "collapsible": 1,
-   "icon": "list",
+   "icon": "calendar-check-2",
    "indent": 0,
    "keep_closed": 0,
    "label": "Employee Checkin",
@@ -81,7 +81,7 @@
   {
    "child": 1,
    "collapsible": 1,
-   "icon": "list",
+   "icon": "backpack",
    "indent": 0,
    "keep_closed": 0,
    "label": "Attendance Request",
@@ -180,7 +180,7 @@
    "type": "Link"
   }
  ],
- "modified": "2026-08-17 18:12:51.126664",
+ "modified": "2026-08-18 23:47:28.683341",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "People",

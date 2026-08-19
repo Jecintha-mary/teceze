@@ -7,7 +7,7 @@
   }
  ],
  "content": "[{\"id\":\"r0a57m9-Yx\",\"type\":\"chart\",\"data\":{\"chart_name\":\"Attendance Count\",\"col\":12}},{\"id\":\"9_DQbkhJgn\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"mYz7o2zWVf\",\"type\":\"header\",\"data\":{\"text\":\"<span style=\\\"font-size: 18px;\\\"><b>Masters &amp; Reports</b></span>\",\"col\":12}},{\"id\":\"iBvYqY6Ul6\",\"type\":\"card\",\"data\":{\"card_name\":\"Shifts\",\"col\":4}},{\"id\":\"aCKU8VAUu8\",\"type\":\"card\",\"data\":{\"card_name\":\"Attendance\",\"col\":4}},{\"id\":\"CMPmxSUFjB\",\"type\":\"card\",\"data\":{\"card_name\":\"Time\",\"col\":4}},{\"id\":\"v61fwPM9fG\",\"type\":\"card\",\"data\":{\"card_name\":\"Overtime\",\"col\":4}},{\"id\":\"WAO9X_IrfP\",\"type\":\"card\",\"data\":{\"card_name\":\"Reports\",\"col\":4}}]",
- "creation": "2026-08-11 22:56:38.435670",
+ "creation": "2026-08-18 11:43:09.780753",
  "custom_blocks": [],
  "docstatus": 0,
  "doctype": "Workspace",
@@ -213,7 +213,7 @@
    "type": "Link"
   },
   {
-   "hidden": 0,
+   "hidden": 1,
    "is_query_report": 0,
    "label": "Reports",
    "link_count": 8,
@@ -302,7 +302,7 @@
    "type": "Link"
   }
  ],
- "modified": "2026-08-13 15:07:43.538832",
+ "modified": "2026-08-19 00:16:24.301117",
  "modified_by": "Administrator",
  "module": "Teceze",
  "name": "Shifts & Attendances",

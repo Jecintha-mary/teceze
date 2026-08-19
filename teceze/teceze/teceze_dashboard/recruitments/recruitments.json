@@ -1,0 +1,78 @@
+{
+ "cards": [
+  {
+   "card": "Job Openings"
+  },
+  {
+   "card": "Total Applicants (This month)"
+  },
+  {
+   "card": "Accepted Job Applicants"
+  },
+  {
+   "card": "Rejected Job Applicants"
+  },
+  {
+   "card": "Job Offers (This Month)"
+  },
+  {
+   "card": "Applicant-to-Hire Percentage"
+  },
+  {
+   "card": "Job Offer Acceptance Rate"
+  },
+  {
+   "card": "Time to Fill"
+  }
+ ],
+ "charts": [
+  {
+   "chart": "Job Applicant Pipeline",
+   "width": "Half"
+  },
+  {
+   "chart": "Job Applicant Source",
+   "width": "Half"
+  },
+  {
+   "chart": "Job Applicants by Country",
+   "width": "Half"
+  },
+  {
+   "chart": "Job Application Status",
+   "width": "Half"
+  },
+  {
+   "chart": "Job Offer Status",
+   "width": "Half"
+  },
+  {
+   "chart": "Interview Status",
+   "width": "Half"
+  },
+  {
+   "chart": "Job Application Frequency",
+   "width": "Full"
+  },
+  {
+   "chart": "Department Wise Openings",
+   "width": "Half"
+  },
+  {
+   "chart": "Designation Wise Openings",
+   "width": "Half"
+  }
+ ],
+ "creation": "2026-08-19 00:10:02.773886",
+ "dashboard_name": "Recruitments",
+ "docstatus": 0,
+ "doctype": "Dashboard",
+ "idx": 0,
+ "is_default": 0,
+ "is_standard": 1,
+ "modified": "2026-08-19 00:10:02.773886",
+ "modified_by": "Administrator",
+ "module": "Teceze",
+ "name": "Recruitments",
+ "owner": "Administrator"
+}

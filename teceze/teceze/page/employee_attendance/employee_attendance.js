@@ -343,7 +343,6 @@ frappe.pages["employee_attendance"].on_page_load = function (wrapper) {
                                 href="#"
                                 id="view_all_members"
                                 class="view-all-link">
-
                                 View All
 
                             </a>
@@ -765,7 +764,7 @@ frappe.pages["employee_attendance"].on_page_load = function (wrapper) {
             callback: function (r) {
 
                 const list = $("#associate_members_list");
-
+                console.log("Associate members:", r.message);
                 list.empty();
 
                 if (!r.message || r.message.length === 0) {
@@ -844,28 +843,31 @@ frappe.pages["employee_attendance"].on_page_load = function (wrapper) {
     // VIEW ALL ASSOCIATE MEMBERS
     // =========================================================
 
-    $(document)
-        .off(
-            "click.employeeAttendance",
-            "#view_all_members"
-        );
+
+    //aravind..////
+    // $(document)
+    //     .off(
+    //         "click.employeeAttendance",
+    //         "#view_all_members"
+    //     );
 
 
-    $(document)
-        .on(
-            "click.employeeAttendance",
-            "#view_all_members",
-            function (e) {
+    // $(document)
+    //     .on(
+    //         "click.employeeAttendance",
+    //         "#view_all_members",
+    //         function (e) {
 
-                e.preventDefault();
+    //             e.preventDefault();
 
-                frappe.set_route(
-                    "query-report",
-                    "Employee Leave and Permission"
-                );
+    //             frappe.set_route(
+    //                 "query-report",
+    //                 "Employee Leave and Permission"
+    //             );
 
-            }
-        );
+    //         }
+    //     );
+    //aravind..////
 
 
     // =========================================================
@@ -2368,31 +2370,31 @@ frappe.pages["employee_attendance"].on_page_load = function (wrapper) {
         );
 
 
-    $(document)
-        .on(
-            "click.employeeAttendance",
-            "#view_all_attendance",
-            function (e) {
+    // $(document)
+    //     .on(
+    //         "click.employeeAttendance",
+    //         "#view_all_attendance",
+    //         function (e) {
 
-                e.preventDefault();
-
-
-                if (!employee) {
-                    return;
-                }
+    //             e.preventDefault();
 
 
-                frappe.set_route(
-                    "List",
-                    "Employee Checkin",
-                    {
-                        employee:
-                            employee
-                    }
-                );
+    //             if (!employee) {
+    //                 return;
+    //             }
 
-            }
-        );
+
+    //             frappe.set_route(
+    //                 "List",
+    //                 "Employee Checkin",
+    //                 {
+    //                     employee:
+    //                         employee
+    //                 }
+    //             );
+
+    //         }
+    //     );
 
 
     // =========================================================

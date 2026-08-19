@@ -1,89 +1,18 @@
 {
  "app": "teceze",
  "charts": [],
- "content": "[{\"id\":\"V8qGngEySy\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Reports</b></span>\",\"col\":12}},{\"id\":\"NqEjhLboBt\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Total Active Employees\",\"col\":4}},{\"id\":\"jaBW-TiCVU\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Inactive Employee\",\"col\":4}},{\"id\":\"Lo5mclHCTQ\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Total Engineers\",\"col\":4}},{\"id\":\"KKMiNtzV6i\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"India Employees\",\"col\":4}},{\"id\":\"LqnanZLrYQ\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"SriLanka Employees\",\"col\":4}},{\"id\":\"4NFSodhmXH\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"UK employees\",\"col\":4}},{\"id\":\"QPD9qOB0X6\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"US Employees\",\"col\":4}},{\"id\":\"tMeOthxE6g\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"China Employees\",\"col\":4}},{\"id\":\"MQl6Q5Tjb7\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Canada Employees\",\"col\":4}},{\"id\":\"yMrYNqTHDp\",\"type\":\"card\",\"data\":{\"card_name\":\"Attendance And Leaves\",\"col\":4}},{\"id\":\"dtrAg5kNob\",\"type\":\"card\",\"data\":{\"card_name\":\"Project Management\",\"col\":4}},{\"id\":\"IqpL4ui-KC\",\"type\":\"card\",\"data\":{\"card_name\":\"Payroll\",\"col\":4}}]",
- "creation": "2026-08-13 18:03:02.323943",
+ "content": "[{\"id\":\"V8qGngEySy\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Reports</b></span>\",\"col\":12}},{\"id\":\"NqEjhLboBt\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Total Active Employees\",\"col\":4}},{\"id\":\"jaBW-TiCVU\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Inactive Employee\",\"col\":4}},{\"id\":\"Lo5mclHCTQ\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Total Engineers\",\"col\":4}},{\"id\":\"KKMiNtzV6i\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"India Employees\",\"col\":4}},{\"id\":\"LqnanZLrYQ\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"SriLanka Employees\",\"col\":4}},{\"id\":\"4NFSodhmXH\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"UK employees\",\"col\":4}},{\"id\":\"QPD9qOB0X6\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"US Employees\",\"col\":4}},{\"id\":\"tMeOthxE6g\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"China Employees\",\"col\":4}},{\"id\":\"MQl6Q5Tjb7\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Canada Employees\",\"col\":4}},{\"id\":\"uYJ5UKDjV_\",\"type\":\"card\",\"data\":{\"card_name\":\"Attendance And Leaves\",\"col\":4}},{\"id\":\"IqpL4ui-KC\",\"type\":\"card\",\"data\":{\"card_name\":\"Payroll\",\"col\":4}},{\"id\":\"NjyKeDPmh3\",\"type\":\"card\",\"data\":{\"card_name\":\"Project Managemnet\",\"col\":4}}]",
+ "creation": "2026-08-18 11:43:13.342415",
  "custom_blocks": [],
  "docstatus": 0,
  "doctype": "Workspace",
  "hide_custom": 0,
- "idx": 1,
+ "idx": 0,
  "indicator_color": "green",
  "is_hidden": 0,
  "label": "Reports",
  "link_type": "DocType",
  "links": [
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Attendance And Leaves",
-   "link_count": 4,
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Card Break"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 1,
-   "label": "Check In/Check Out ",
-   "link_count": 0,
-   "link_to": "Employee Checkin Out Report",
-   "link_type": "Report",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Employee Leave Balance",
-   "link_count": 0,
-   "link_to": "Employee Leave Balance Report",
-   "link_type": "Report",
-   "onboard": 0,
-   "report_ref_doctype": "Leave Allocation",
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Employee Leave Permission",
-   "link_count": 0,
-   "link_to": "Employee Leave and Permission",
-   "link_type": "Report",
-   "onboard": 0,
-   "report_ref_doctype": "Leave Application",
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Monthly Attendance Report",
-   "link_count": 0,
-   "link_to": "Monthly Attendance Report",
-   "link_type": "Report",
-   "onboard": 0,
-   "report_ref_doctype": "Attendance",
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Project Management",
-   "link_count": 1,
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Card Break"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 1,
-   "label": "Project Schedule",
-   "link_count": 0,
-   "link_to": "Project Schedule Report",
-   "link_type": "Report",
-   "onboard": 0,
-   "type": "Link"
-  },
   {
    "hidden": 0,
    "is_query_report": 0,
@@ -102,9 +31,77 @@
    "link_type": "Report",
    "onboard": 0,
    "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Project Managemnet",
+   "link_count": 1,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Project Schedule",
+   "link_count": 0,
+   "link_to": "Project Schedule Report",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Attendance And Leaves",
+   "link_count": 4,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Checkin In/Check Out ",
+   "link_count": 0,
+   "link_to": "Employee Checkin Out Report",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Employee Leave And Permission",
+   "link_count": 0,
+   "link_to": "Employee Leave and Permission",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Employee Leave Balance",
+   "link_count": 0,
+   "link_to": "Employee Leave Balance Report",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Monthly  Attendance Report",
+   "link_count": 0,
+   "link_to": "Monthly Attendance Report",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
   }
  ],
- "modified": "2026-08-17 16:13:44.350082",
+ "modified": "2026-08-18 19:23:06.633149",
  "modified_by": "Administrator",
  "module": "Teceze",
  "name": "Reports",
