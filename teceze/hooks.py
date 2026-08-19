@@ -328,30 +328,30 @@ scheduler_events = {
 # ignore_translatable_strings_from = []
 
 fixtures = [
-	{
-	"doctype": "Notification",
-	"filters": [{"is_standard":0}]
-	},
-	{
-	"doctype": "Dashboard",
-	"filters": [{"is_standard":0}]
-	},
-	{
-	"doctype": "Dashboard Chart",
-	"filters": [{"is_standard":0}]
-	},
-   	"Custom Field",
-   	"Property Setter",
-	"Workflow",
-   	"Workflow Action Master",
-   	"Workflow State",
-   	"Role",
-   	# "Workspace",
-	"Print Format",
-   	"Custom DocPerm",
-   	"Report",
-	"Number Card",
-	"Web Form",
+	# {
+	# "doctype": "Notification",
+	# "filters": [{"is_standard":0}]
+	# },
+	# {
+	# "doctype": "Dashboard",
+	# "filters": [{"is_standard":0}]
+	# },
+	# {
+	# "doctype": "Dashboard Chart",
+	# "filters": [{"is_standard":0}]
+	# },
+   	# "Custom Field",
+   	# "Property Setter",
+	# "Workflow",
+   	# "Workflow Action Master",
+   	# "Workflow State",
+   	# "Role",
+   	"Workspace",
+	# "Print Format",
+   	# "Custom DocPerm",
+   	# "Report",
+	# "Number Card",
+	# "Web Form",
 	# "Desktop Icon",
 ]
 
