@@ -346,13 +346,14 @@ fixtures = [
    	# "Workflow Action Master",
    	# "Workflow State",
    	# "Role",
-   	# "Workspace",
+   	"Workspace",
 	# "Print Format",
    	# "Custom DocPerm",
    	# "Report",
 	# "Number Card",
 	# "Web Form",
 	"Desktop Icon",
+	"Workspace Sidebar",
 ]
 
 

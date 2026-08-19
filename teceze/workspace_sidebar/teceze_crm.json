@@ -471,9 +471,20 @@
    "link_type": "DocType",
    "show_arrow": 0,
    "type": "Link"
+  },
+  {
+   "child": 0,
+   "collapsible": 1,
+   "indent": 0,
+   "keep_closed": 0,
+   "label": "Teceze CRM",
+   "link_to": "Teceze CRM",
+   "link_type": "Workspace",
+   "show_arrow": 0,
+   "type": "Link"
   }
  ],
- "modified": "2026-08-13 18:51:51.496133",
+ "modified": "2026-08-19 15:22:06.370712",
  "modified_by": "Administrator",
  "module": "Teceze",
  "name": "Teceze CRM",

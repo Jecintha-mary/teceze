@@ -178,9 +178,20 @@
    "link_type": "DocType",
    "show_arrow": 0,
    "type": "Link"
+  },
+  {
+   "child": 0,
+   "collapsible": 1,
+   "indent": 0,
+   "keep_closed": 0,
+   "label": "People",
+   "link_to": "People",
+   "link_type": "Workspace",
+   "show_arrow": 0,
+   "type": "Link"
   }
  ],
- "modified": "2026-08-18 23:47:28.683341",
+ "modified": "2026-08-19 15:24:12.955468",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "People",
