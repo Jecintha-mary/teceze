@@ -79,12 +79,14 @@ def get_columns():
             "fieldtype": "Link",
             "options": "Leave Type",
             "width": 130,
+            "hidden":1,
         },
         {
             "label": _("Leave Status"),
             "fieldname": "leave_status",
             "fieldtype": "Data",
             "width": 140,
+            "hidden":1,
         },
         {
             "label": _("Half Day"),
