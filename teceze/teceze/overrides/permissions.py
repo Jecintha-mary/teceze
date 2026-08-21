@@ -11,7 +11,8 @@ def user_has_permission(doc, ptype, user=None, debug=False):
     # Only System Manager can access User
     if "System Manager" not in frappe.get_roles(user):
         frappe.throw(
-            "You do not have permission to access the User page.",
+            "You are not authorized to access the User page. "
+            "Please contact the System Manager.",
             frappe.PermissionError
         )
 

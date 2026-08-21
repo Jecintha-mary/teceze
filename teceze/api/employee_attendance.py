@@ -166,11 +166,7 @@ def validate_employee_location(
     if location.custom_attendance_radius_uom == "KM":
         allowed_radius = allowed_radius * 1000
     if distance > allowed_radius:
-
-        frappe.throw(_(f"You are outside your assigned Work Location.\n\n"
-            f"Current Distance : {round(distance,2)} meters\n"
-            f"Allowed Radius : {allowed_radius} meters"
-        ))
+        frappe.throw(_("You are outside of the geolocation."))
     return distance
 
 
