@@ -192,7 +192,9 @@ extend_doctype_class = {
 # has_permission = {
 # 	"Event": "frappe.desk.doctype.event.event.has_permission",
 # }
-
+has_permission = {
+    "User": "teceze.teceze.overrides.permissions.user_has_permission"
+}
 # Document Events
 # ---------------
 # Hook on document methods and events
