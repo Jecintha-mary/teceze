@@ -10,6 +10,19 @@ frappe.pages["employee_attendance"].on_page_load = function (wrapper) {
     let attendance_calendar = null;
     let attendance_calendar_filters = [];
 
+    // Stores Attendance working hours by attendance date
+    //
+    // Example:
+    //
+    // {
+    //     "2026-08-25": {
+    //         status: "Present",
+    //         working_hours: 9.45
+    //     }
+    // }
+    //
+    let attendance_working_hours = {};
+
     // =========================================================
     // ASSOCIATE MEMBERS - DISPLAY CAP
     // =========================================================
@@ -18,15 +31,6 @@ frappe.pages["employee_attendance"].on_page_load = function (wrapper) {
 
     // =========================================================
     // LEFT COLUMN / CALENDAR HEIGHT SYNC
-    //
-    // The Associate Members card needs its bottom edge to line up
-    // with the calendar card's bottom edge. CSS Grid's align-items
-    // stretch can't do this reliably because FullCalendar sets its
-    // own height via JS *after* the initial layout - so instead we
-    // measure the calendar card directly and mirror its height onto
-    // .attendance-left. A ResizeObserver keeps this in sync any time
-    // the calendar's rendered height changes (month with 6 weeks vs
-    // 5, Month/Week/Day view switch, window resize, etc).
     // =========================================================
 
     let calendar_height_observer = null;
@@ -35,27 +39,38 @@ frappe.pages["employee_attendance"].on_page_load = function (wrapper) {
 
     // =========================================================
     // CALENDAR EVENT STATUS COLORS
-    //
-    // FullCalendar renders every event chip with the same default
-    // styling regardless of what it says ("Present", "Absent",
-    // "On Leave", "Half Day", "Holiday" all looked identical). This
-    // watches the calendar container and repaints each event chip
-    // to match the legend colors, keyed off the chip's own text.
     // =========================================================
 
     let calendar_events_observer = null;
 
     const CALENDAR_STATUS_CLASS_MAP = [
-        { match: "half day", className: "cal-event-halfday" },
-        { match: "present", className: "cal-event-present" },
-        { match: "absent", className: "cal-event-absent" },
-        { match: "leave", className: "cal-event-leave" },
-        { match: "holiday", className: "cal-event-holiday" }
+        {
+            match: "half day",
+            className: "cal-event-halfday"
+        },
+        {
+            match: "present",
+            className: "cal-event-present"
+        },
+        {
+            match: "absent",
+            className: "cal-event-absent"
+        },
+        {
+            match: "leave",
+            className: "cal-event-leave"
+        },
+        {
+            match: "holiday",
+            className: "cal-event-holiday"
+        }
     ];
 
     const CALENDAR_STATUS_CLASSNAMES =
         CALENDAR_STATUS_CLASS_MAP
-            .map(function (entry) { return entry.className; });
+            .map(function (entry) {
+                return entry.className;
+            });
 
 
     // =========================================================
@@ -311,15 +326,32 @@ frappe.pages["employee_attendance"].on_page_load = function (wrapper) {
                             Reporting Manager
                         </div>
 
-                        <div class="manager-row" id="manager_row">
+                        <div
+                            class="manager-row"
+                            id="manager_row">
 
-                            <div class="avatar avatar-small" id="manager_avatar">
+                            <div
+                                class="avatar avatar-small"
+                                id="manager_avatar">
+
                                 --
+
                             </div>
 
                             <div class="manager-info">
-                                <strong id="manager_name">Loading...</strong>
-                                <span id="manager_status" class="member-status">--</span>
+
+                                <strong id="manager_name">
+                                    Loading...
+                                </strong>
+
+                                <span
+                                    id="manager_status"
+                                    class="member-status">
+
+                                    --
+
+                                </span>
+
                             </div>
 
                         </div>
@@ -343,16 +375,23 @@ frappe.pages["employee_attendance"].on_page_load = function (wrapper) {
                                 href="#"
                                 id="view_all_members"
                                 class="view-all-link">
+
                                 View All
 
                             </a>
 
                         </div>
 
-                        <div id="associate_members_list" class="members-list">
+                        <div
+                            id="associate_members_list"
+                            class="members-list">
 
-                            <div class="text-muted text-center" style="padding:16px;">
+                            <div
+                                class="text-muted text-center"
+                                style="padding:16px;">
+
                                 Loading...
+
                             </div>
 
                         </div>
@@ -543,18 +582,40 @@ frappe.pages["employee_attendance"].on_page_load = function (wrapper) {
 
 
     // =========================================================
+    // WORKING HOURS CALENDAR CSS
+    // =========================================================
+
+    frappe.dom.set_style(`
+
+        .calendar-working-hours {
+            font-size: 10px;
+            line-height: 14px;
+            margin-top: 2px;
+            font-weight: 500;
+            opacity: 0.75;
+            white-space: nowrap;
+        }
+
+    `);
+
+
+    // =========================================================
     // CURRENT DATE
     // =========================================================
 
     const today = new Date();
 
     $("#current-date-main").text(
-        today.toLocaleDateString(undefined, {
-            year: "numeric",
-            month: "short",
-            day: "2-digit"
-        })
+        today.toLocaleDateString(
+            undefined,
+            {
+                year: "numeric",
+                month: "short",
+                day: "2-digit"
+            }
+        )
     );
+
 
     $("#current-date-sub").text(
         today.toLocaleDateString(
@@ -659,10 +720,17 @@ frappe.pages["employee_attendance"].on_page_load = function (wrapper) {
 
 
                 // -------------------------------------------------
-                // LOAD FRAPPE CALENDAR
+                // LOAD CALENDAR WORKING HOURS
+                // THEN CREATE CALENDAR
                 // -------------------------------------------------
 
-                create_attendance_calendar();
+                load_calendar_working_hours(
+                    function () {
+
+                        create_attendance_calendar();
+
+                    }
+                );
 
             },
 
@@ -689,48 +757,71 @@ frappe.pages["employee_attendance"].on_page_load = function (wrapper) {
             return;
         }
 
+
         frappe.call({
 
-            method: "teceze.api.employee_attendance.get_reporting_manager_status",
+            method:
+                "teceze.api.employee_attendance.get_reporting_manager_status",
 
-            args: { employee: employee },
+            args: {
+                employee: employee
+            },
 
             callback: function (r) {
 
                 const card = $(".manager-card");
 
+
                 if (!r.message) {
 
-                    // No reporting manager assigned — hide the card
-                    // rather than show a confusing empty state.
                     card.hide();
+
                     return;
+
                 }
+
 
                 card.show();
 
+
                 const m = r.message;
 
+
                 $("#manager_avatar").text(
-                    (m.employee_name || "?").charAt(0).toUpperCase()
+
+                    (m.employee_name || "?")
+                        .charAt(0)
+                        .toUpperCase()
+
                 );
+
 
                 $("#manager_name").text(
+
                     `${m.name} - ${m.employee_name}`
+
                 );
 
+
                 const status_class =
-                    m.status === "IN" ? "status-in-text" : "status-out-text";
+                    m.status === "IN"
+                        ? "status-in-text"
+                        : "status-out-text";
+
 
                 $("#manager_status")
                     .text(m.status_label)
-                    .removeClass("status-in-text status-out-text")
+                    .removeClass(
+                        "status-in-text status-out-text"
+                    )
                     .addClass(status_class);
 
             },
 
             error: function () {
+
                 $(".manager-card").hide();
+
             }
 
         });
@@ -740,13 +831,6 @@ frappe.pages["employee_attendance"].on_page_load = function (wrapper) {
 
     // =========================================================
     // ASSOCIATE MEMBERS CARD
-    //
-    // Only the first MAX_VISIBLE_ASSOCIATES rows are rendered so
-    // the card can never grow taller than the calendar beside it.
-    // Clicking a member routes to the "Employee Leave and
-    // Permission" report filtered to that employee. Clicking
-    // "View All" (top right of the card) routes to the same
-    // report with no filter, showing every record.
     // =========================================================
 
     function load_associate_members() {
@@ -755,81 +839,155 @@ frappe.pages["employee_attendance"].on_page_load = function (wrapper) {
             return;
         }
 
+
         frappe.call({
 
-            method: "teceze.api.employee_attendance.get_associate_members",
+            method:
+                "teceze.api.employee_attendance.get_associate_members",
 
-            args: { employee: employee },
+            args: {
+                employee: employee
+            },
 
             callback: function (r) {
 
-                const list = $("#associate_members_list");
-                console.log("Associate members:", r.message);
+                const list =
+                    $("#associate_members_list");
+
+
+                console.log(
+                    "Associate members:",
+                    r.message
+                );
+
+
                 list.empty();
 
-                if (!r.message || r.message.length === 0) {
+
+                if (
+                    !r.message ||
+                    r.message.length === 0
+                ) {
 
                     list.append(`
-                        <div class="text-muted text-center" style="padding:16px;">
+
+                        <div
+                            class="text-muted text-center"
+                            style="padding:16px;">
+
                             No associate members found
+
                         </div>
+
                     `);
 
                     return;
+
                 }
 
+
                 const visible_members =
-                    r.message.slice(0, MAX_VISIBLE_ASSOCIATES);
+                    r.message.slice(
+                        0,
+                        MAX_VISIBLE_ASSOCIATES
+                    );
 
-                visible_members.forEach(function (m) {
 
-                    const initial = (m.employee_name || "?").charAt(0).toUpperCase();
+                visible_members.forEach(
+                    function (m) {
 
-                    const status_class =
-                        m.status === "IN" ? "status-in-text" : "status-out-text";
+                        const initial =
+                            (m.employee_name || "?")
+                                .charAt(0)
+                                .toUpperCase();
 
-                    const row = $(`
-                        <div class="member-row">
-                            <div class="avatar avatar-small">
-                                ${frappe.utils.escape_html(initial)}
+
+                        const status_class =
+                            m.status === "IN"
+                                ? "status-in-text"
+                                : "status-out-text";
+
+
+                        const row = $(`
+
+                            <div class="member-row">
+
+                                <div
+                                    class="avatar avatar-small">
+
+                                    ${frappe.utils.escape_html(
+                                        initial
+                                    )}
+
+                                </div>
+
+                                <div class="member-info">
+
+                                    <strong>
+
+                                        ${frappe.utils.escape_html(
+                                            m.name
+                                        )}
+                                        -
+                                        ${frappe.utils.escape_html(
+                                            m.employee_name
+                                        )}
+
+                                    </strong>
+
+                                    <span
+                                        class="member-status ${status_class}">
+
+                                        ${frappe.utils.escape_html(
+                                            m.status_label
+                                        )}
+
+                                    </span>
+
+                                </div>
+
                             </div>
-                            <div class="member-info">
-                                <strong>
-                                    ${frappe.utils.escape_html(m.name)} -
-                                    ${frappe.utils.escape_html(m.employee_name)}
-                                </strong>
-                                <span class="member-status ${status_class}">
-                                    ${frappe.utils.escape_html(m.status_label)}
-                                </span>
-                            </div>
-                        </div>
-                    `);
 
-                    row.on("click", function () {
+                        `);
 
-                        frappe.route_options = {
-                            employee: m.name
-                        };
 
-                        frappe.set_route(
-                            "query-report",
-                            "Employee Leave and Permission"
+                        row.on(
+                            "click",
+                            function () {
+
+                                frappe.route_options = {
+                                    employee: m.name
+                                };
+
+
+                                frappe.set_route(
+                                    "query-report",
+                                    "Employee Leave and Permission"
+                                );
+
+                            }
                         );
 
-                    });
 
-                    list.append(row);
+                        list.append(row);
 
-                });
+                    }
+                );
 
             },
 
             error: function () {
 
                 $("#associate_members_list").html(`
-                    <div class="text-muted text-center" style="padding:16px;">
+
+                    <div
+                        class="text-muted text-center"
+                        style="padding:16px;">
+
                         Unable to load associate members
+
                     </div>
+
                 `);
 
             }
@@ -843,31 +1001,277 @@ frappe.pages["employee_attendance"].on_page_load = function (wrapper) {
     // VIEW ALL ASSOCIATE MEMBERS
     // =========================================================
 
-
-    //aravind..////
-    // $(document)
-    //     .off(
-    //         "click.employeeAttendance",
-    //         "#view_all_members"
-    //     );
+    $(document)
+        .off(
+            "click.employeeAttendance",
+            "#view_all_members"
+        );
 
 
-    // $(document)
-    //     .on(
-    //         "click.employeeAttendance",
-    //         "#view_all_members",
-    //         function (e) {
+    $(document)
+        .on(
+            "click.employeeAttendance",
+            "#view_all_members",
+            function (e) {
 
-    //             e.preventDefault();
+                e.preventDefault();
 
-    //             frappe.set_route(
-    //                 "query-report",
-    //                 "Employee Leave and Permission"
-    //             );
 
-    //         }
-    //     );
-    //aravind..////
+                frappe.set_route(
+                    "query-report",
+                    "Employee Leave and Permission"
+                );
+
+            }
+        );
+
+
+    // =========================================================
+    // LOAD ATTENDANCE WORKING HOURS
+    // =========================================================
+
+    function load_calendar_working_hours(callback) {
+
+        if (!employee) {
+
+            attendance_working_hours = {};
+
+            if (callback) {
+                callback();
+            }
+
+            return;
+        }
+
+
+        frappe.call({
+
+            method:
+                "frappe.client.get_list",
+
+            args: {
+
+                doctype:
+                    "Attendance",
+
+                filters: {
+
+                    employee:
+                        employee
+
+                },
+
+                fields: [
+
+                    "attendance_date",
+                    "status",
+                    "working_hours"
+
+                ],
+
+                limit_page_length:
+                    0
+
+            },
+
+            callback: function (r) {
+
+                // Clear old values
+                attendance_working_hours = {};
+
+
+                const records =
+                    r.message || [];
+
+
+                records.forEach(
+                    function (row) {
+
+                        if (!row.attendance_date) {
+                            return;
+                        }
+
+
+                        attendance_working_hours[
+                            row.attendance_date
+                        ] = {
+
+                            status:
+                                row.status,
+
+                            working_hours:
+                                row.working_hours
+
+                        };
+
+                    }
+                );
+
+
+                console.log(
+                    "Attendance working hours loaded:",
+                    attendance_working_hours
+                );
+
+
+                if (callback) {
+                    callback();
+                }
+
+            },
+
+            error: function (error) {
+
+                console.error(
+                    "Unable to load Attendance working hours:",
+                    error
+                );
+
+
+                attendance_working_hours = {};
+
+
+                if (callback) {
+                    callback();
+                }
+
+            }
+
+        });
+
+    }
+
+
+    // =========================================================
+    // ADD WORKING HOURS TO CALENDAR EVENT
+    // =========================================================
+
+    function add_working_hours_to_calendar_event(
+        eventEl
+    ) {
+
+        if (!eventEl) {
+            return;
+        }
+
+
+        // -------------------------------------------------
+        // Find the calendar day containing this event
+        // -------------------------------------------------
+
+        const dayCell =
+            eventEl.closest(
+                ".fc-daygrid-day"
+            );
+
+
+        if (!dayCell) {
+            return;
+        }
+
+
+        // -------------------------------------------------
+        // Get the date from FullCalendar
+        // -------------------------------------------------
+
+        const date =
+            dayCell.getAttribute(
+                "data-date"
+            );
+
+
+        if (!date) {
+            return;
+        }
+
+
+        // -------------------------------------------------
+        // Find Attendance data for this date
+        // -------------------------------------------------
+
+        const attendance =
+            attendance_working_hours[
+                date
+            ];
+
+
+        if (!attendance) {
+            return;
+        }
+
+
+        // -------------------------------------------------
+        // Prevent duplicate working-hours display
+        // -------------------------------------------------
+
+        if (
+            eventEl.querySelector(
+                ".calendar-working-hours"
+            )
+        ) {
+
+            return;
+
+        }
+
+
+        // -------------------------------------------------
+        // Get the existing Attendance value
+        //
+        // IMPORTANT:
+        // We do NOT convert it.
+        //
+        // 9.45 -> 9.45 hrs
+        // 8.50 -> 8.50 hrs
+        // -------------------------------------------------
+
+        const workingHours =
+            attendance.working_hours;
+
+
+        // -------------------------------------------------
+        // If there is no working_hours value,
+        // don't display anything.
+        // -------------------------------------------------
+
+        if (
+            workingHours === null ||
+            workingHours === undefined ||
+            workingHours === ""
+        ) {
+
+            return;
+
+        }
+
+
+        // -------------------------------------------------
+        // Create display element
+        // -------------------------------------------------
+
+        const workingHoursElement =
+            document.createElement(
+                "div"
+            );
+
+
+        workingHoursElement.className =
+            "calendar-working-hours";
+
+
+        workingHoursElement.textContent =
+            `${workingHours} hrs`;
+
+
+        // -------------------------------------------------
+        // Add below Present / Absent / Leave
+        // -------------------------------------------------
+
+        eventEl.appendChild(
+            workingHoursElement
+        );
+
+    }
 
 
     // =========================================================
@@ -889,7 +1293,6 @@ frappe.pages["employee_attendance"].on_page_load = function (wrapper) {
             );
 
             return;
-
         }
 
 
@@ -900,12 +1303,11 @@ frappe.pages["employee_attendance"].on_page_load = function (wrapper) {
             );
 
             return;
-
         }
 
 
         // -------------------------------------------------
-        // DESTROY PREVIOUS CALENDAR IF ANY
+        // CLEAR PREVIOUS CALENDAR
         // -------------------------------------------------
 
         attendance_calendar = null;
@@ -941,7 +1343,7 @@ frappe.pages["employee_attendance"].on_page_load = function (wrapper) {
 
 
         // -------------------------------------------------
-        // LOAD FRAPPE CALENDAR LIBRARY
+        // LOAD FRAPPE CALENDAR
         // -------------------------------------------------
 
         frappe.require(
@@ -962,7 +1364,7 @@ frappe.pages["employee_attendance"].on_page_load = function (wrapper) {
 
 
     // =========================================================
-    // LOAD EMPLOYEE ATTENDANCE CALENDAR CONFIGURATION
+    // LOAD CALENDAR CONFIGURATION
     // =========================================================
 
     function load_attendance_calendar_config() {
@@ -981,10 +1383,6 @@ frappe.pages["employee_attendance"].on_page_load = function (wrapper) {
                         "Employee Attendance Calendar"
                     );
 
-
-                // -------------------------------------------------
-                // CHECK CONFIGURATION
-                // -------------------------------------------------
 
                 if (!calendar_doc) {
 
@@ -1011,11 +1409,17 @@ frappe.pages["employee_attendance"].on_page_load = function (wrapper) {
 
                 // -------------------------------------------------
                 // FIELD MAP
+                //
+                // Subject Field remains STATUS.
+                //
+                // Working Hours is added separately by
+                // add_working_hours_to_calendar_event().
                 // -------------------------------------------------
 
                 const field_map = {
 
-                    id: "name",
+                    id:
+                        "name",
 
                     start:
                         calendar_doc.start_date_field,
@@ -1027,7 +1431,9 @@ frappe.pages["employee_attendance"].on_page_load = function (wrapper) {
                         calendar_doc.subject_field,
 
                     allDay:
-                        calendar_doc.all_day ? 1 : 0
+                        calendar_doc.all_day
+                            ? 1
+                            : 0
 
                 };
 
@@ -1037,10 +1443,6 @@ frappe.pages["employee_attendance"].on_page_load = function (wrapper) {
                     field_map
                 );
 
-
-                // -------------------------------------------------
-                // START DATE CHECK
-                // -------------------------------------------------
 
                 if (!field_map.start) {
 
@@ -1060,7 +1462,7 @@ frappe.pages["employee_attendance"].on_page_load = function (wrapper) {
 
 
                 // -------------------------------------------------
-                // LIST VIEW
+                // LIST VIEW FILTER
                 // -------------------------------------------------
 
                 const list_view = {
@@ -1084,7 +1486,8 @@ frappe.pages["employee_attendance"].on_page_load = function (wrapper) {
 
                 const calendar_options = {
 
-                    doctype: "Attendance",
+                    doctype:
+                        "Attendance",
 
                     parent:
                         $("#attendance-calendar"),
@@ -1110,7 +1513,7 @@ frappe.pages["employee_attendance"].on_page_load = function (wrapper) {
 
 
                 // -------------------------------------------------
-                // CREATE FRAPPE CALENDAR
+                // CREATE CALENDAR
                 // -------------------------------------------------
 
                 try {
@@ -1132,17 +1535,7 @@ frappe.pages["employee_attendance"].on_page_load = function (wrapper) {
 
 
                     // -------------------------------------------------
-                    // IMPORTANT
-                    // REMOVE LOADING PLACEHOLDER
-                    // -------------------------------------------------
-
-                    $("#attendance-calendar")
-                        .find(".calendar-loading")
-                        .remove();
-
-
-                    // -------------------------------------------------
-                    // RESIZE AFTER RENDER
+                    // INITIAL CALENDAR PROCESSING
                     // -------------------------------------------------
 
                     setTimeout(
@@ -1150,31 +1543,14 @@ frappe.pages["employee_attendance"].on_page_load = function (wrapper) {
 
                             resize_attendance_calendar();
 
-
-                            // Remove any leftover loading message
-                            $("#attendance-calendar")
-                                .find(".calendar-loading")
-                                .remove();
-
-
-                            // Start watching the calendar card's
-                            // height so Associate Members can match
-                            // its bottom edge once it settles.
                             watch_calendar_height();
 
-                            // Start watching for event chips so
-                            // Present / Absent / Leave / Half Day /
-                            // Holiday each get their own color.
                             watch_calendar_event_colors();
 
                         },
                         500
                     );
 
-
-                    // -------------------------------------------------
-                    // ANOTHER RESIZE AFTER FULL RENDER
-                    // -------------------------------------------------
 
                     setTimeout(
                         function () {
@@ -1263,7 +1639,8 @@ frappe.pages["employee_attendance"].on_page_load = function (wrapper) {
             // Older Frappe calendar versions
             if (
                 attendance_calendar.fullCalendar &&
-                typeof attendance_calendar.fullCalendar.updateSize ===
+                typeof
+                    attendance_calendar.fullCalendar.updateSize ===
                     "function"
             ) {
 
@@ -1274,7 +1651,7 @@ frappe.pages["employee_attendance"].on_page_load = function (wrapper) {
             }
 
 
-            // Some Frappe versions expose refresh
+            // Some Frappe versions expose resize
             if (
                 typeof attendance_calendar.resize ===
                     "function"
@@ -1299,31 +1676,33 @@ frappe.pages["employee_attendance"].on_page_load = function (wrapper) {
 
 
     // =========================================================
-    // SYNC LEFT COLUMN HEIGHT TO CALENDAR HEIGHT
-    //
-    // Mirrors the calendar card's actual rendered height onto
-    // .attendance-left. Once that inline height is set, the flex
-    // rules on .members-card / .members-list (see CSS) take over
-    // and let Associate Members grow to fill the leftover space -
-    // so its bottom edge lands on the calendar's bottom edge.
+    // SYNC LEFT COLUMN HEIGHT
     // =========================================================
 
     function sync_left_column_height() {
 
         const calendarCard =
-            document.querySelector(".attendance-calendar-card");
+            document.querySelector(
+                ".attendance-calendar-card"
+            );
+
 
         const leftCol =
-            document.querySelector(".attendance-left");
+            document.querySelector(
+                ".attendance-left"
+            );
+
 
         if (!calendarCard || !leftCol) {
             return;
         }
 
-        // Below the stacking breakpoint the two columns are no
-        // longer side by side, so there's nothing to match -
-        // release the inline height and let it size naturally.
-        if (window.innerWidth <= LEFT_RIGHT_STACK_BREAKPOINT) {
+
+        // Mobile/tablet stacked layout
+        if (
+            window.innerWidth <=
+            LEFT_RIGHT_STACK_BREAKPOINT
+        ) {
 
             leftCol.style.height = "";
 
@@ -1331,30 +1710,30 @@ frappe.pages["employee_attendance"].on_page_load = function (wrapper) {
 
         }
 
+
         leftCol.style.height =
-            calendarCard.offsetHeight + "px";
+            calendarCard.offsetHeight +
+            "px";
 
     }
 
 
     // =========================================================
-    // WATCH THE CALENDAR CARD FOR HEIGHT CHANGES
-    //
-    // FullCalendar sets its own height via JS well after our
-    // initial render, and that height can also change later
-    // (a 6-week month vs a 5-week month, Month/Week/Day toggle,
-    // window resize). A ResizeObserver catches all of those
-    // automatically instead of us guessing at timeouts.
+    // WATCH CALENDAR HEIGHT
     // =========================================================
 
     function watch_calendar_height() {
 
         const calendarCard =
-            document.querySelector(".attendance-calendar-card");
+            document.querySelector(
+                ".attendance-calendar-card"
+            );
+
 
         if (!calendarCard) {
             return;
         }
+
 
         if (calendar_height_observer) {
 
@@ -1362,54 +1741,82 @@ frappe.pages["employee_attendance"].on_page_load = function (wrapper) {
 
         }
 
-        if (typeof ResizeObserver === "undefined") {
 
-            // Very old browser fallback - at least sync once.
+        if (
+            typeof ResizeObserver ===
+            "undefined"
+        ) {
+
             sync_left_column_height();
 
             return;
 
         }
 
+
         calendar_height_observer =
-            new ResizeObserver(function () {
+            new ResizeObserver(
+                function () {
 
-                sync_left_column_height();
+                    sync_left_column_height();
 
-            });
+                }
+            );
 
-        calendar_height_observer.observe(calendarCard);
 
-        // Run once immediately too, don't wait for the first
-        // observed change.
+        calendar_height_observer.observe(
+            calendarCard
+        );
+
+
         sync_left_column_height();
 
     }
 
 
     // =========================================================
-    // COLORIZE ONE EVENT CHIP BASED ON ITS STATUS TEXT
+    // COLORIZE ONE CALENDAR EVENT
     // =========================================================
 
-    function colorize_calendar_event(eventEl) {
+    function colorize_calendar_event(
+        eventEl
+    ) {
 
         const text =
-            (eventEl.textContent || "")
+            (
+                eventEl.textContent ||
+                ""
+            )
                 .trim()
                 .toLowerCase();
+
 
         eventEl.classList.remove.apply(
             eventEl.classList,
             CALENDAR_STATUS_CLASSNAMES
         );
 
-        for (let i = 0; i < CALENDAR_STATUS_CLASS_MAP.length; i++) {
 
-            const entry = CALENDAR_STATUS_CLASS_MAP[i];
+        for (
+            let i = 0;
+            i < CALENDAR_STATUS_CLASS_MAP.length;
+            i++
+        ) {
 
-            if (text.indexOf(entry.match) !== -1) {
+            const entry =
+                CALENDAR_STATUS_CLASS_MAP[i];
 
-                eventEl.classList.add(entry.className);
+
+            if (
+                text.indexOf(
+                    entry.match
+                ) !== -1
+            ) {
+
+                eventEl.classList.add(
+                    entry.className
+                );
+
 
                 return;
 
@@ -1421,53 +1828,68 @@ frappe.pages["employee_attendance"].on_page_load = function (wrapper) {
 
 
     // =========================================================
-    // COLORIZE ALL CURRENTLY RENDERED EVENT CHIPS
-    //
-    // Covers the different DOM structures FullCalendar uses across
-    // Month / Week / Day / List views.
+    // COLORIZE CALENDAR EVENTS
+    // + ADD WORKING HOURS
     // =========================================================
 
     function colorize_calendar_events() {
 
         const container =
-            document.getElementById("attendance-calendar");
+            document.getElementById(
+                "attendance-calendar"
+            );
+
 
         if (!container) {
             return;
         }
 
+
         const events =
             container.querySelectorAll(
-                ".fc-event, .fc-daygrid-event, .fc-list-event"
+                ".fc-event, " +
+                ".fc-daygrid-event, " +
+                ".fc-list-event"
             );
 
-        events.forEach(function (eventEl) {
 
-            colorize_calendar_event(eventEl);
+        events.forEach(
+            function (eventEl) {
 
-        });
+                // Existing status color
+                colorize_calendar_event(
+                    eventEl
+                );
+
+
+                // NEW:
+                // Add existing Attendance working hours
+                add_working_hours_to_calendar_event(
+                    eventEl
+                );
+
+            }
+        );
 
     }
 
 
     // =========================================================
-    // WATCH THE CALENDAR FOR EVENT CHIPS BEING (RE)RENDERED
-    //
-    // The calendar rebuilds its event chips whenever the month
-    // changes, the view switches (Month/Week/Day), or data is
-    // refetched after a check-in/out. A MutationObserver catches
-    // all of those so the status colors stay correct without us
-    // hooking into every individual FullCalendar callback.
+    // WATCH CALENDAR EVENTS
     // =========================================================
 
     function watch_calendar_event_colors() {
 
         const container =
-            document.getElementById("attendance-calendar");
+            document.getElementById(
+                "attendance-calendar"
+            );
+
 
         if (!container) {
             return;
         }
+
 
         if (calendar_events_observer) {
 
@@ -1475,7 +1897,11 @@ frappe.pages["employee_attendance"].on_page_load = function (wrapper) {
 
         }
 
-        if (typeof MutationObserver === "undefined") {
+
+        if (
+            typeof MutationObserver ===
+            "undefined"
+        ) {
 
             colorize_calendar_events();
 
@@ -1483,20 +1909,30 @@ frappe.pages["employee_attendance"].on_page_load = function (wrapper) {
 
         }
 
+
         calendar_events_observer =
-            new MutationObserver(function () {
+            new MutationObserver(
+                function () {
 
-                colorize_calendar_events();
+                    colorize_calendar_events();
 
-            });
+                }
+            );
+
 
         calendar_events_observer.observe(
+
             container,
-            { childList: true, subtree: true }
+
+            {
+                childList: true,
+                subtree: true
+            }
+
         );
 
-        // Run once immediately too, don't wait for the first
-        // observed mutation.
+
+        // Run once immediately
         colorize_calendar_events();
 
     }
@@ -1508,67 +1944,101 @@ frappe.pages["employee_attendance"].on_page_load = function (wrapper) {
 
     function refresh_attendance_calendar() {
 
-        if (!attendance_calendar) {
+        // -------------------------------------------------
+        // Reload working hours first
+        // -------------------------------------------------
 
-            if (employee) {
+        load_calendar_working_hours(
+            function () {
 
-                create_attendance_calendar();
+                if (!attendance_calendar) {
+
+                    if (employee) {
+
+                        create_attendance_calendar();
+
+                    }
+
+                    return;
+
+                }
+
+
+                try {
+
+                    // Frappe Calendar refresh
+                    if (
+                        typeof
+                            attendance_calendar.refresh ===
+                            "function"
+                    ) {
+
+                        attendance_calendar.refresh();
+
+
+                        // Run again after refresh
+                        setTimeout(
+                            function () {
+
+                                colorize_calendar_events();
+
+                            },
+                            500
+                        );
+
+
+                        console.log(
+                            "Attendance calendar refreshed."
+                        );
+
+
+                        return;
+
+                    }
+
+
+                    // FullCalendar fallback
+                    if (
+                        attendance_calendar.fullCalendar
+                    ) {
+
+                        attendance_calendar
+                            .fullCalendar
+                            .refetchEvents();
+
+
+                        setTimeout(
+                            function () {
+
+                                colorize_calendar_events();
+
+                            },
+                            500
+                        );
+
+
+                        console.log(
+                            "Attendance calendar events refreshed."
+                        );
+
+                    }
+
+                }
+
+                catch (error) {
+
+                    console.error(
+                        "Calendar refresh failed:",
+                        error
+                    );
+
+
+                    create_attendance_calendar();
+
+                }
 
             }
-
-            return;
-
-        }
-
-
-        try {
-
-            // Frappe Calendar refresh
-            if (
-                typeof attendance_calendar.refresh ===
-                    "function"
-            ) {
-
-                attendance_calendar.refresh();
-
-                console.log(
-                    "Attendance calendar refreshed."
-                );
-
-                return;
-
-            }
-
-
-            // FullCalendar fallback
-            if (
-                attendance_calendar.fullCalendar
-            ) {
-
-                attendance_calendar
-                    .fullCalendar
-                    .refetchEvents();
-
-                console.log(
-                    "Attendance calendar events refreshed."
-                );
-
-            }
-
-        }
-
-        catch (error) {
-
-            console.error(
-                "Calendar refresh failed:",
-                error
-            );
-
-
-            // Recreate if refresh fails
-            create_attendance_calendar();
-
-        }
+        );
 
     }
 
@@ -1587,7 +2057,9 @@ frappe.pages["employee_attendance"].on_page_load = function (wrapper) {
 
 
         const checkIn =
-            new Date(checkinTime);
+            new Date(
+                checkinTime
+            );
 
 
         const base =
@@ -1599,11 +2071,17 @@ frappe.pages["employee_attendance"].on_page_load = function (wrapper) {
         const capInstant =
             sessionExpiresAt
 
-                ? new Date(sessionExpiresAt)
+                ? new Date(
+                    sessionExpiresAt
+                )
 
                 : new Date(
                     checkIn.getTime() +
-                    (86400 - base) * 1000
+                    (
+                        86400 -
+                        base
+                    ) *
+                    1000
                 );
 
 
@@ -1675,7 +2153,8 @@ frappe.pages["employee_attendance"].on_page_load = function (wrapper) {
 
 
         let totalSeconds =
-            base + liveElapsed;
+            base +
+            liveElapsed;
 
 
         if (totalSeconds > 86400) {
@@ -1730,7 +2209,9 @@ frappe.pages["employee_attendance"].on_page_load = function (wrapper) {
 
         const mins =
             Math.floor(
-                (totalSeconds % 3600) / 60
+                (
+                    totalSeconds % 3600
+                ) / 60
             );
 
 
@@ -1786,7 +2267,9 @@ frappe.pages["employee_attendance"].on_page_load = function (wrapper) {
 
         const mins =
             Math.floor(
-                (totalSeconds % 3600) / 60
+                (
+                    totalSeconds % 3600
+                ) / 60
             );
 
 
@@ -1799,14 +2282,18 @@ frappe.pages["employee_attendance"].on_page_load = function (wrapper) {
             String(hrs)
                 .padStart(2, "0")
 
-            + ":"
+            +
+
+            ":"
 
             +
 
             String(mins)
                 .padStart(2, "0")
 
-            + ":"
+            +
+
+            ":"
 
             +
 
@@ -1992,17 +2479,21 @@ frappe.pages["employee_attendance"].on_page_load = function (wrapper) {
 
                     "CHECKED IN": {
 
-                        text: "In",
+                        text:
+                            "In",
 
-                        color: "#1f9d55"
+                        color:
+                            "#1f9d55"
 
                     },
 
                     "CHECKED OUT": {
 
-                        text: "Out",
+                        text:
+                            "Out",
 
-                        color: "#0c447c"
+                        color:
+                            "#0c447c"
 
                     },
 
@@ -2011,7 +2502,8 @@ frappe.pages["employee_attendance"].on_page_load = function (wrapper) {
                         text:
                             "Missed Check Out",
 
-                        color: "#b7791f"
+                        color:
+                            "#b7791f"
 
                     },
 
@@ -2020,7 +2512,8 @@ frappe.pages["employee_attendance"].on_page_load = function (wrapper) {
                         text:
                             "Not Checked In",
 
-                        color: "#c0392b"
+                        color:
+                            "#c0392b"
 
                     }
 
@@ -2370,31 +2863,31 @@ frappe.pages["employee_attendance"].on_page_load = function (wrapper) {
         );
 
 
-    // $(document)
-    //     .on(
-    //         "click.employeeAttendance",
-    //         "#view_all_attendance",
-    //         function (e) {
+    $(document)
+        .on(
+            "click.employeeAttendance",
+            "#view_all_attendance",
+            function (e) {
 
-    //             e.preventDefault();
-
-
-    //             if (!employee) {
-    //                 return;
-    //             }
+                e.preventDefault();
 
 
-    //             frappe.set_route(
-    //                 "List",
-    //                 "Employee Checkin",
-    //                 {
-    //                     employee:
-    //                         employee
-    //                 }
-    //             );
+                if (!employee) {
+                    return;
+                }
 
-    //         }
-    //     );
+
+                frappe.set_route(
+                    "List",
+                    "Employee Checkin",
+                    {
+                        employee:
+                            employee
+                    }
+                );
+
+            }
+        );
 
 
     // =========================================================
@@ -2452,7 +2945,7 @@ frappe.pages["employee_attendance"].on_page_load = function (wrapper) {
                     case error.POSITION_UNAVAILABLE:
 
                         message =
-                            "Location information unavailable.";
+                            "Unable to detect your location. Please turn on your location and try checking in again.";
 
                         break;
 
@@ -2483,11 +2976,14 @@ frappe.pages["employee_attendance"].on_page_load = function (wrapper) {
 
             {
 
-                enableHighAccuracy: true,
+                enableHighAccuracy:
+                    true,
 
-                timeout: 15000,
+                timeout:
+                    15000,
 
-                maximumAge: 0
+                maximumAge:
+                    0
 
             }
 
@@ -2552,7 +3048,8 @@ frappe.pages["employee_attendance"].on_page_load = function (wrapper) {
                             method:
                                 "teceze.api.employee_attendance.employee_checkin",
 
-                            freeze: true,
+                            freeze:
+                                true,
 
                             freeze_message:
                                 "Processing Attendance...",
@@ -2620,11 +3117,11 @@ frappe.pages["employee_attendance"].on_page_load = function (wrapper) {
                                     load_recent_attendance();
 
 
-                                    // Refresh reporting manager /
-                                    // associate member statuses too,
-                                    // since our own status just changed
+                                    // Refresh reporting manager
                                     load_reporting_manager();
 
+
+                                    // Refresh associate members
                                     load_associate_members();
 
 
@@ -2691,10 +3188,6 @@ frappe.pages["employee_attendance"].on_page_load = function (wrapper) {
 
                 resize_attendance_calendar();
 
-                // Handles crossing the LEFT_RIGHT_STACK_BREAKPOINT
-                // (mobile <-> desktop layout) - the ResizeObserver
-                // only fires on the calendar card's own size
-                // changing, not on the breakpoint switch itself.
                 sync_left_column_height();
 
             }
@@ -2711,7 +3204,12 @@ frappe.pages["employee_attendance"].on_page_load = function (wrapper) {
 
             stopWorkingTimer();
 
+
             attendance_calendar = null;
+
+
+            attendance_working_hours = {};
+
 
             if (calendar_height_observer) {
 
@@ -2721,6 +3219,7 @@ frappe.pages["employee_attendance"].on_page_load = function (wrapper) {
 
             }
 
+
             if (calendar_events_observer) {
 
                 calendar_events_observer.disconnect();
@@ -2729,10 +3228,12 @@ frappe.pages["employee_attendance"].on_page_load = function (wrapper) {
 
             }
 
+
             $(window)
                 .off(
                     "resize.employeeAttendanceCalendar"
                 );
+
 
             $(document)
                 .off(
