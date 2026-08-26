@@ -11073,7 +11073,7 @@
    }
   ],
   "modified": "2026-07-08 14:59:01.759446",
-  "module": null,
+  "module": "Teceze",
   "module_onboarding": null,
   "name": "Teceze Admin",
   "standard": 0,
@@ -16519,7 +16519,7 @@
    }
   ],
   "modified": "2026-07-08 16:51:26.094657",
-  "module": null,
+  "module": "Teceze",
   "module_onboarding": null,
   "name": "SDC",
   "standard": 0,
