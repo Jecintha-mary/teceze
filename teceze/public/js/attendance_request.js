@@ -8,6 +8,32 @@ frappe.ui.form.on("Attendance Request", {
 		if (frm.doc.reason === "Regularization" && frm.doc.from_date) {
 			frm.set_value("to_date", frm.doc.from_date);
 		}
+
+		//Hide Submit button for employees and HR
+		if(has_common(frappe.user_roles, ["System Manager","HR Manager"])){
+		}else{
+			if(frm.doc.custom_employee_email == frappe.session.user || (frappe.user_roles.indexOf("HR User") > 0 && frm.doc.custom_reporting_manager!= frappe.session.user)){
+				frm.page.clear_primary_action()
+			}
+		}
+
+		//Status Non editable
+		if(has_common(frappe.user_roles, ["System Manager","HR Manager"])){
+        }else{
+			if(!frm.is_new()){
+				if(has_common(frappe.user_roles, ["HR User"]) && frm.doc.custom_reporting_manager != frappe.session.user){
+					frm.set_df_property("custom_status", "read_only", 1); }
+				else if(has_common(frappe.user_roles, ["Leave Approver"]) && frm.doc.custom_employee_email != frappe.session.user){
+					frm.set_df_property("custom_status", "read_only", 0);
+				}else{	
+						frm.set_df_property("custom_status", "read_only", 1);
+				}
+			}
+			else{
+				frm.set_df_property("custom_status", "read_only", 1);
+			}
+            
+        }
 	},
 
 	show_attendance_warnings(frm) {

@@ -1,10 +1,10 @@
 {
  "app": "teceze",
- "creation": "2026-07-27 16:57:25.038443",
+ "creation": "2026-08-24 11:56:03.461803",
  "docstatus": 0,
  "doctype": "Workspace Sidebar",
  "header_icon": "circle-user-round",
- "idx": 1,
+ "idx": 0,
  "items": [
   {
    "child": 1,
@@ -183,9 +183,21 @@
    "link_type": "DocType",
    "show_arrow": 0,
    "type": "Link"
+  },
+  {
+   "child": 0,
+   "collapsible": 1,
+   "icon": "calendar-days",
+   "indent": 0,
+   "keep_closed": 0,
+   "label": "Holiday List",
+   "link_to": "Holiday Details",
+   "link_type": "Report",
+   "show_arrow": 0,
+   "type": "Link"
   }
  ],
- "modified": "2026-08-21 16:26:52.354653",
+ "modified": "2026-08-26 12:56:40.594003",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "People",

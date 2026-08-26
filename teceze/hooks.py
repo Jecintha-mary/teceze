@@ -69,7 +69,7 @@ doctype_js = {
 
 }
 doctype_list_js = {
-	#  "Employee Checkin" : ["public/js/employee_checkin_list.js"]
+	 "Attendance Request" : ["public/js/attendance_request_list.js"]
 }
 
 doc_events = {
