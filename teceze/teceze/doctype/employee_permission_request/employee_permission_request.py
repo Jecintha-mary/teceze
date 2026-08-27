@@ -10,7 +10,12 @@ from frappe import _
 current_db_name = frappe.conf.get("db_name")
 
 class EmployeePermissionRequest(Document):
-	def validate(self):		
+	def validate(self):
+		if self.workflow_state == "Approved":
+			self.status = "Approved"
+
+		elif self.workflow_state == "Rejected":
+			self.status = "Rejected"	
 		if self.employee:
 			### Not allowed permission for weekoff and holidays
 			holiday=frappe.db.sql("""select holiday_list from `tabShift Type`;""",as_list=True)[0][0]

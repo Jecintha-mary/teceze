@@ -16,6 +16,14 @@ frappe.ui.form.on('Employee Permission Request', {
 		}
 	},
 	refresh: function(frm) {
+		//Hide Submit button for employees and HR
+		if(has_common(frappe.user_roles, ["System Manager","HR Manager"])){
+		}else{
+			if(frm.doc.employee_email == frappe.session.user || (frappe.user_roles.indexOf("HR User") > 0 && frm.doc.leave_approver!= frappe.session.user)){
+				frm.page.clear_primary_action()
+				frm.page.clear_secondary_action()
+			}
+		}
 		//Status should be Open if new data
 		if(frm.is_new()){
 			if (frm.doc.status == "Approved"){
