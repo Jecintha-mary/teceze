@@ -32,6 +32,7 @@ frappe.ui.form.on('Leave Application', {
 		}else{
 			if(frm.doc.employee_email == frappe.session.user || (frappe.user_roles.indexOf("HR User") > 0 && frm.doc.leave_approver!= frappe.session.user)){
 				frm.page.clear_primary_action()
+				frm.page.clear_secondary_action()
 			}
 		}
 

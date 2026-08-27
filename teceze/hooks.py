@@ -97,6 +97,9 @@ doc_events = {
 	},
 	"Salary Structure Assignment": {
         "validate": ["teceze.teceze.overrides.salary_assignment.validate"]
+    },
+	"Leave Application": {
+        "validate": ["teceze.teceze.overrides.leave_application.validate"]
     }
 
 }
@@ -344,9 +347,9 @@ fixtures = [
 	# },
    	"Custom Field",
    	"Property Setter",
-	# "Workflow",
-   	# "Workflow Action Master",
-   	# "Workflow State",
+	"Workflow",
+   	"Workflow Action Master",
+   	"Workflow State",
    	# "Role",
    	"Workspace",
 	# "Print Format",

@@ -14,6 +14,8 @@ frappe.ui.form.on("Attendance Request", {
 		}else{
 			if(frm.doc.custom_employee_email == frappe.session.user || (frappe.user_roles.indexOf("HR User") > 0 && frm.doc.custom_reporting_manager!= frappe.session.user)){
 				frm.page.clear_primary_action()
+				frm.page.clear_secondary_action()
+
 			}
 		}
 
@@ -142,6 +144,16 @@ frappe.ui.form.on("Attendance Request", {
 			frm.trigger("fetch_existing_checkins");
 		}
 	},
+	custom_check_in(frm) {
+		if (frm.doc.reason === "Regularization") {
+			frm.trigger("calculate_half_day");
+		}
+	},
+	custom_check_out(frm) {
+		if (frm.doc.reason === "Regularization") {
+			frm.trigger("calculate_half_day");
+		}
+	},
 
 	set_request_type_options(frm) {
 
@@ -234,10 +246,34 @@ frappe.ui.form.on("Attendance Request", {
 						r.message.check_out_doc || ""
 					);
 				}
+				frm.trigger("calculate_half_day");
 			},
 		});
 	},
-
+    calculate_half_day(frm) {
+		if (!frm.doc.custom_check_in ||!frm.doc.custom_check_out) {
+			
+		}
+		let check_in = frappe.datetime.str_to_obj(
+			frm.doc.custom_check_in
+		);
+		let check_out = frappe.datetime.str_to_obj(
+			frm.doc.custom_check_out
+		);
+		if (!check_in || !check_out) {
+			return;
+		}
+		let difference =check_out.getTime() - check_in.getTime();
+		let hours =difference / (1000 * 60 * 60);
+		if (hours < 0) {frm.set_value("half_day", 0);
+			return;
+		}
+		// Less than 8 hours = Half Day
+		if (hours < 8) {
+			frm.set_value("half_day", 1);
+		}
+		else {frm.set_value("half_day", 0);}
+	},
 	set_employee_shift(frm) {
 
 		if (!frm.doc.employee || !frm.doc.from_date) return;
