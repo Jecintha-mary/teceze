@@ -77,8 +77,8 @@ doc_events = {
         "autoname": ["teceze.teceze.overrides.employee.autoname"],
 		"validate": ["teceze.teceze.overrides.employee.validate"],
         "onload": ["teceze.teceze.overrides.employee.onload"],
-		"on_update": "teceze.teceze.overrides.employee.on_update"
-        # "after_insert": ["teceze.teceze.overrides.employee.after_insert"],
+		"on_update": "teceze.teceze.overrides.employee.on_update",
+        "after_insert": ["teceze.teceze.overrides.employee.after_insert"],
     },
     "Leave Ledger Entry": {
         "after_insert": ["teceze.teceze.overrides.leave_ledger_entry.after_insert"],
@@ -351,14 +351,14 @@ fixtures = [
    	"Workflow Action Master",
    	"Workflow State",
    	# "Role",
-   	"Workspace",
+   	# "Workspace",
 	# "Print Format",
    	"Custom DocPerm",
    	# "Report",
 	# "Number Card",
 	# "Web Form",
-	"Desktop Icon",
-	"Workspace Sidebar",
+	# "Desktop Icon",
+	# "Workspace Sidebar",
 ]
 
 

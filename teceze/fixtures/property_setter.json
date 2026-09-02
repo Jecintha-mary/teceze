@@ -6517,22 +6517,6 @@
   "docstatus": 0,
   "doctype": "Property Setter",
   "doctype_or_field": "DocField",
-  "field_name": "email_id",
-  "is_system_generated": 0,
-  "modified": "2026-08-20 12:23:36.877841",
-  "module": null,
-  "name": "Contact-email_id-reqd",
-  "property": "reqd",
-  "property_type": "Check",
-  "row_name": null,
-  "value": "1"
- },
- {
-  "default_value": null,
-  "doc_type": "Contact",
-  "docstatus": 0,
-  "doctype": "Property Setter",
-  "doctype_or_field": "DocField",
   "field_name": "last_name",
   "is_system_generated": 0,
   "modified": "2026-08-20 12:23:37.046472",
@@ -7662,5 +7646,21 @@
   "property_type": "Data",
   "row_name": null,
   "value": "[\"activity_type\", \"from_time\", \"description\", \"section_break_3\", \"expected_hours\", \"to_time\", \"hours\", \"completed\", \"project_details\", \"project\", \"project_name\", \"column_break_2\", \"task\", \"custom_task_name\", \"section_break_6\", \"is_billable\", \"sales_invoice\", \"column_break_8\", \"billing_hours\", \"section_break_11\", \"base_billing_rate\", \"base_billing_amount\", \"base_costing_rate\", \"base_costing_amount\", \"column_break_14\", \"billing_rate\", \"billing_amount\", \"costing_rate\", \"costing_amount\"]"
+ },
+ {
+  "default_value": null,
+  "doc_type": "CRM Lead Status",
+  "docstatus": 0,
+  "doctype": "Property Setter",
+  "doctype_or_field": "DocType",
+  "field_name": null,
+  "is_system_generated": 0,
+  "modified": "2026-09-02 11:23:31.491218",
+  "module": null,
+  "name": "CRM Lead Status-main-allow_import",
+  "property": "allow_import",
+  "property_type": "Check",
+  "row_name": null,
+  "value": "1"
  }
 ]

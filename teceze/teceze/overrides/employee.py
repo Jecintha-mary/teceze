@@ -45,8 +45,7 @@ def onload(doc, method):
     date_calculation_for_employee(doc)
 
 def after_insert(doc,method):
-    pass
-    # create_leave_allocations(doc) 
+    create_leave_allocations(doc) 
 
 def date_calculation_for_employee(doc):
     #Calculate employee age from date of birth--dharshini
@@ -62,7 +61,6 @@ def date_calculation_for_employee(doc):
         val = relativedelta(today, doj)
         doc.custom_tenure = f"{val.years} years, {val.months} months, {val.days} days"
     frappe.db.commit()
-
 
 
 def create_leave_allocations(doc):
@@ -98,29 +96,16 @@ def create_leave_allocations(doc):
         joining_date
     ) + 1
 
-    leave_types = ["Casual Leave", "Sick Leave"]
+    # Leave types
+    leave_types = [
+        "Casual Leave",
+        "Sick Leave",
+        "Restricted Leave"
+    ]
 
     for leave_type in leave_types:
 
-        # Get annual leave count from Leave Type
-        annual_leaves = frappe.db.get_value(
-            "Leave Type",
-            leave_type,
-            "max_leaves_allowed"
-        )
-        frappe.log_error('annual_leaves',str(annual_leaves))
-        if not annual_leaves:
-            frappe.log_error(
-                f"Max Leaves Allowed not set for {leave_type}",
-                "Leave Allocation Error"
-            )
-            continue
-
-        # Prorated leave calculation
-        calculated_leaves = (annual_leaves * remaining_days) / total_days
-        allocated_leaves = round(calculated_leaves * 2) / 2
-
-        # Skip if allocation already exists
+        # Check if allocation already exists
         if frappe.db.exists(
             "Leave Allocation",
             {
@@ -131,7 +116,52 @@ def create_leave_allocations(doc):
         ):
             continue
 
+        # ---------------------------------------
+        # Restricted Leave Logic
+        # ---------------------------------------
+        if leave_type == "Restricted Leave":
+
+            # January to June = 5 RL
+            # July to December = 3 RL
+            if joining_date.month <= 6:
+                allocated_leaves = 5
+            else:
+                allocated_leaves = 3
+
+        # ---------------------------------------
+        # CL / SL Logic
+        # ---------------------------------------
+        else:
+
+            # Get annual leave count from Leave Type
+            annual_leaves = frappe.db.get_value(
+                "Leave Type",
+                leave_type,
+                "max_leaves_allowed"
+            )
+
+            if not annual_leaves:
+                frappe.log_error(
+                    f"Max Leaves Allowed not set for {leave_type}",
+                    "Leave Allocation Error"
+                )
+                continue
+
+            # Prorated leave calculation
+            calculated_leaves = (
+                annual_leaves * remaining_days
+            ) / total_days
+
+            # Round to nearest 0.5
+            allocated_leaves = round(
+                calculated_leaves * 2
+            ) / 2
+
+        # ---------------------------------------
+        # Create Leave Allocation
+        # ---------------------------------------
         allocation = frappe.new_doc("Leave Allocation")
+
         allocation.employee = doc.name
         allocation.leave_type = leave_type
         allocation.leave_period = leave_period.name
@@ -143,19 +173,39 @@ def create_leave_allocations(doc):
         allocation.submit()
 
 
-
 def credit_privilege_leave():
-
     current_date = getdate(today())
-    # current_date = getdate("2027-09-01")
+
+    # Run only on 1st of the month
+    if current_date.day != 1:
+        return {
+            "success": False,
+            "message": "PL credit runs only on the 1st of the month."
+        }
+
+    leave_type = "Privilege Leave"
+
+    results = []
+
+    # ---------------------------------------------------------
+    # GET ACTIVE FULL TIME EMPLOYEES
+    # ---------------------------------------------------------
+
     employees = frappe.get_all(
         "Employee",
         filters={
             "status": "Active",
             "employment_type": "Full Time"
         },
-        fields=["name", "date_of_joining"]
+        fields=[
+            "name",
+            "date_of_joining"
+        ]
     )
+
+    # ---------------------------------------------------------
+    # PROCESS EMPLOYEES
+    # ---------------------------------------------------------
 
     for emp in employees:
 
@@ -163,13 +213,41 @@ def credit_privilege_leave():
             continue
 
         joining_date = getdate(emp.date_of_joining)
-        completion_date = add_years(joining_date, 1)
 
-        # Employee has not completed 1 year
-        if current_date < completion_date:
+        # -----------------------------------------------------
+        # ONE YEAR COMPLETION
+        # -----------------------------------------------------
+
+        completion_date = add_years(
+            joining_date,
+            1
+        )
+
+        # Employee should complete one year first
+        if current_date <= completion_date:
             continue
 
-        leave_type = "Privilege Leave"
+
+        if completion_date.month == 12:
+
+            first_credit_date = getdate(
+                f"{completion_date.year + 1}-01-01"
+            )
+
+        else:
+
+            first_credit_date = getdate(
+                f"{completion_date.year}-"
+                f"{completion_date.month + 1:02d}-01"
+            )
+
+        # Not yet reached first credit month
+        if current_date < first_credit_date:
+            continue
+
+        # -----------------------------------------------------
+        # FIND EXISTING PL ALLOCATION
+        # -----------------------------------------------------
 
         allocation_name = frappe.db.get_value(
             "Leave Allocation",
@@ -177,112 +255,129 @@ def credit_privilege_leave():
                 "employee": emp.name,
                 "leave_type": leave_type,
                 "docstatus": 1
-            }
+            },
+            "name",
+            order_by="creation desc"
         )
 
-        # --------------------------------------------------
-        # FIRST TIME CREATE ALLOCATION
-        # --------------------------------------------------
-        if not allocation_name:
+        # -----------------------------------------------------
+        # GET CURRENT LEAVE PERIOD
+        # -----------------------------------------------------
 
-            log_key = f"PL_INITIAL_{emp.name}_{completion_date}"
+        leave_period = frappe.get_value(
+            "Leave Period",
+            {
+                "from_date": ["<=", current_date],
+                "to_date": [">=", current_date]
+            },
+            [
+                "name",
+                "from_date",
+                "to_date"
+            ],
+            as_dict=True
+        )
 
-            if not frappe.db.exists(
-                "Error Log",
-                {"error": ["like", f"%{log_key}%"]}
-            ):
-
-                leave_count = frappe.db.get_value(
-                    "Leave Type",
-                    leave_type,
-                    "max_leaves_allowed"
-                ) or 0
-
-                leave_period = frappe.get_value(
-                    "Leave Period",
-                    {
-                        "from_date": ["<=", current_date],
-                        "to_date": [">=", current_date]
-                    },
-                    ["name", "to_date"],
-                    as_dict=True
-                )
-
-                if not leave_period:
-                    continue
-
-                allocation = frappe.new_doc("Leave Allocation")
-                allocation.employee = emp.name
-                allocation.leave_type = leave_type
-                allocation.leave_period = leave_period.name
-                allocation.from_date = current_date
-                allocation.to_date = leave_period.to_date
-                allocation.new_leaves_allocated = 6
-
-                allocation.insert(ignore_permissions=True)
-                allocation.submit()
-
-                frappe.log_error(
-                    title="Privilege Leave Initial Allocation",
-                    message=log_key
-                )
-
+        if not leave_period:
             continue
 
-        # --------------------------------------------------
-        # ADD +1 EVERY 2 MONTHS
-        # RUN ONLY ON 1ST OF MONTH
-        # --------------------------------------------------
-        if current_date.day != 1:
-            continue
+        # =====================================================
+        # EXISTING ALLOCATION
+        # =====================================================
 
-        months_since_completion = (
-            (current_date.year - completion_date.year) * 12
-            + (current_date.month - completion_date.month)
-        )
+        if allocation_name:
 
-        # Sep(3), Nov(5), Jan(7), Mar(9)...
-        if months_since_completion < 3:
-            continue
+            allocation = frappe.get_doc(
+                "Leave Allocation",
+                allocation_name
+            )
 
-        if months_since_completion % 2 == 0:
-            continue
+            # Existing PL value
+            old_value = float(
+                allocation.total_leaves_allocated or 0
+            )
 
-        log_key = f"PL_INCREMENT_{emp.name}_{current_date}"
+            # -------------------------------------------------
+            # ADD ONLY 0.5
+            # -------------------------------------------------
 
-        if frappe.db.exists(
-            "Error Log",
-            {"error": ["like", f"%{log_key}%"]}
-        ):
-            continue
+            new_value = round(
+                old_value + 0.5,
+                2
+            )
 
-        allocation = frappe.get_doc(
-            "Leave Allocation",
-            allocation_name
-        )
+            frappe.db.set_value(
+                "Leave Allocation",
+                allocation.name,
+                "total_leaves_allocated",
+                new_value
+            )
 
-        current_leave = allocation.total_leaves_allocated or 0
+            frappe.db.set_value(
+                "Leave Allocation",
+                allocation.name,
+                "new_leaves_allocated",
+                new_value
+            )
 
-        frappe.db.set_value(
-            "Leave Allocation",
-            allocation.name,
-            "total_leaves_allocated",
-            current_leave + 1
-        )
-        frappe.db.set_value(
-            "Leave Allocation",
-            allocation.name,
-            "new_leaves_allocated",
-            current_leave + 1
-        )
+            results.append({
+                "employee": emp.name,
+                "action": "Updated",
+                "old_value": old_value,
+                "added": 0.5,
+                "new_value": new_value
+            })
 
-        frappe.log_error(
-            title="Privilege Leave Increment",
-            message=log_key
-        )
+        # =====================================================
+        # NO ALLOCATION
+        # =====================================================
 
-        frappe.db.commit()
- #dharshini        
+        else:
+
+            # -------------------------------------------------
+            # CREATE WITH 0.5
+            # -------------------------------------------------
+
+            allocation = frappe.new_doc(
+                "Leave Allocation"
+            )
+
+            allocation.employee = emp.name
+            allocation.leave_type = leave_type
+            allocation.leave_period = leave_period.name
+
+            allocation.from_date = leave_period.from_date
+            allocation.to_date = leave_period.to_date
+
+            allocation.new_leaves_allocated = 0.5
+
+            allocation.insert(
+                ignore_permissions=True
+            )
+
+            allocation.submit()
+
+            results.append({
+                "employee": emp.name,
+                "action": "Created",
+                "old_value": 0,
+                "added": 0.5,
+                "new_value": 0.5
+            })
+
+    # ---------------------------------------------------------
+    # COMMIT
+    # ---------------------------------------------------------
+
+    frappe.db.commit()
+
+    return {
+        "success": True,
+        "run_date": str(current_date),
+        "employees_processed": len(results),
+        "data": results
+    }
+
 def on_update(doc, method):
     if not doc.resignation_letter_date:
         return
