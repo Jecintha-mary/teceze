@@ -43,6 +43,16 @@
    "type": "Link"
   },
   {
+   "child": 0,
+   "collapsible": 1,
+   "indent": 0,
+   "keep_closed": 0,
+   "label": "Attendance",
+   "link_type": "DocType",
+   "show_arrow": 0,
+   "type": "Section Break"
+  },
+  {
    "child": 1,
    "collapsible": 1,
    "icon": "check",
@@ -50,6 +60,64 @@
    "keep_closed": 0,
    "label": "Attendance",
    "link_to": "Attendance",
+   "link_type": "DocType",
+   "show_arrow": 0,
+   "type": "Link"
+  },
+  {
+   "child": 1,
+   "collapsible": 1,
+   "icon": "align-horizontal-space-around",
+   "indent": 0,
+   "keep_closed": 0,
+   "label": "Permission Request",
+   "link_to": "Employee Permission Request",
+   "link_type": "DocType",
+   "show_arrow": 0,
+   "type": "Link"
+  },
+  {
+   "child": 1,
+   "collapsible": 1,
+   "icon": "backpack",
+   "indent": 0,
+   "keep_closed": 0,
+   "label": "Attendance Request",
+   "link_to": "Attendance Request",
+   "link_type": "DocType",
+   "show_arrow": 0,
+   "type": "Link"
+  },
+  {
+   "child": 1,
+   "collapsible": 1,
+   "icon": "chart-bar-increasing",
+   "indent": 0,
+   "keep_closed": 0,
+   "label": "Monthly Attendance Report",
+   "link_to": "Monthly Attendance Report",
+   "link_type": "Report",
+   "show_arrow": 0,
+   "type": "Link"
+  },
+  {
+   "child": 0,
+   "collapsible": 1,
+   "indent": 0,
+   "keep_closed": 0,
+   "label": "Leaves",
+   "link_type": "DocType",
+   "show_arrow": 0,
+   "type": "Section Break"
+  },
+  {
+   "child": 1,
+   "collapsible": 1,
+   "icon": "backpack",
+   "indent": 0,
+   "keep_closed": 0,
+   "label": "Compensatory Leave Request",
+   "link_to": "Compensatory Leave Request",
    "link_type": "DocType",
    "show_arrow": 0,
    "type": "Link"
@@ -69,11 +137,11 @@
   {
    "child": 1,
    "collapsible": 1,
-   "icon": "chart-bar-increasing",
+   "icon": "align-end-vertical",
    "indent": 0,
    "keep_closed": 0,
-   "label": "Monthly Attendance Report",
-   "link_to": "Monthly Attendance Report",
+   "label": "Leave and Permission Report",
+   "link_to": "Employee Leave and Permission",
    "link_type": "Report",
    "show_arrow": 0,
    "type": "Link"
@@ -81,36 +149,12 @@
   {
    "child": 1,
    "collapsible": 1,
-   "icon": "backpack",
+   "icon": "calendar-days",
    "indent": 0,
    "keep_closed": 0,
-   "label": "Attendance Request",
-   "link_to": "Attendance Request",
-   "link_type": "DocType",
-   "show_arrow": 0,
-   "type": "Link"
-  },
-  {
-   "child": 1,
-   "collapsible": 1,
-   "icon": "",
-   "indent": 0,
-   "keep_closed": 0,
-   "label": "Permission Request",
-   "link_to": "Employee Permission Request",
-   "link_type": "DocType",
-   "show_arrow": 0,
-   "type": "Link"
-  },
-  {
-   "child": 1,
-   "collapsible": 1,
-   "icon": "backpack",
-   "indent": 0,
-   "keep_closed": 0,
-   "label": "Compensatory Leave Request",
-   "link_to": "Compensatory Leave Request",
-   "link_type": "DocType",
+   "label": "Holiday List",
+   "link_to": "Holiday Details",
+   "link_type": "Report",
    "show_arrow": 0,
    "type": "Link"
   },
@@ -174,18 +218,6 @@
    "type": "Link"
   },
   {
-   "child": 1,
-   "collapsible": 1,
-   "icon": "align-end-vertical",
-   "indent": 0,
-   "keep_closed": 0,
-   "label": "Leave and Permission Report",
-   "link_to": "Employee Leave and Permission",
-   "link_type": "Report",
-   "show_arrow": 0,
-   "type": "Link"
-  },
-  {
    "child": 0,
    "collapsible": 1,
    "indent": 0,
@@ -195,21 +227,9 @@
    "link_type": "DocType",
    "show_arrow": 0,
    "type": "Link"
-  },
-  {
-   "child": 0,
-   "collapsible": 1,
-   "icon": "calendar-days",
-   "indent": 0,
-   "keep_closed": 0,
-   "label": "Holiday List",
-   "link_to": "Holiday Details",
-   "link_type": "Report",
-   "show_arrow": 0,
-   "type": "Link"
   }
  ],
- "modified": "2026-08-27 13:28:25.450538",
+ "modified": "2026-09-01 16:36:18.211868",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "People",

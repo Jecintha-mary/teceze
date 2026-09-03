@@ -48,15 +48,6 @@
   "docstatus": 0,
   "doctype": "Workflow State",
   "icon": "",
-  "modified": "2026-06-11 14:37:52.402882",
-  "name": "Draft",
-  "style": "Danger",
-  "workflow_state_name": "Draft"
- },
- {
-  "docstatus": 0,
-  "doctype": "Workflow State",
-  "icon": "",
   "modified": "2026-06-11 15:15:31.629389",
   "name": "HR Review",
   "style": "Success",
@@ -70,6 +61,15 @@
   "name": "Reporting Manager Review",
   "style": "Primary",
   "workflow_state_name": "Reporting Manager Review"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2026-06-11 14:37:52.402882",
+  "name": "Draft",
+  "style": "Danger",
+  "workflow_state_name": "Draft"
  },
  {
   "docstatus": 0,

@@ -1,11 +1,22 @@
 frappe.ui.form.on("Attendance Request", {
+	validate(frm) {
+		if (frm.doc.reason !== "Regularization") {
+			return;
+		}
+		if (frm.doc.custom_working_hours != null &&frm.doc.custom_working_hours < 4) {
+			frappe.msgprint(__("Regularization is allowed only if working hours are at least 4 hours."));
+			frappe.validated = false;
+			return;
+		}
+	},
 
 	refresh(frm) {
 		frm.trigger("show_attendance_warnings");
 		frm.trigger("set_request_type_options");
 		frm.trigger("toggle_regularization_fields");
 
-		if (frm.doc.reason === "Regularization" && frm.doc.from_date) {
+		if (frm.doc.reason === "Regularization" && frm.doc.from_date) {    
+			frm.set_value("half_day_date", frm.doc.from_date);
 			frm.set_value("to_date", frm.doc.from_date);
 		}
 
@@ -101,6 +112,7 @@ frappe.ui.form.on("Attendance Request", {
 
 		if (frm.doc.reason === "Regularization") {
 			frm.set_value("to_date", frm.doc.from_date);
+			frm.set_value("half_day_date", frm.doc.from_date);
 		}
 
 		if (frm.doc.employee && frm.doc.from_date && !frm.doc.shift) {
@@ -123,6 +135,7 @@ frappe.ui.form.on("Attendance Request", {
 		if (frm.doc.reason === "Regularization") {
 
 			if (frm.doc.from_date) {
+				frm.set_value("half_day_date", frm.doc.from_date);
 				frm.set_value("to_date", frm.doc.from_date);
 			}
 
@@ -192,6 +205,7 @@ frappe.ui.form.on("Attendance Request", {
 		frm.toggle_display("custom_check_in", regularization);
 
 		frm.toggle_display("custom_check_out", regularization);
+		frm.toggle_display("half_day_date", !regularization);
 
 	},
 
@@ -265,6 +279,7 @@ frappe.ui.form.on("Attendance Request", {
 		}
 		let difference =check_out.getTime() - check_in.getTime();
 		let hours =difference / (1000 * 60 * 60);
+		frm.set_value("custom_working_hours", hours);
 		if (hours < 0) {frm.set_value("half_day", 0);
 			return;
 		}
