@@ -7,6 +7,7 @@ from frappe.utils import (
     add_to_date,
     date_diff
 )
+from teceze.api.attendance_regularization import get_existing_checkins
 
 class CRUD:
 
@@ -857,15 +858,32 @@ class CRUD:
             doctype,
             data
         )
-
+        if (doctype == "Attendance Request" and clean_data.get("reason") == "Regularization" and clean_data.get("from_date")):
+             clean_data["to_date"] = clean_data["from_date"]
+        else:
+            clean_data["custom_request_type"] = None
+        
+        
         doc = frappe.get_doc({
             "doctype": doctype,
             **clean_data
         })
+        
+
 
         doc.insert(
             ignore_permissions=permission
         )
+       
+    #     frappe.log_error(title="ATTENDANCE AFTER INSERT",message=frappe.as_json({
+    #     "name": doc.name,
+    #     "reason": doc.reason,
+    #     "custom_request_type": doc.custom_request_type,
+    #     "custom_check_in": doc.custom_check_in,
+    #     "custom_check_out": doc.custom_check_out
+    # }))
+
+
 
         return {
             "success": True,
@@ -1566,11 +1584,11 @@ from frappe.utils import add_days, getdate
 
 @frappe.whitelist(allow_guest=True)
 def employee_checkin():
-
     return CRUD.handle(
         doctype="Employee Checkin",
         permission=True
     )
+
 
 @frappe.whitelist(allow_guest=True)
 def app_policy():
@@ -1643,9 +1661,6 @@ def employee():
     return CRUD.handle(
         doctype="Employee"
     )
-
-
-
 
 
 def get_logged_in_employee():
@@ -2173,27 +2188,34 @@ def leave_type():
     )
 
 @frappe.whitelist(allow_guest=False)
-def attendance_request():
-    return CRUD.handle(
-        doctype="Attendance Request",
-    )
-
-@frappe.whitelist(allow_guest=False)
 def leave_balance():
 
-    # -----------------------------------------
-    # LEAVE ALLOCATION
-    # -----------------------------------------
+    # Get logged-in employee
+    employee = frappe.db.get_value(
+        "Employee",
+        {"user_id": frappe.session.user},
+        "name"
+    )
 
+    if not employee:
+        return {
+            "success": False,
+            "message": "Employee not found"
+        }
+
+    leave_balance = {}
+
+    # Get only logged-in employee's allocations
     allocations = frappe.get_list(
         "Leave Allocation",
+        filters={
+            "employee": employee
+        },
         fields=[
             "leave_type",
             "total_leaves_allocated"
         ]
     )
-
-    leave_balance = {}
 
     for allocation in allocations:
 
@@ -2211,13 +2233,11 @@ def leave_balance():
             allocation.total_leaves_allocated or 0
         )
 
-    # -----------------------------------------
-    # USED LEAVE
-    # -----------------------------------------
-
+    # Get only logged-in employee's approved applications
     applications = frappe.get_list(
         "Leave Application",
         filters={
+            "employee": employee,
             "status": "Approved"
         },
         fields=[
@@ -2242,10 +2262,7 @@ def leave_balance():
             application.total_leave_days or 0
         )
 
-    # -----------------------------------------
-    # CALCULATE BALANCE
-    # -----------------------------------------
-
+    # Calculate balance
     for item in leave_balance.values():
 
         item["balance"] = (
@@ -2255,9 +2272,7 @@ def leave_balance():
     return {
         "success": True,
         "data": list(leave_balance.values())
-    }  
-
-
+    }
 
 from frappe.utils import (
     getdate,
@@ -2271,10 +2286,6 @@ def get_attendance_list(
     from_date=None,
     to_date=None
 ):
-
-    # =====================================================
-    # 1. VALIDATE DATE PARAMETERS
-    # =====================================================
 
     if not from_date or not to_date:
         frappe.throw(
@@ -2291,15 +2302,9 @@ def get_attendance_list(
             frappe.ValidationError
         )
 
-    # =====================================================
-    # 2. GET LOGGED-IN EMPLOYEE
-    # =====================================================
 
     employee = get_logged_in_employee()
 
-    # =====================================================
-    # 3. GET EMPLOYEE DETAILS
-    # =====================================================
 
     employee_data = frappe.db.get_value(
         "Employee",
@@ -2323,9 +2328,6 @@ def get_attendance_list(
     holiday_list = employee_data.holiday_list
     shift = employee_data.custom_shift
 
-    # =====================================================
-    # 4. GET ATTENDANCE RECORDS
-    # =====================================================
 
     attendance_records = frappe.get_all(
         "Attendance",
@@ -2347,9 +2349,7 @@ def get_attendance_list(
         order_by="attendance_date asc"
     )
 
-    # =====================================================
-    # 5. CREATE ATTENDANCE MAP
-    # =====================================================
+
 
     attendance_map = {
         getdate(record.attendance_date): record
@@ -2662,9 +2662,6 @@ def leave():
                 "data": doc.as_dict()
             }
 
-        # --------------------------------
-        # Normal update
-        # --------------------------------
         return CRUD.handle(
             doctype="Leave Application",
             permission=True
@@ -2684,3 +2681,244 @@ def update_user_password(pwd):
         "success": True,
         "message": "Password updated successfully"
     }
+
+@frappe.whitelist(allow_guest=False)
+def Leave_cancellation(name, comment):
+    # 1. Authentication
+    CRUD.check_authentication()
+    # 2. Name validation
+    if not name or not name.strip():
+        frappe.throw("Leave Application name is required")
+    # 3. Comment validation
+    if not comment or not comment.strip():
+        frappe.throw("Comment is required")
+    # 4. Logged-in employee
+    employee = get_logged_in_employee()
+    # 5. Get Leave Application
+    leave_application = frappe.db.get_value(
+        "Leave Application",
+        name,
+        ["employee", "leave_approver"],
+        as_dict=True
+    )
+    # 6. Leave Application exists
+    if not leave_application:
+        frappe.throw("Leave Application not found")
+    # 7. Ownership validation
+    if leave_application.employee != employee:
+        frappe.throw(
+            "You are not allowed to access this Leave Application"
+        )
+    # 8. Approver validation
+    approver = leave_application.leave_approver
+    if not approver:
+        frappe.throw("Leave Approver not found")
+    # 9. Approver User validation
+    approver_name = frappe.db.get_value(
+        "User",
+        approver,
+        "full_name"
+    )
+    if not approver_name:
+        frappe.throw("Leave Approver user not found")
+    # 10. Get document
+    doc = frappe.get_doc("Leave Application", name)
+    # 11. Add comment
+    doc.add_comment(
+        "Comment",
+        f"@{approver_name} {comment.strip()}"
+    )
+    return {
+        "success": True,
+        "message": "Comment added successfully"
+    }
+@frappe.whitelist(allow_guest=False)
+def attendance_request_fields():
+    CRUD.check_authentication()
+    get_logged_in_employee()
+    meta = frappe.get_meta("Attendance Request")
+    reason_field = meta.get_field("reason")
+    if not reason_field:
+        frappe.throw("Reason field not found")
+    exclude_fields = {
+        "employee",
+        "company",
+        "from_date"
+    }
+    data = {}
+    reasons = [
+        reason.strip()
+        for reason in reason_field.options.splitlines()
+        if reason.strip()
+    ]
+
+    for reason in reasons:
+        doc = frappe._dict({
+            "reason": reason
+        })
+
+        fields = {}
+        for field in meta.fields:
+
+            if (
+                field.hidden
+                or field.fieldname in exclude_fields
+                or field.fieldname == "reason"
+                or field.fieldtype in (
+                    "Section Break",
+                    "Column Break",
+                    "Tab Break",
+                    "HTML"
+                )
+            ):
+                continue
+            # Use depends_on OR mandatory_depends_on
+            condition = field.depends_on or field.mandatory_depends_on
+            if not condition:
+                continue
+            condition = condition.removeprefix("eval:")
+            try:
+                if frappe.safe_eval(condition, {"doc": doc}):
+
+                    fields[field.fieldname] = {
+                        "fieldname": field.fieldname,
+                        "fieldtype": field.fieldtype
+                    }
+            except Exception:
+                continue
+        if fields:
+            data[frappe.scrub(reason)] = fields
+    return {
+        "success": True,
+        "message": "Attendance Request fields fetched successfully",
+        "data": data
+    }
+@frappe.whitelist(allow_guest=False)
+def regularization_date(employee, from_date):
+
+    CRUD.check_authentication()
+
+    checkin_data = get_existing_checkins(employee, from_date)
+
+    return {
+        "success":True,
+        "data":{
+        "check_in": checkin_data.get("check_in", ""),
+        "check_out": checkin_data.get("check_out", "")
+        }
+    }
+
+@frappe.whitelist(allow_guest=False)
+def attendance_request():
+
+    method = frappe.request.method
+    if method in ("GET", "DELETE"):
+
+        return CRUD.handle(
+            doctype="Attendance Request"
+        )
+
+    # --------------------------------
+    # POST = Create + Submit
+    # Draft → Pending Approval
+    # --------------------------------
+    if method == "POST":
+
+        payload = CRUD.get_json_payload()
+
+        data = payload.get(
+            "data",
+            payload
+        )
+
+        if not isinstance(data, dict):
+            frappe.throw(
+                "data must be an object",
+                frappe.ValidationError
+            )
+
+        if not data:
+            frappe.throw(
+                "data cannot be empty",
+                frappe.ValidationError
+            )
+
+        # --------------------------------
+        # Create Attendance Request
+        # --------------------------------
+        result = CRUD.create_document(
+            doctype="Attendance Request",
+            data=data,
+            permission=False
+        )
+
+        # Get created document
+        doc = frappe.get_doc(
+            "Attendance Request",
+            result["data"]["name"]
+        )
+        frappe.log_error( title="WORKFLOW APPROVE DEBUG", message=frappe.as_json({ "name": doc.name, "action_received": action, "workflow_state": doc.workflow_state, "docstatus": doc.docstatus, "session_user": frappe.session.user }) )
+
+        # --------------------------------
+        # Submit using Workflow
+        # Draft → Pending Approval
+        # --------------------------------
+        doc = apply_workflow(
+            doc,
+            "Submit"
+        )
+
+        return {
+            "success": True,
+            "message": "Attendance Request submitted successfully",
+            "data": doc.as_dict()
+        }
+
+    # --------------------------------
+    # PUT / PATCH
+    # --------------------------------
+    if method in ("PUT", "PATCH"):
+        payload = CRUD.get_json_payload()
+
+        name = payload.get("name")
+        action = payload.get("action")
+
+        if not name:
+            frappe.throw(
+                "Attendance Request name is required"
+            )
+
+        # --------------------------------
+        # Workflow Action
+        # Approve / Reject / Cancel
+        # --------------------------------
+        if action:
+
+            doc = frappe.get_doc(
+                "Attendance Request",
+                name
+            )
+
+            doc = apply_workflow(
+                doc,
+                action
+            )
+
+            return {
+                "success": True,
+                "message": f"Attendance Request {action} successfully",
+                "data": doc.as_dict()
+            }
+
+        # --------------------------------
+        # Normal Update
+        # --------------------------------
+        return CRUD.handle(
+            doctype="Attendance Request",
+            permission=True
+        )
+
+    frappe.throw(
+        f"Method {method} not supported"
+    )
+

@@ -475,34 +475,34 @@ frappe.query_reports["Project Schedule Report"] = {
 					break;
 			}
 
-			if (column.fieldname == '_assign') {
-				if (value && value !== null) {
-					value = JSON.parse(String(value));
+			// if (column.fieldname == '_assign') {
+			// 	if (value && value !== null) {
+			// 		value = JSON.parse(String(value));
 
-					div1 = `<div class="avatar-group left overlap">`
-					div2 = ``
-					div3 = `</div>`
-					for (let i = 0; i < value.length; i++) {
-						for (let j = 0; j < imgs.length; j++) {
-							if (value[i] == imgs[j].name && imgs[j].image !== null && value[i] !== null) {
-								span = `<span class="avatar avatar-small " title="` + value[i] + `">
-									<span class="avatar-frame" style="background-image: url(&quot;` + imgs[j].image + `&quot;)" title="` + value[i] + `"></span>
-								</span>`
-								div2 = div2 + span
-							}
-						}
-					}
-					value = div1 + div2 + div3
-				} else {
-					value = ''
-				}
-			} else {
-				if (value !== null) {
-					value = value
-				} else {
-					value = ''
-				}
-			}
+			// 		div1 = `<div class="avatar-group left overlap">`
+			// 		div2 = ``
+			// 		div3 = `</div>`
+			// 		for (let i = 0; i < value.length; i++) {
+			// 			for (let j = 0; j < imgs.length; j++) {
+			// 				if (value[i] == imgs[j].name && imgs[j].image !== null && value[i] !== null) {
+			// 					span = `<span class="avatar avatar-small " title="` + value[i] + `">
+			// 						<span class="avatar-frame" style="background-image: url(&quot;` + imgs[j].image + `&quot;)" title="` + value[i] + `"></span>
+			// 					</span>`
+			// 					div2 = div2 + span
+			// 				}
+			// 			}
+			// 		}
+			// 		value = div1 + div2 + div3
+			// 	} else {
+			// 		value = ''
+			// 	}
+			// } else {
+			// 	if (value !== null) {
+			// 		value = value
+			// 	} else {
+			// 		value = ''
+			// 	}
+			// }
 
 			if (value == 0) {
 				value = ''

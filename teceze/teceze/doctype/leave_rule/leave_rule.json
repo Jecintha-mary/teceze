@@ -1,0 +1,120 @@
+{
+ "actions": [],
+ "allow_bulk_edit": 1,
+ "allow_rename": 1,
+ "autoname": "field:name1",
+ "creation": "2026-09-03 12:41:30.002032",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "name1",
+  "country",
+  "leave_type",
+  "column_break_reuq",
+  "eligibility_period",
+  "uom",
+  "enabled",
+  "section_break_lakg",
+  "leave_allocation",
+  "expire_leave_types_section",
+  "table_hyic"
+ ],
+ "fields": [
+  {
+   "fieldname": "name1",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Name",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "country",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Country",
+   "options": "Country",
+   "reqd": 1
+  },
+  {
+   "fieldname": "eligibility_period",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Eligibility Period",
+   "reqd": 1
+  },
+  {
+   "fieldname": "uom",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "UOM",
+   "options": "\nYear\nMonth",
+   "reqd": 1
+  },
+  {
+   "fieldname": "leave_allocation",
+   "fieldtype": "Table",
+   "label": "Leave Allocation",
+   "options": "Leave Rule Details"
+  },
+  {
+   "fieldname": "column_break_reuq",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_lakg",
+   "fieldtype": "Section Break",
+   "label": "Allocation"
+  },
+  {
+   "fieldname": "leave_type",
+   "fieldtype": "Link",
+   "label": "Leave Type",
+   "options": "Leave Type"
+  },
+  {
+   "fieldname": "expire_leave_types_section",
+   "fieldtype": "Section Break",
+   "label": "Expire Leave Types"
+  },
+  {
+   "fieldname": "table_hyic",
+   "fieldtype": "Table",
+   "options": "Expire Leave Rule"
+  },
+  {
+   "default": "0",
+   "fieldname": "enabled",
+   "fieldtype": "Check",
+   "label": "Enable"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-09-03 16:48:27.668634",
+ "modified_by": "Administrator",
+ "module": "Teceze",
+ "name": "Leave Rule",
+ "naming_rule": "By fieldname",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}
