@@ -29,7 +29,7 @@ class EmployeePermissionRequest(Document):
         elif self.workflow_state == "Rejected":
             self.status = "Rejected"
         elif self.workflow_state == "Pending Approval":
-            self.status = "Open"
+            self.status = "Pending Approval"
 
         if self.employee:
             ### Not allowed permission for weekoff and holidays

@@ -77,7 +77,7 @@
    "fetch_from": "employee.company_email",
    "fieldname": "employee_email",
    "fieldtype": "Data",
-   "label": "Employee eMail",
+   "label": "Employee Email",
    "options": "Email",
    "read_only": 1
   },
@@ -130,7 +130,7 @@
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Status",
-   "options": "Open\nApproved\nRejected",
+   "options": "Open\nApproved\nRejected\nPending Approval",
    "reqd": 1
   },
   {
@@ -150,7 +150,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-06-11 14:26:34.873840",
+ "modified": "2026-09-11 16:06:09.166345",
  "modified_by": "Administrator",
  "module": "Teceze",
  "name": "Employee Permission Request",
