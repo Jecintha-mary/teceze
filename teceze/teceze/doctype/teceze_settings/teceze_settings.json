@@ -8,7 +8,9 @@
  "field_order": [
   "employee_prefix",
   "employee_series",
-  "engineer_prefix"
+  "engineer_prefix",
+  "column_break_qrqi",
+  "process_auto_attendance_after"
  ],
  "fields": [
   {
@@ -25,13 +27,22 @@
    "fieldname": "engineer_prefix",
    "fieldtype": "Data",
    "label": "Engineer Naming Prefix"
+  },
+  {
+   "fieldname": "column_break_qrqi",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "process_auto_attendance_after",
+   "fieldtype": "Date",
+   "label": "Process Auto Attendance After"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-07-09 17:17:08.316868",
+ "modified": "2026-09-09 12:16:07.734534",
  "modified_by": "Administrator",
  "module": "Teceze",
  "name": "Teceze Settings",

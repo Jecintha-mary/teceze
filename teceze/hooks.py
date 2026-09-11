@@ -235,6 +235,13 @@ scheduler_events = {
 	# "cron": {
        
     # },
+     "cron": {
+		"10 * * * *": [
+			"teceze.teceze.overrides.permission.attendance_for_permission",
+            "teceze.teceze.overrides.employee.annual_leave_allocation"
+		]
+       
+    },
 	"hourly": [
         "teceze.api.employee_attendance.auto_checkout_open_sessions",
     ],
@@ -333,10 +340,10 @@ scheduler_events = {
 # ignore_translatable_strings_from = []
 
 fixtures = [
-	# {
-	# "doctype": "Notification",
-	# "filters": [{"is_standard":0}]
-	# },
+	{
+	"doctype": "Notification",
+	"filters": [{"is_standard":0}]
+	},
 	# {
 	# "doctype": "Dashboard",
 	# "filters": [{"is_standard":0}]
@@ -358,7 +365,7 @@ fixtures = [
 	# "Number Card",
 	# "Web Form",
 	# "Desktop Icon",
-	# "Workspace Sidebar",
+	"Workspace Sidebar",
 ]
 
 

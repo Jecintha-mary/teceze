@@ -186,54 +186,12 @@ function validate_permission(frm){
     	    frappe.throw(__("To Time can not be less than from time"));
     	    
         }
-        if (Date.parse('1/1/1999 ' + frm.doc.from_time) < Date.parse("1/1/1999 9:00")){
-			frm.doc.from_time = "";
-			cur_frm.refresh_fields()
-    	    frappe.throw(__("From Time can not be less than 9 AM"));
-    	    
-        }
-        
-        if (Date.parse('1/1/1999 ' + frm.doc.to_time) > Date.parse("1/1/1999 18:00")){
-			frm.doc.to_time = "";
-			cur_frm.refresh_fields()
-    	    frappe.throw(__("To Time can not be greater than 6 PM"));
-    	   
-        }
+       
 	}
     	
     }
 }
-//Validate permission limitation
-function valid_permission(frm){
-    if(frm.doc.employee && frm.doc.permission_on && frm.is_new()){
-    const PermissionDate = frm.doc.permission_on.split("-");
-    	frappe.call({
-    	"method": "teceze.teceze.doctype.my_white_list_functions.my_white_list_functions.permission_validation",
-    	"args": {
-    		"employee": frm.doc.employee,
-    		"month": PermissionDate[1],
-    		"year": PermissionDate[0]
-    	},
-    	callback:function(r){
-    		if(r.message.length >= 2){
-				frm.doc.employee = "";
-				frm.doc.from_time = "";
-				frm.doc.to_time = "";
-				frm.doc.permission_on = "";
-				frm.doc.leave_approver = "";
-				frm.doc.employee_name = "";
-				frm.doc.employee_email = "";
-				frm.doc.department = "";
-				frm.doc.designation = "";
-				frm.doc.leave_approver_name = "";
-				frm.doc.reason = "";
-				cur_frm.refresh_fields()
-    		    frappe.throw(__("Permission limit for the month exceeds. Please contact your RM"));
-    		}
-    	}
-        });
-	}
-}
+
 
 function valid_apply_permission(frm){
 	if(has_common(frappe.user_roles, ["System Manager"])){
@@ -276,5 +234,37 @@ function duplicate_permission(frm){
 					}
 			}
 		})
+	}
+}
+
+//Validate permission limitation
+function valid_permission(frm){
+    if(frm.doc.employee && frm.doc.permission_on && frm.is_new()){
+    const PermissionDate = frm.doc.permission_on.split("-");
+    	frappe.call({
+    	"method": "teceze.teceze.doctype.my_white_list_functions.my_white_list_functions.permission_validation",
+    	"args": {
+    		"employee": frm.doc.employee,
+    		"month": PermissionDate[1],
+    		"year": PermissionDate[0]
+    	},
+    	callback:function(r){
+    		if(r.message.length >= 2){
+				frm.doc.employee = "";
+				frm.doc.from_time = "";
+				frm.doc.to_time = "";
+				frm.doc.permission_on = "";
+				frm.doc.leave_approver = "";
+				frm.doc.employee_name = "";
+				frm.doc.employee_email = "";
+				frm.doc.department = "";
+				frm.doc.designation = "";
+				frm.doc.leave_approver_name = "";
+				frm.doc.reason = "";
+				cur_frm.refresh_fields()
+    		    frappe.throw(__("Permission limit for the month exceeds. Please contact your RM"));
+    		}
+    	}
+        });
 	}
 }

@@ -162,7 +162,7 @@
   "document_type": "Attendance Request",
   "enable_action_confirmation": 1,
   "is_active": 1,
-  "modified": "2026-09-07 12:28:19.899307",
+  "modified": "2026-09-09 15:50:36.347416",
   "name": "Attendance Request",
   "override_status": 0,
   "send_email_alert": 0,
@@ -184,7 +184,7 @@
    {
     "allow_edit": "Report Manager",
     "avoid_status_override": 0,
-    "doc_status": "1",
+    "doc_status": "0",
     "evaluate_as_expression": 0,
     "is_optional_state": 0,
     "message": null,

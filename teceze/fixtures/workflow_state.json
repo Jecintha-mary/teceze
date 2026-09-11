@@ -65,20 +65,20 @@
  {
   "docstatus": 0,
   "doctype": "Workflow State",
-  "icon": "",
-  "modified": "2026-06-11 14:37:52.402882",
-  "name": "Draft",
-  "style": "Danger",
-  "workflow_state_name": "Draft"
- },
- {
-  "docstatus": 0,
-  "doctype": "Workflow State",
   "icon": "ok-sign",
   "modified": "2026-06-10 15:03:44.688523",
   "name": "Approved",
   "style": "Success",
   "workflow_state_name": "Approved"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2026-06-11 14:37:52.402882",
+  "name": "Draft",
+  "style": "Danger",
+  "workflow_state_name": "Draft"
  },
  {
   "docstatus": 0,
