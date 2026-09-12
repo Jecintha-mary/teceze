@@ -1,0 +1,61 @@
+name: Deploy Frappe Production
+
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: [self-hosted, Linux, X64]
+
+    steps:
+      - name: Deploy Teceze application
+        shell: bash
+        run: |
+          set -e
+
+          BENCH_PATH="/home/frappe/frappe-bench"
+          APP_PATH="$BENCH_PATH/apps/teceze"
+          SITE="erp.teceze.com"
+          BRANCH="version-16"
+
+          echo "========================================="
+          echo "Starting Frappe Production Deployment"
+          echo "========================================="
+
+          cd "$APP_PATH"
+
+          echo "Current branch:"
+          git branch --show-current
+
+          echo "Fetching latest code..."
+          git fetch origin "$BRANCH"
+
+          echo "Switching to $BRANCH..."
+          git checkout "$BRANCH"
+
+          echo "Resetting to origin/$BRANCH..."
+          git reset --hard "origin/$BRANCH"
+
+          echo "Current commit:"
+          git log -1 --oneline
+
+          cd "$BENCH_PATH"
+
+          echo "Running database migration..."
+          bench --site "$SITE" migrate
+
+          echo "Clearing cache..."
+          bench --site "$SITE" clear-cache
+
+          echo "Clearing website cache..."
+          bench --site "$SITE" clear-website-cache
+
+          echo "Building Teceze application..."
+          bench build --app teceze
+
+          echo "Restarting Frappe..."
+          bench restart
+
+          echo "========================================="
+          echo "Deployment completed successfully"
+          echo "========================================="
