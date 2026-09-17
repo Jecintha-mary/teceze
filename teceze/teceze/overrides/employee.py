@@ -367,7 +367,6 @@ def create_first_pl(emp, leave_type, current_date, results):
 
 def credit_privilege_leave():
     current_date = getdate(today())
-    frappe.log_error('ssssssssssssssssssssssss')
     # # Run only on 1st of the month
     # if current_date.day != 1:
     #     return {

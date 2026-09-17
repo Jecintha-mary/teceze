@@ -875,15 +875,7 @@ class CRUD:
             ignore_permissions=permission
         )
        
-    #     frappe.log_error(title="ATTENDANCE AFTER INSERT",message=frappe.as_json({
-    #     "name": doc.name,
-    #     "reason": doc.reason,
-    #     "custom_request_type": doc.custom_request_type,
-    #     "custom_check_in": doc.custom_check_in,
-    #     "custom_check_out": doc.custom_check_out
-    # }))
-
-
+        
 
         return {
             "success": True,
@@ -1584,6 +1576,7 @@ from frappe.utils import add_days, getdate
 
 @frappe.whitelist(allow_guest=True)
 def employee_checkin():
+
     return CRUD.handle(
         doctype="Employee Checkin",
         permission=True
@@ -1853,112 +1846,258 @@ def get_date_range(days=None, from_date=None, to_date=None):
 
     return from_date, to_date
 
+from frappe.utils import time_diff_in_seconds    
 @frappe.whitelist(allow_guest=False)
-def get_employee_checkin_summary(
-    days=None,
-    from_date=None,
-    to_date=None
-):
+
+def get_employee_checkin_summary(days=None, from_date=None, to_date=None):
 
     employee = get_logged_in_employee()
 
-    from_date, to_date = get_date_range(
-        days,
-        from_date,
-        to_date
-    )
+    from_date, to_date = get_date_range(days, from_date, to_date)
 
-    total_days = date_diff(
-        to_date,
-        from_date
-    ) + 1
-
+    total_days = date_diff(to_date, from_date) + 1
+ 
     result = []
-
+ 
     for i in range(total_days):
 
-        current_date = add_to_date(
-            from_date,
-            days=i
+        current_date = add_to_date(from_date, days=i)
+
+        shift_data = get_shift_window(employee, current_date)
+
+        shift_type = shift_data["shift_type"] if shift_data else None
+ 
+        # Every check-in event for the CALENDAR DAY, oldest first — scoped
+
+        # to the full day, not the shift's scheduled hours, so a check-in
+
+        # before the shift starts or a checkout after it ends (staying
+
+        # late) is never silently dropped. Queried unconditionally, even
+
+        # with no shift scheduled, since an employee can still check in
+
+        # on an off day.
+
+        events = frappe.get_all(
+
+            "Employee Checkin",
+
+            filters={
+
+                "employee": employee,
+
+                "time": ["between", [f"{current_date} 00:00:00", f"{current_date} 23:59:59"]]
+
+            },
+
+            fields=["log_type", "time"],
+
+            order_by="time asc"
+
         )
+ 
+        first_in = None
 
-        shift_data = get_shift_window(
-            employee,
-            current_date
-        )
+        last_out = None
 
-        # No shift
-        if not shift_data:
+        session_start = None
 
-            result.append({
-                "date": str(current_date),
-                "shift_type": None,
-                "first_in": None,
-                "last_out": None,
-                "worked_hours": None
-            })
+        total_seconds = 0
+ 
+        for ev in events:
 
-            continue
+            if ev.log_type == "IN":
 
-        # First IN
-        first_in = get_checkin(
-            employee,
-            shift_data["from_time"],
-            shift_data["to_time"],
-            "IN",
-            "asc"
-        )
+                if first_in is None:
 
-        # Last OUT
-        last_out = get_checkin(
-            employee,
-            shift_data["from_time"],
-            shift_data["to_time"],
-            "OUT",
-            "desc"
-        )
+                    first_in = ev.time
 
-        first_time = (
-            first_in.time
-            if first_in
-            else None
-        )
+                if session_start is None:
 
-        last_time = (
-            last_out.time
-            if last_out
-            else None
-        )
+                    session_start = ev.time
 
-        worked_time = calculate_worked_time(
-            first_time,
-            last_time
-        )
+                # A duplicate IN while already open (double tap / bad
 
+                # data) doesn't restart the session — the original start
+
+                # stands, so total_seconds isn't skewed.
+
+            elif ev.log_type == "OUT":
+
+                if session_start is not None:
+
+                    total_seconds += time_diff_in_seconds(ev.time, session_start)
+
+                    session_start = None
+
+                    last_out = ev.time
+
+                # An OUT with nothing open (double checkout / bad data)
+
+                # is ignored instead of producing a bogus duration.
+ 
+        if session_start is not None:
+
+            status = "CHECKED_IN"
+
+            last_out = None
+
+        elif first_in is not None:
+
+            status = "CHECKED_OUT"
+
+        else:
+
+            status = "NOT_CHECKED_IN"
+ 
+        total_seconds = int(total_seconds)
+
+        hours, remainder = divmod(total_seconds, 3600)
+
+        minutes, seconds = divmod(remainder, 60)
+ 
         result.append({
-            "date": str(current_date),
-            "shift_type": shift_data["shift_type"],
-            "first_in": str(first_time) if first_time else None,
-            "last_out": str(last_time) if last_time else None,
-            "worked_hours": (
-                worked_time["formatted"]
-                if worked_time
-                else None
-            ),
-            "total_seconds": (
-                worked_time["total_seconds"]
-                if worked_time
-                else 0
-            )
-        })
 
+            "date": str(current_date),
+
+            "shift_type": shift_type,
+
+            "status": status,
+
+            "first_in": str(first_in) if first_in else None,
+
+            "last_out": str(last_out) if last_out else None,
+
+            "current_session_first_in": str(session_start) if session_start else None,
+
+            "worked_hours": f"{hours:02d}:{minutes:02d}:{seconds:02d}" if total_seconds else None,
+
+            "total_seconds": total_seconds
+
+        })
+ 
     return {
+
         "employee": employee,
+
         "from_date": str(from_date),
+
         "to_date": str(to_date),
+
         "total_days": total_days,
+
         "data": result
+
     }
+
+ 
+# @frappe.whitelist(allow_guest=False)
+# def get_employee_checkin_summary(
+#     days=None,
+#     from_date=None,
+#     to_date=None
+# ):
+
+#     employee = get_logged_in_employee()
+
+#     from_date, to_date = get_date_range(
+#         days,
+#         from_date,
+#         to_date
+#     )
+
+#     total_days = date_diff(
+#         to_date,
+#         from_date
+#     ) + 1
+
+#     result = []
+
+#     for i in range(total_days):
+
+#         current_date = add_to_date(
+#             from_date,
+#             days=i
+#         )
+
+#         shift_data = get_shift_window(
+#             employee,
+#             current_date
+#         )
+
+#         # No shift
+#         if not shift_data:
+
+#             result.append({
+#                 "date": str(current_date),
+#                 "shift_type": None,
+#                 "first_in": None,
+#                 "last_out": None,
+#                 "worked_hours": None
+#             })
+
+#             continue
+
+#         # First IN
+#         first_in = get_checkin(
+#             employee,
+#             shift_data["from_time"],
+#             shift_data["to_time"],
+#             "IN",
+#             "asc"
+#         )
+
+#         # Last OUT
+#         last_out = get_checkin(
+#             employee,
+#             shift_data["from_time"],
+#             shift_data["to_time"],
+#             "OUT",
+#             "desc"
+#         )
+
+#         first_time = (
+#             first_in.time
+#             if first_in
+#             else None
+#         )
+
+#         last_time = (
+#             last_out.time
+#             if last_out
+#             else None
+#         )
+
+#         worked_time = calculate_worked_time(
+#             first_time,
+#             last_time
+#         )
+
+#         result.append({
+#             "date": str(current_date),
+#             "shift_type": shift_data["shift_type"],
+#             "first_in": str(first_time) if first_time else None,
+#             "last_out": str(last_time) if last_time else None,
+#             "worked_hours": (
+#                 worked_time["formatted"]
+#                 if worked_time
+#                 else None
+#             ),
+#             "total_seconds": (
+#                 worked_time["total_seconds"]
+#                 if worked_time
+#                 else 0
+#             )
+#         })
+
+#     return {
+#         "employee": employee,
+#         "from_date": str(from_date),
+#         "to_date": str(to_date),
+#         "total_days": total_days,
+#         "data": result
+#     }
 from frappe.utils import get_datetime, getdate, now_datetime, add_to_date
 
 
@@ -2808,90 +2947,91 @@ def regularization_date(employee, from_date):
         }
     }
 
+from frappe.model.workflow import apply_workflow
+from frappe.utils import getdate, today
 @frappe.whitelist(allow_guest=False)
 def attendance_request():
 
     method = frappe.request.method
-    if method in ("GET", "DELETE"):
 
+    # GET / DELETE
+    if method in ("GET", "DELETE"):
         return CRUD.handle(
             doctype="Attendance Request"
         )
 
-    # --------------------------------
     # POST = Create + Submit
-    # Draft → Pending Approval
-    # --------------------------------
     if method == "POST":
 
-        payload = CRUD.get_json_payload()
+        data = frappe.form_dict.copy()
+        data.pop("cmd", None)
 
-        data = payload.get(
-            "data",
-            payload
-        )
+        from_date = data.get("from_date")
+        to_date = data.get("to_date")
 
-        if not isinstance(data, dict):
+        # Future date is not allowed
+        if from_date and getdate(from_date) > getdate(today()):
             frappe.throw(
-                "data must be an object",
-                frappe.ValidationError
+                "Attendance Request cannot be created for a future date."
             )
 
-        if not data:
+        if to_date and getdate(to_date) > getdate(today()):
             frappe.throw(
-                "data cannot be empty",
-                frappe.ValidationError
+                "Attendance Request cannot be created for a future date."
             )
 
-        # --------------------------------
-        # Create Attendance Request
-        # --------------------------------
-        result = CRUD.create_document(
-            doctype="Attendance Request",
-            data=data,
-            permission=False
-        )
+        try:
+            doc = frappe.new_doc("Attendance Request")
 
-        # Get created document
-        doc = frappe.get_doc(
-            "Attendance Request",
-            result["data"]["name"]
-        )
-        frappe.log_error( title="WORKFLOW APPROVE DEBUG", message=frappe.as_json({ "name": doc.name, "action_received": action, "workflow_state": doc.workflow_state, "docstatus": doc.docstatus, "session_user": frappe.session.user }) )
+            for fieldname, value in data.items():
+                if doc.meta.has_field(fieldname):
+                    doc.set(fieldname, value)
 
-        # --------------------------------
-        # Submit using Workflow
-        # Draft → Pending Approval
-        # --------------------------------
-        doc = apply_workflow(
-            doc,
-            "Submit"
-        )
+            #Regularization
+            if ( data.get("reason") == "Regularization" and data.get("from_date") ): 
+                doc.to_date = data.get("from_date") 
+                doc.half_day = 0 
+                doc.half_day_date = None
+            
+            # Always use logged-in employee
+            doc.employee = get_logged_in_employee()
 
-        return {
-            "success": True,
-            "message": "Attendance Request submitted successfully",
-            "data": doc.as_dict()
-        }
+            # Draft
+            doc.insert()
+            
 
-    # --------------------------------
+            # Draft → Pending Approval
+            doc = apply_workflow(
+                doc,
+                "Submit"
+            )
+
+            return {
+                "success": True,
+                "message": "Attendance Request submitted successfully",
+                "data": doc.as_dict()
+            }
+
+        except Exception as e:
+            # Let the original Frappe error go to frontend
+            if "Holiday" in str(e):
+                frappe.local.response["http_status_code"] = 417
+
+                return {
+                    "success": False,
+                    "message": "The selected date is a holiday. Please include holidays to continue.",
+                    "status_code":417,
+                    "data": None
+                }
+
+            frappe.throw(str(e))
+
     # PUT / PATCH
-    # --------------------------------
     if method in ("PUT", "PATCH"):
-        payload = CRUD.get_json_payload()
 
-        name = payload.get("name")
-        action = payload.get("action")
+        name = frappe.form_dict.get("name")
+        action = frappe.form_dict.get("action")
 
-        if not name:
-            frappe.throw(
-                "Attendance Request name is required"
-            )
-
-        # --------------------------------
-        # Workflow Action
-        # Approve / Reject / Cancel
-        # --------------------------------
         if action:
 
             doc = frappe.get_doc(
@@ -2910,9 +3050,6 @@ def attendance_request():
                 "data": doc.as_dict()
             }
 
-        # --------------------------------
-        # Normal Update
-        # --------------------------------
         return CRUD.handle(
             doctype="Attendance Request",
             permission=True
@@ -2921,4 +3058,3 @@ def attendance_request():
     frappe.throw(
         f"Method {method} not supported"
     )
-

@@ -30,10 +30,19 @@
   "docstatus": 0,
   "doctype": "Workflow State",
   "icon": "",
-  "modified": "2026-09-02 12:01:57.977085",
-  "name": "Cancelled",
-  "style": "Danger",
-  "workflow_state_name": "Cancelled"
+  "modified": "2026-06-11 15:15:31.629389",
+  "name": "HR Review",
+  "style": "Success",
+  "workflow_state_name": "HR Review"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2026-06-11 14:38:09.572537",
+  "name": "Reporting Manager Review",
+  "style": "Primary",
+  "workflow_state_name": "Reporting Manager Review"
  },
  {
   "docstatus": 0,
@@ -48,19 +57,19 @@
   "docstatus": 0,
   "doctype": "Workflow State",
   "icon": "",
-  "modified": "2026-06-11 15:15:31.629389",
-  "name": "HR Review",
-  "style": "Success",
-  "workflow_state_name": "HR Review"
+  "modified": "2026-09-02 12:01:57.977085",
+  "name": "Cancelled",
+  "style": "Danger",
+  "workflow_state_name": "Cancelled"
  },
  {
   "docstatus": 0,
   "doctype": "Workflow State",
   "icon": "",
-  "modified": "2026-06-11 14:38:09.572537",
-  "name": "Reporting Manager Review",
-  "style": "Primary",
-  "workflow_state_name": "Reporting Manager Review"
+  "modified": "2026-09-15 11:44:36.156725",
+  "name": "Presales Assessment",
+  "style": "",
+  "workflow_state_name": "Presales Assessment"
  },
  {
   "docstatus": 0,

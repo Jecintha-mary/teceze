@@ -112,14 +112,7 @@ frappe.ui.form.on('Employee Permission Request', {
 		valid_apply_permission(frm);
 		duplicate_permission(frm);
 		//Not allow previous date
-		if(has_common(frappe.user_roles, ["System Manager"])){
-        }else{
-			if(frm.doc.permission_on < today_date){
-				frm.doc.permission_on = '';
-				cur_frm.refresh_fields();
-				frappe.throw("You don't have permission to create this document. Please contact admin.")
-			}
-		}
+		
 	},
 	employee: function(frm) {
 		valid_apply_permission(frm);
@@ -142,22 +135,22 @@ frappe.ui.form.on('Employee Permission Request', {
 		//HR should not allow to create employee permission request for other employees
 		if(has_common(frappe.user_roles, ["System Manager"])){
 		}else{
-		if(frappe.user_roles.indexOf("HR Manager") >= 0 && frm.doc.employee_email != frappe.session.user && frappe.session.user != frm.doc.leave_approver){    
-			frm.doc.employee = "";
-			frm.doc.employee_name = "";
-			frm.doc.employee_email = "";
-			frm.doc.leave_approver = "";
-			frm.doc.leave_approver_name = "";
-			frm.doc.department = "";
-			frm.doc.designation = "";   
-			frm.doc.division = "";              
-			frm.doc.permission_on = "";
-			frm.doc.from_time = "";
-			frm.doc.to_time = "";
-			cur_frm.refresh_fields()
-			frappe.msgprint("You don't have permission to create this document. Please contact admin.")  
+		// if(frappe.user_roles.indexOf("HR Manager") >= 0 && frm.doc.employee_email != frappe.session.user && frappe.session.user != frm.doc.leave_approver){    
+		// 	frm.doc.employee = "";
+		// 	frm.doc.employee_name = "";
+		// 	frm.doc.employee_email = "";
+		// 	frm.doc.leave_approver = "";
+		// 	frm.doc.leave_approver_name = "";
+		// 	frm.doc.department = "";
+		// 	frm.doc.designation = "";   
+		// 	frm.doc.division = "";              
+		// 	frm.doc.permission_on = "";
+		// 	frm.doc.from_time = "";
+		// 	frm.doc.to_time = "";
+		// 	cur_frm.refresh_fields()
+		// 	frappe.msgprint("You don't have permission to create this document. Please contact admin.")  
 			
-		}
+		// }
 	}
 	},
 });
@@ -196,22 +189,14 @@ function validate_permission(frm){
 function valid_apply_permission(frm){
 	if(has_common(frappe.user_roles, ["System Manager"])){
 	}else{
-		//Should not allow for previous date	
-		if(frm.doc.employee && frm.doc.permission_on < today_date){	
-				frm.doc.permission_on = "";
-				frm.doc.from_time = "";
-				frm.doc.to_time = "";
-				cur_frm.refresh_fields()
-				frappe.throw("You don't have permission to create this document. Please contact admin.")
-
-		}
+		
 		//Should not allow future date for RM
 		if(frm.doc.employee && frm.doc.employee_email != frappe.session.user && frm.doc.permission_on > today_date){
 				frm.doc.permission_on = "";
 				frm.doc.from_time = "";
 				frm.doc.to_time = "";
 				cur_frm.refresh_fields()
-				frappe.throw("You don't have permission to create this document. Please contact admin.")
+				frappe.throw("You don't have permission to .")
 		}
 		
 	}
