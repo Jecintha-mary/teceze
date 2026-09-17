@@ -1,0 +1,28 @@
+name: Test Production Runner
+
+on:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: [self-hosted, Linux, X64]
+
+    steps:
+      - name: Test production runner
+        run: |
+          echo "GitHub Actions runner is working"
+          echo "Hostname:"
+          hostname
+
+          echo "User:"
+          whoami
+
+          echo "Private IP:"
+          hostname -I
+
+          echo "Frappe Bench:"
+          ls -ld /home/frappe/frappe-bench
+
+          echo "Bench version:"
+          cd /home/frappe/frappe-bench
+          bench version
