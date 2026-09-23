@@ -75,7 +75,8 @@ def validate(doc, method):
         and doc.custom_correct_check_out
         and doc.custom_correct_check_out <= doc.custom_correct_check_in
     ):
-        frappe.throw(_("Correct Check Out must be later than Correct Check In."))def before_save(doc, method):
+        frappe.throw(_("Correct Check Out must be later than Correct Check In."))
+def before_save(doc, method):
 
     if not doc.employee:
         return

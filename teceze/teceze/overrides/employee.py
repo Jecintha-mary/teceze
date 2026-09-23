@@ -145,7 +145,6 @@ def update_shift_and_holiday_assignment(doc):
         holiday_assignment.insert(ignore_permissions=True)
         holiday_assignment.submit()
 def after_insert(doc, method):
-    frappe.log_error("After Insert Triggered", "Employee After Insert")
     create_leave_allocations(doc)
     create_shift_and_holiday_assignment(doc)
 
@@ -578,15 +577,10 @@ def credit_privilege_leave():
     }
 
 
-def annual_leave_allocation():
-    frappe.log_error("Annual Leave Allocation Cron Job Triggered", "Annual Leave Allocation")
 
 def allocate_eligible_leaves():
 
-    frappe.log_error(
-        "Annual Leave Allocation Cron Job Triggered",
-        "Annual Leave Allocation"
-    )
+
 
     current_date = getdate(today())
     expiry_date = current_date - timedelta(days=1)

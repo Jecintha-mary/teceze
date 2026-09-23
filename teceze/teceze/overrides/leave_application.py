@@ -8,8 +8,9 @@ def validate(doc,method):
 
     elif doc.workflow_state == "Rejected":
         doc.status = "Rejected"
+        return
 
-
+    
     # Only validate Restricted Leave
     if doc.leave_type != "Restricted Leave":
         return

@@ -10,7 +10,8 @@
   "employee_series",
   "engineer_prefix",
   "column_break_qrqi",
-  "process_auto_attendance_after"
+  "process_auto_attendance_after",
+  "max_monthly_regularization"
  ],
  "fields": [
   {
@@ -36,13 +37,20 @@
    "fieldname": "process_auto_attendance_after",
    "fieldtype": "Date",
    "label": "Process Auto Attendance After"
+  },
+  {
+   "fieldname": "max_monthly_regularization",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Max Monthly Regularization",
+   "reqd": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-09-09 12:16:07.734534",
+ "modified": "2026-09-22 12:36:56.941487",
  "modified_by": "Administrator",
  "module": "Teceze",
  "name": "Teceze Settings",

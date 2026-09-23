@@ -5,5 +5,5 @@
 from frappe.model.document import Document
 
 
-class HRSPOC(Document):
+class Region(Document):
 	pass

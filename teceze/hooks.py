@@ -62,6 +62,7 @@ doctype_js = {
     "Employee" : ["public/js/employee.js"],
 	"Attendance Request": ["public/js/attendance_request.js"],
     "Leave Application" : ["public/js/leave_application.js"],
+    "Opportunity" : ["public/js/oppurtunity.js"],
 	"Project" : ["public/js/project.js"],
 	"Quotation" : ["public/js/quotation.js"],
 	"Salary Structure Assignment" : ["public/js/salary_structure_assignment.js"],
@@ -88,7 +89,8 @@ doc_events = {
 	},
 	
 	"Attendance Request": {
-        "validate": ["teceze.api.attendance_regularization.validate_regularization_limit"]
+        "validate": ["teceze.api.attendance_regularization.validate_regularization_limit"],
+        "on_submit": ["teceze.api.attendance_regularization.update_attendance_working_hours"]
     },
 
 	"Job Offer":{
@@ -238,7 +240,8 @@ scheduler_events = {
      "cron": {
 		"10 * * * *": [
 			"teceze.teceze.overrides.permission.attendance_for_permission",
-            "teceze.teceze.overrides.employee.annual_leave_allocation"
+            "teceze.teceze.overrides.employee.allocate_eligible_leaves",
+            "teceze.teceze.overrides.attendance.mark_absent_for_rh"
 		]
        
     },
@@ -354,18 +357,18 @@ fixtures = [
 	# },
    	"Custom Field",
    	"Property Setter",
-	"Workflow",
-   	"Workflow Action Master",
-   	"Workflow State",
+	# "Workflow",
+   	# "Workflow Action Master",
+   	# "Workflow State",
    	# "Role",
    	# "Workspace",
-	# "Print Format",
+	"Print Format",
    	"Custom DocPerm",
    	# "Report",
 	# "Number Card",
 	# "Web Form",
 	# "Desktop Icon",
-	"Workspace Sidebar",
+	# "Workspace Sidebar",
 ]
 
 

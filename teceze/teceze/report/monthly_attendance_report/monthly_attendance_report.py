@@ -182,7 +182,9 @@ def get_columns(filters: Filters) -> list[dict]:
 			]
 		)
 	else:
-		columns.append({"label": _("Shift"), "fieldname": "shift", "fieldtype": "Data", "width": 120})
+		# Detailed view is one row per employee.
+		# Shift is intentionally not a column because an employee can have
+		# different Shift Assignments during the selected period.
 		columns.extend(get_columns_for_days(filters))
 
 	return columns
@@ -239,7 +241,7 @@ def get_date_condition(docfield: Field, filters: Filters) -> Criterion:
 def get_data(filters: Filters, attendance_map: dict) -> list[dict]:
 	employee_details, group_by_param_values = get_employee_related_details(filters)
 
-	# flatten grouped structure so get_employee_holiday_map always gets {emp: details}
+	# Flatten grouped structure so holiday/shift calendars always get {emp: details}.
 	if filters.group_by:
 		ungrouped_employee_details = {}
 		for details in employee_details.values():
@@ -248,6 +250,7 @@ def get_data(filters: Filters, attendance_map: dict) -> list[dict]:
 		ungrouped_employee_details = employee_details
 
 	employee_holiday_map = get_employee_holiday_map(ungrouped_employee_details, filters)
+	shift_calendar_map = get_employee_shift_calendar(ungrouped_employee_details, filters)
 	data = []
 
 	if filters.group_by:
@@ -257,14 +260,22 @@ def get_data(filters: Filters, attendance_map: dict) -> list[dict]:
 			if not value:
 				continue
 
-			records = get_rows(employee_details[value], filters, employee_holiday_map, attendance_map)
+			records = get_rows(
+				employee_details[value],
+				filters,
+				employee_holiday_map,
+				shift_calendar_map,
+				attendance_map,
+			)
 
 			if records:
 				data.append({group_by_column: value})
 				data.extend(records)
 
 	else:
-		data = get_rows(employee_details, filters, employee_holiday_map, attendance_map)
+		data = get_rows(
+			employee_details, filters, employee_holiday_map, shift_calendar_map, attendance_map
+		)
 
 	return data
 
@@ -500,16 +511,97 @@ def get_date_range_from_filters(filters: Filters) -> tuple:
 	return getdate(filters.start_date), getdate(filters.end_date)
 
 
+def get_employee_shift_calendar(employee_details: dict, filters: Filters) -> dict:
+	"""
+	Build a date-aware calendar from Shift Assignment + Shift Type.
+
+	Returns:
+	{
+		employee: {
+			date: {
+				"shift_type": "General Day Shift",
+				"holiday_list": "Holiday List A",
+			}
+		}
+	}
+
+	The shift assignment is resolved independently for every date, so a change
+	from Shift A to Shift B in the middle of a month also changes the weekly-off
+	calendar from that date onward.
+	"""
+	if not employee_details:
+		return {}
+
+	start_date, end_date = get_date_range_from_filters(filters)
+	employees = list(employee_details.keys())
+
+	ShiftAssignment = frappe.qb.DocType("Shift Assignment")
+	ShiftType = frappe.qb.DocType("Shift Type")
+
+	assignments = (
+		frappe.qb.from_(ShiftAssignment)
+		.join(ShiftType)
+		.on(ShiftAssignment.shift_type == ShiftType.name)
+		.select(
+			ShiftAssignment.employee,
+			ShiftAssignment.shift_type,
+			ShiftAssignment.start_date,
+			ShiftAssignment.end_date,
+			ShiftType.holiday_list,
+		)
+		.where(
+			(ShiftAssignment.employee.isin(employees))
+			& (ShiftAssignment.docstatus == 1)
+			& (ShiftAssignment.status == "Active")
+			& (ShiftAssignment.start_date <= end_date)
+			& (ShiftAssignment.end_date.isnull() | (ShiftAssignment.end_date >= start_date))
+		)
+		.orderby(ShiftAssignment.employee, ShiftAssignment.start_date)
+	).run(as_dict=True)
+
+	shift_calendar = {}
+	period_dates = [getdate(d) for d in get_dates_in_period(filters)]
+
+	for assignment in assignments:
+		employee = assignment.employee
+		assignment_start = max(getdate(assignment.start_date), start_date)
+		assignment_end = min(getdate(assignment.end_date), end_date) if assignment.end_date else end_date
+
+		if assignment_start > assignment_end:
+			continue
+
+		# Iterate only over dates in the selected report period.
+		for d in period_dates:
+			if assignment_start <= d <= assignment_end:
+				# If overlapping assignments are allowed, the later assignment wins.
+				shift_calendar.setdefault(employee, {})[d] = {
+					"shift_type": assignment.shift_type,
+					"holiday_list": assignment.holiday_list,
+				}
+
+	return shift_calendar
+
+
 def get_rows(
-	employee_details: dict, filters: Filters, employee_holiday_map: dict, attendance_map: dict
+	employee_details: dict,
+	filters: Filters,
+	employee_holiday_map: dict,
+	shift_calendar_map: dict,
+	attendance_map: dict,
 ) -> list[dict]:
 	records = []
 	for employee, details in employee_details.items():
 		holidays = employee_holiday_map.get(employee, [])
+		shift_calendar = shift_calendar_map.get(employee, {})
 
 		if filters.summarized_view:
 			attendance = get_attendance_status_for_summarized_view(
-				employee, filters, holidays, details.joined_in_current_period, details.joined_date
+				employee,
+				filters,
+				holidays,
+				details.joined_in_current_period,
+				details.joined_date,
+				shift_calendar,
 			)
 			if not attendance:
 				continue
@@ -529,10 +621,11 @@ def get_rows(
 			if not employee_attendance:
 				continue
 
+			# Detailed view is deliberately one row per employee, not one row per shift.
 			attendance_for_employee = get_attendance_status_for_detailed_view(
-				employee, filters, employee_attendance, holidays
+				employee, filters, employee_attendance, holidays, shift_calendar
 			)
-			# set employee details in the first row
+
 			for record in attendance_for_employee:
 				record.update({"employee": employee, "employee_name": details.employee_name})
 
@@ -548,11 +641,14 @@ def set_defaults_for_summarized_view(filters, row):
 
 
 def get_attendance_status_for_summarized_view(
-	employee: str, filters: Filters, holidays: list, joined_in_current_period: int, joined_date: int
+	employee: str,
+	filters: Filters,
+	holidays: list,
+	joined_in_current_period: int,
+	joined_date: int,
+	shift_calendar: dict,
 ) -> dict:
-	"""Returns dict of attendance status for employee like
-	{'total_present': 1.5, 'total_leaves': 0.5, 'total_absent': 13.5, 'total_holidays': 8, 'unmarked_days': 5}
-	"""
+	"""Returns summarized attendance, using the applicable shift's holiday list per date."""
 	summary, attendance_days = get_attendance_summary_and_days(employee, filters)
 	if not any(summary.values()):
 		return {}
@@ -565,7 +661,7 @@ def get_attendance_status_for_summarized_view(
 		if d.day in attendance_days or (joined_in_current_period and d < joined_date):
 			continue
 
-		status = get_holiday_status(d, holidays)
+		status = get_holiday_status_for_date(d, holidays, shift_calendar.get(d))
 		if status in ["Weekly Off", "Holiday"]:
 			total_holidays += 1
 		elif not status:
@@ -633,37 +729,114 @@ def get_attendance_summary_and_days(employee: str, filters: Filters) -> tuple[di
 
 
 def get_attendance_status_for_detailed_view(
-	employee: str, filters: Filters, employee_attendance: dict, holidays: list
+	employee: str,
+	filters: Filters,
+	employee_attendance: dict,
+	holidays: list,
+	shift_calendar: dict,
 ) -> list[dict]:
-	"""Returns list of shift-wise attendance status for employee
-	[
-	        {'shift': 'Morning Shift', 1: 'A', 2: 'P', 3: 'A'....},
-	        {'shift': 'Evening Shift', 1: 'P', 2: 'A', 3: 'P'....}
-	]
+	"""
+	Returns exactly one row per employee for the selected period.
+
+	Attendance takes priority over holiday/weekly-off status. When there is no
+	Attendance record for a date, the report resolves the employee's active
+	Shift Assignment for that exact date and uses that Shift Type's Holiday List.
 	"""
 	total_days = get_dates_in_period(filters)
-	attendance_values = []
+	row = {}
+
+	for d in total_days:
+		d = getdate(d)
+
+		# 1. Resolve Attendance for this employee + exact date.
+		status = get_attendance_status_for_date(employee_attendance, d, shift_calendar.get(d))
+
+		# 2. If no Attendance exists, resolve the holiday/weekly-off calendar
+		#    for this employee + exact date.
+		if status is None:
+			status = get_holiday_status_for_date(d, holidays, shift_calendar.get(d))
+
+		abbr = status_map.get(status, "")
+		row[d.strftime("%d-%m-%Y")] = abbr
+
+	return [row]
+
+
+def get_attendance_status_for_date(
+	employee_attendance: dict, attendance_date: date, shift_info: dict | None
+) -> str | None:
+	"""
+	Resolve Attendance for one employee/date.
+
+	If the date has an assigned shift, prefer Attendance belonging to that shift.
+	If no matching shift record exists, use a non-empty-shift record, and finally
+	fall back to a blank-shift record. This prevents a blank-shift record from
+	overriding the Attendance generated for the actual scheduled shift.
+	"""
+	preferred_shift = (shift_info or {}).get("shift_type")
+	preferred_status = None
+	named_status = None
+	blank_status = None
 
 	for shift, status_dict in employee_attendance.items():
-		row = {"shift": shift}
-		"""{
-	            'Morning Shift': {1: 'Present', 2: 'Absent', ...}
-	            'Evening Shift': {1: 'Absent', 2: 'Present', ...}
-	    },"""
-		for d in total_days:
-			d = getdate(d)
+		if attendance_date not in status_dict:
+			continue
 
-			status = status_dict.get(d)
+		status = status_dict.get(attendance_date)
+		if preferred_shift and shift == preferred_shift:
+			preferred_status = status
+		elif shift:
+			named_status = status
+		else:
+			blank_status = status
 
-			if status is None and holidays:
-				status = get_holiday_status(d, holidays)
+	if preferred_status is not None:
+		return preferred_status
+	if named_status is not None:
+		return named_status
+	return blank_status
 
-			abbr = status_map.get(status, "")
-			row[d.strftime("%d-%m-%Y")] = abbr
 
-		attendance_values.append(row)
+def get_holiday_status_for_date(
+	holiday_date: date, employee_holidays: list, shift_info: dict | None
+) -> str | None:
+	"""
+	Return Holiday/Weekly Off for this employee and this exact date.
 
-	return attendance_values
+	Priority:
+	1. Holiday List configured on the Shift Type assigned on this date.
+	2. Employee/company Holiday List map already built by the report.
+	"""
+	shift_holiday_list = (shift_info or {}).get("holiday_list")
+
+	if shift_holiday_list:
+		# A Shift Type holiday list is authoritative for dates covered by that
+		# Shift Assignment. If this exact date is not in that list, it is a
+		# normal working day; do NOT fall back to the employee/company list,
+		# otherwise Saturday/Sunday from the old shift could leak into the
+		# new shift period.
+		return get_holiday_status_from_list(holiday_date, shift_holiday_list)
+
+	return get_holiday_status(holiday_date, employee_holidays)
+
+
+def get_holiday_status_from_list(holiday_date: date, holiday_list: str) -> str | None:
+	"""Look up one exact date in one Holiday List."""
+	Holiday = frappe.qb.DocType("Holiday")
+	holiday = (
+		frappe.qb.from_(Holiday)
+		.select(Holiday.holiday_date, Holiday.weekly_off)
+		.where(
+			(Holiday.parent == holiday_list)
+			& (Holiday.holiday_date == holiday_date)
+		)
+		.limit(1)
+	).run(as_dict=True)
+
+	if not holiday:
+		return None
+
+	return "Weekly Off" if holiday[0].weekly_off else "Holiday"
 
 
 def get_holiday_status(holiday_date: date, holidays: list) -> str:
@@ -753,47 +926,52 @@ def get_attendance_years() -> str:
 
 	return "\n".join(cstr(entry.year) for entry in year_list)
 
-
 def get_chart_data(attendance_map: dict, filters: Filters) -> dict:
-	days = get_columns_for_days(filters)
-	labels = []
-	absent = []
-	present = []
-	leave = []
+    days = get_columns_for_days(filters)
+    labels = []
+    absent = []
+    present = []
+    leave = []
 
-	for day in days:
-		labels.append(day["label"])
-		total_absent_on_day = total_leaves_on_day = total_present_on_day = 0
+    for day in days:
+        date_value = getdate(day["fieldname"], parse_day_first=True)
 
-		for __, attendance_dict in attendance_map.items():
-			for __, attendance in attendance_dict.items():
-				attendance_on_day = attendance.get(getdate(day["fieldname"], parse_day_first=True))
+        # Chart should show only the day number.
+        # Example: 1, 2, 3, ... 30
+        labels.append(str(date_value.day))
 
-				if attendance_on_day == "On Leave":
-					# leave should be counted only once for the entire day
-					total_leaves_on_day += 1
-					break
-				elif attendance_on_day == "Absent":
-					total_absent_on_day += 1
-				elif attendance_on_day in ["Present", "Work From Home"]:
-					total_present_on_day += 1
-				elif attendance_on_day == "Half Day":
-					total_present_on_day += 0.5
-					total_leaves_on_day += 0.5
+        total_absent_on_day = total_leaves_on_day = total_present_on_day = 0
 
-		absent.append(total_absent_on_day)
-		present.append(total_present_on_day)
-		leave.append(total_leaves_on_day)
+        for __, attendance_dict in attendance_map.items():
+            for __, attendance in attendance_dict.items():
+                attendance_on_day = attendance.get(date_value)
 
-	return {
-		"data": {
-			"labels": labels,
-			"datasets": [
-				{"name": _("Absent"), "values": absent},
-				{"name": _("Present"), "values": present},
-				{"name": _("Leave"), "values": leave},
-			],
-		},
-		"type": "line",
-		"colors": ["red", "green", "blue"],
-	}
+                if attendance_on_day == "On Leave":
+                    total_leaves_on_day += 1
+                    break
+                elif attendance_on_day == "Absent":
+                    total_absent_on_day += 1
+                elif attendance_on_day in ["Present", "Work From Home"]:
+                    total_present_on_day += 1
+                elif attendance_on_day == "Half Day":
+                    total_present_on_day += 0.5
+                    total_leaves_on_day += 0.5
+
+        absent.append(total_absent_on_day)
+        present.append(total_present_on_day)
+        leave.append(total_leaves_on_day)
+
+    return {
+        "data": {
+            "labels": labels,
+            "datasets": [
+                {"name": _("Absent"), "values": absent},
+                {"name": _("Present"), "values": present},
+                {"name": _("Leave"), "values": leave},
+            ],
+        },
+        "type": "line",
+        "colors": ["red", "green", "blue"],
+    }
+
+

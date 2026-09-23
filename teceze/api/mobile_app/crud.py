@@ -2820,19 +2820,23 @@ def update_user_password(pwd):
         "success": True,
         "message": "Password updated successfully"
     }
-
 @frappe.whitelist(allow_guest=False)
 def Leave_cancellation(name, comment):
+
     # 1. Authentication
     CRUD.check_authentication()
+
     # 2. Name validation
     if not name or not name.strip():
         frappe.throw("Leave Application name is required")
+
     # 3. Comment validation
     if not comment or not comment.strip():
         frappe.throw("Comment is required")
+
     # 4. Logged-in employee
     employee = get_logged_in_employee()
+
     # 5. Get Leave Application
     leave_application = frappe.db.get_value(
         "Leave Application",
@@ -2840,36 +2844,58 @@ def Leave_cancellation(name, comment):
         ["employee", "leave_approver"],
         as_dict=True
     )
+
     # 6. Leave Application exists
     if not leave_application:
         frappe.throw("Leave Application not found")
+
     # 7. Ownership validation
     if leave_application.employee != employee:
         frappe.throw(
             "You are not allowed to access this Leave Application"
         )
+
     # 8. Approver validation
     approver = leave_application.leave_approver
+
     if not approver:
         frappe.throw("Leave Approver not found")
+
     # 9. Approver User validation
     approver_name = frappe.db.get_value(
         "User",
         approver,
         "full_name"
     )
+
     if not approver_name:
         frappe.throw("Leave Approver user not found")
-    # 10. Get document
-    doc = frappe.get_doc("Leave Application", name)
-    # 11. Add comment
-    doc.add_comment(
-        "Comment",
-        f"@{approver_name} {comment.strip()}"
+
+    # 10. Get Employee Name
+    employee_name = frappe.db.get_value(
+        "Employee",
+        employee,
+        "employee_name"
     )
+
+    if not employee_name:
+        frappe.throw("Employee name not found")
+
+    # 11. Get document
+    doc = frappe.get_doc("Leave Application", name)
+
+    # 12. Add cancellation comment
+    message = (
+        f"@{approver_name} "
+        f"{employee_name} has requested you to cancel the Leave Application, "
+        f"due to {comment.strip()}."
+    )
+
+    doc.add_comment("Comment", message)
+
     return {
         "success": True,
-        "message": "Comment added successfully"
+        "message": "Cancellation request sent successfully"
     }
 @frappe.whitelist(allow_guest=False)
 def attendance_request_fields():
@@ -3058,3 +3084,88 @@ def attendance_request():
     frappe.throw(
         f"Method {method} not supported"
     )
+
+@frappe.whitelist(allow_guest=False)
+def attendance_request_cancellation(name, comment):
+
+    # 1. Name validation
+    if not name or not name.strip():
+        frappe.throw("Attendance request name is required")
+
+    # 2. Comment validation
+    if not comment or not comment.strip():
+        frappe.throw("Comment is required")
+
+    # 3. Logged-in employee
+    employee = get_logged_in_employee()
+
+    # 4. Get Attendance Request
+    attendance_request = frappe.db.get_value(
+        "Attendance Request",
+        name,
+        ["employee"],
+        as_dict=True
+    )
+
+    # 5. Attendance Request exists
+    if not attendance_request:
+        frappe.throw("Attendance Request not found")
+
+    # 6. Ownership validation
+    if attendance_request.employee != employee:
+        frappe.throw(
+            "You are not allowed to access this Attendance Request"
+        )
+
+    # 7. Get Reporting Manager from Employee
+    reporting_manager = frappe.db.get_value(
+        "Employee",
+        employee,
+        "reports_to"
+    )
+
+    if not reporting_manager:
+        frappe.throw("Reporting Manager not found")
+
+    # 8. Get Reporting Manager's User
+    reporting_manager_user = frappe.db.get_value(
+        "Employee",
+        reporting_manager,
+        "user_id"
+    )
+
+    if not reporting_manager_user:
+        frappe.throw("Reporting Manager user not found")
+
+    # 9. Get Reporting Manager's full name from User
+    reporting_manager_name = frappe.db.get_value(
+        "User",
+        reporting_manager_user,
+        "full_name"
+    )
+
+    if not reporting_manager_name:
+        frappe.throw("Reporting Manager user not found")
+
+    employee_name = frappe.db.get_value(
+    "Employee",
+    employee,
+    "employee_name"
+    )
+
+    # 10. Get Attendance Request document
+    doc = frappe.get_doc("Attendance Request", name)
+
+    # 11. Add cancellation comment
+    message = (
+    f"@{reporting_manager_name} "
+    f"{employee_name} has requested you to cancel the Attendance Request, "
+    f"due to {comment.strip()}."
+)
+    doc.add_comment("Comment", message)
+
+
+    return {
+    "success": True,
+    "message": "Cancellation request sent successfully"
+}
