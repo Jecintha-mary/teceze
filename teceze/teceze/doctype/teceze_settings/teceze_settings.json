@@ -11,7 +11,9 @@
   "engineer_prefix",
   "column_break_qrqi",
   "process_auto_attendance_after",
-  "max_monthly_regularization"
+  "max_monthly_regularization",
+  "shift",
+  "payslip"
  ],
  "fields": [
   {
@@ -44,13 +46,25 @@
    "in_list_view": 1,
    "label": "Max Monthly Regularization",
    "reqd": 1
+  },
+  {
+   "fieldname": "shift",
+   "fieldtype": "Table MultiSelect",
+   "label": "Shift",
+   "options": "Shift Items"
+  },
+  {
+   "fieldname": "payslip",
+   "fieldtype": "Link",
+   "label": "Payslip Letter Head",
+   "options": "Letter Head"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-09-22 12:36:56.941487",
+ "modified": "2026-09-24 11:49:33.031123",
  "modified_by": "Administrator",
  "module": "Teceze",
  "name": "Teceze Settings",

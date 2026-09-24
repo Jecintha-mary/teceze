@@ -67,6 +67,7 @@ doctype_js = {
 	"Quotation" : ["public/js/quotation.js"],
 	"Salary Structure Assignment" : ["public/js/salary_structure_assignment.js"],
 	"Timesheet" : ["public/js/timesheet.js"],
+    "Lead" : ["public/js/lead.js"],
 
 }
 doctype_list_js = {
@@ -242,7 +243,10 @@ scheduler_events = {
 			"teceze.teceze.overrides.permission.attendance_for_permission",
             "teceze.teceze.overrides.employee.allocate_eligible_leaves",
             "teceze.teceze.overrides.attendance.mark_absent_for_rh"
-		]
+		],
+           "0 1 * * *": [
+            "teceze.teceze.overrides.attendance.update_last_sync_of_checkin"
+        ]
        
     },
 	"hourly": [
@@ -343,10 +347,10 @@ scheduler_events = {
 # ignore_translatable_strings_from = []
 
 fixtures = [
-	{
-	"doctype": "Notification",
-	"filters": [{"is_standard":0}]
-	},
+	# {
+	# "doctype": "Notification",
+	# "filters": [{"is_standard":0}]
+	# },
 	# {
 	# "doctype": "Dashboard",
 	# "filters": [{"is_standard":0}]
@@ -363,10 +367,11 @@ fixtures = [
    	# "Role",
    	# "Workspace",
 	"Print Format",
-   	"Custom DocPerm",
+   	# "Custom DocPerm",
    	# "Report",
 	# "Number Card",
 	# "Web Form",
+    "Web Page",
 	# "Desktop Icon",
 	# "Workspace Sidebar",
 ]

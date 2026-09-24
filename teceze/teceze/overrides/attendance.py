@@ -108,3 +108,23 @@ def mark_absent_for_rh():
         )
 
     frappe.db.commit()
+
+
+def update_last_sync_of_checkin():
+    settings = frappe.get_single("Teceze Settings")
+
+    if not settings.shift:
+        return
+
+    sync_datetime = f"{today()} 01:00:00"
+    frappe.log_error("settings.shift",str(settings.shift))
+    for row in settings.shift:
+        shift_type = row.shift
+
+        if shift_type and frappe.db.exists("Shift Type", shift_type):
+            frappe.db.set_value(
+                "Shift Type",
+                shift_type,
+                "last_sync_of_checkin",
+                sync_datetime
+            )
