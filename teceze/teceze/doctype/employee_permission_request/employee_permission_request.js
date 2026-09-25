@@ -95,7 +95,36 @@ frappe.ui.form.on('Employee Permission Request', {
 	    if (validate_permission(frm) === false){
 	        frappe.validated = false;
 	    }
+		        // Only show confirmation for a new Leave Application
+        if (frm.is_new() && !frm._create_confirmed) {
+
+            // Stop the current save
+            frappe.validated = false;
+
+            frappe.confirm(
+                __("Are you sure you want to create this Employee Permission Request?"),
+
+                // Yes
+                () => {
+                    frm._create_confirmed = true;
+                    frm.save();
+                },
+
+                // No
+                () => {
+                    frm._create_confirmed = false;
+                }
+            );
+        }
+
+
+		
+
 	},
+	after_save(frm) {
+        // Reset for future saves
+        frm._create_confirmed = false;
+    },
 	from_time: function(frm){
 		valid_permission(frm);
 		valid_apply_permission(frm);

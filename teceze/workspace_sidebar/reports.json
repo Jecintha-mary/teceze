@@ -1,6 +1,6 @@
 {
  "app": "teceze",
- "creation": "2026-08-13 16:05:04.028408",
+ "creation": "2026-09-17 15:59:38.355082",
  "docstatus": 0,
  "doctype": "Workspace Sidebar",
  "idx": 0,
@@ -66,6 +66,17 @@
   {
    "child": 1,
    "collapsible": 1,
+   "indent": 0,
+   "keep_closed": 0,
+   "label": "Attendance Tracking",
+   "link_to": "Employee Attendance Overveiw",
+   "link_type": "Report",
+   "show_arrow": 0,
+   "type": "Link"
+  },
+  {
+   "child": 1,
+   "collapsible": 1,
    "icon": "",
    "indent": 0,
    "keep_closed": 0,
@@ -120,7 +131,7 @@
    "type": "Link"
   }
  ],
- "modified": "2026-08-14 11:45:06.291933",
+ "modified": "2026-09-25 12:18:15.003597",
  "modified_by": "Administrator",
  "module": "Teceze",
  "name": "Reports",

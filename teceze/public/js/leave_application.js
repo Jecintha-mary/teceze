@@ -2,6 +2,36 @@ var RM = "";
 var user = '';
 var today_date = frappe.datetime.get_today()
 frappe.ui.form.on('Leave Application', {
+    validate: function(frm){
+        // Only show confirmation for a new Leave Application
+        if (frm.is_new() && !frm._create_confirmed) {
+
+            // Stop the current save
+            frappe.validated = false;
+
+            frappe.confirm(
+                __("Are you sure you want to create this Leave Application?"),
+
+                // Yes
+                () => {
+                    frm._create_confirmed = true;
+                    frm.save();
+                },
+
+                // No
+                () => {
+                    frm._create_confirmed = false;
+                }
+            );
+        }
+    },
+
+    after_save(frm) {
+        // Reset for future saves
+        frm._create_confirmed = false;
+    },
+
+    
 	refresh: function(frm) {
         //Status should be Open if new data
 		if(frm.is_new()){
@@ -31,8 +61,8 @@ frappe.ui.form.on('Leave Application', {
 		if(has_common(frappe.user_roles, ["System Manager","HR Manager"])){
 		}else{
 			if(frm.doc.employee_email == frappe.session.user || (frappe.user_roles.indexOf("HR User") > 0 && frm.doc.leave_approver!= frappe.session.user)){
-				frm.page.clear_primary_action()
-				frm.page.clear_secondary_action()
+				// frm.page.clear_primary_action()
+				// frm.page.clear_secondary_action()
 			}
 		}
 

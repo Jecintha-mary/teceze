@@ -1,5 +1,52 @@
 [
  {
+  "app": null,
+  "docstatus": 0,
+  "doctype": "Workspace Sidebar",
+  "for_user": null,
+  "header_icon": null,
+  "items": [
+   {
+    "child": 0,
+    "collapsible": 1,
+    "filters": null,
+    "icon": null,
+    "indent": 0,
+    "keep_closed": 0,
+    "label": "Home",
+    "link_to": "check-2",
+    "link_type": "Workspace",
+    "navigate_to_tab": null,
+    "route_options": null,
+    "show_arrow": 0,
+    "type": "Link",
+    "url": null
+   },
+   {
+    "child": 0,
+    "collapsible": 1,
+    "filters": null,
+    "icon": null,
+    "indent": 0,
+    "keep_closed": 0,
+    "label": "Employee",
+    "link_to": "Employee",
+    "link_type": "DocType",
+    "navigate_to_tab": null,
+    "route_options": null,
+    "show_arrow": 0,
+    "type": "Link",
+    "url": null
+   }
+  ],
+  "modified": "2026-09-15 14:34:00.829462",
+  "module": null,
+  "module_onboarding": null,
+  "name": "check-2",
+  "standard": 0,
+  "title": "check-2"
+ },
+ {
   "app": "erpnext",
   "docstatus": 0,
   "doctype": "Workspace Sidebar",
@@ -13351,6 +13398,22 @@
     "child": 1,
     "collapsible": 1,
     "filters": null,
+    "icon": null,
+    "indent": 0,
+    "keep_closed": 0,
+    "label": "Attendance Tracking",
+    "link_to": "Employee Attendance Overveiw",
+    "link_type": "Report",
+    "navigate_to_tab": null,
+    "route_options": null,
+    "show_arrow": 0,
+    "type": "Link",
+    "url": null
+   },
+   {
+    "child": 1,
+    "collapsible": 1,
+    "filters": null,
     "icon": "",
     "indent": 0,
     "keep_closed": 0,
@@ -13428,7 +13491,7 @@
     "url": null
    }
   ],
-  "modified": "2026-08-14 11:45:06.291933",
+  "modified": "2026-09-25 12:18:15.003597",
   "module": "Teceze",
   "module_onboarding": null,
   "name": "Reports",

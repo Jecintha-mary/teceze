@@ -9,6 +9,8 @@
   "employee_prefix",
   "employee_series",
   "engineer_prefix",
+  "work_anniversary",
+  "birthday",
   "column_break_qrqi",
   "process_auto_attendance_after",
   "max_monthly_regularization",
@@ -58,13 +60,25 @@
    "fieldtype": "Link",
    "label": "Payslip Letter Head",
    "options": "Letter Head"
+  },
+  {
+   "default": "0",
+   "fieldname": "work_anniversary",
+   "fieldtype": "Check",
+   "label": " Work Anniversaries"
+  },
+  {
+   "default": "0",
+   "fieldname": "birthday",
+   "fieldtype": "Check",
+   "label": "Birthdays"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-09-24 11:49:33.031123",
+ "modified": "2026-09-25 14:43:20.239747",
  "modified_by": "Administrator",
  "module": "Teceze",
  "name": "Teceze Settings",

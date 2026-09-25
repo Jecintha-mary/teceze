@@ -68,6 +68,7 @@ doctype_js = {
 	"Salary Structure Assignment" : ["public/js/salary_structure_assignment.js"],
 	"Timesheet" : ["public/js/timesheet.js"],
     "Lead" : ["public/js/lead.js"],
+    "Compensatory Leave Request" : ["public/js/compensatory_leave_request.js"],
 
 }
 doctype_list_js = {
@@ -242,7 +243,10 @@ scheduler_events = {
 		"10 * * * *": [
 			"teceze.teceze.overrides.permission.attendance_for_permission",
             "teceze.teceze.overrides.employee.allocate_eligible_leaves",
-            "teceze.teceze.overrides.attendance.mark_absent_for_rh"
+            "teceze.teceze.overrides.attendance.mark_absent_for_rh",
+            "teceze.teceze.overrides.reminder.birthday_reminder.send_birthday_wishes",
+            "teceze.teceze.overrides.reminder.work_anniversary_reminder.send_work_anniversary_wishes"
+            
 		],
            "0 1 * * *": [
             "teceze.teceze.overrides.attendance.update_last_sync_of_checkin"
@@ -361,19 +365,19 @@ fixtures = [
 	# },
    	"Custom Field",
    	"Property Setter",
-	# "Workflow",
-   	# "Workflow Action Master",
-   	# "Workflow State",
+	"Workflow",
+   	"Workflow Action Master",
+   	"Workflow State",
    	# "Role",
-   	# "Workspace",
-	"Print Format",
+   	"Workspace",
+	# "Print Format",
    	# "Custom DocPerm",
-   	# "Report",
+   	"Report",
 	# "Number Card",
 	# "Web Form",
-    "Web Page",
+    # "Web Page",
 	# "Desktop Icon",
-	# "Workspace Sidebar",
+	"Workspace Sidebar",
 ]
 
 

@@ -21,15 +21,6 @@
   "docstatus": 0,
   "doctype": "Workflow State",
   "icon": "",
-  "modified": "2026-06-11 14:37:59.665242",
-  "name": "Completed",
-  "style": "Success",
-  "workflow_state_name": "Completed"
- },
- {
-  "docstatus": 0,
-  "doctype": "Workflow State",
-  "icon": "",
   "modified": "2026-06-11 15:15:31.629389",
   "name": "HR Review",
   "style": "Success",
@@ -43,6 +34,24 @@
   "name": "Reporting Manager Review",
   "style": "Primary",
   "workflow_state_name": "Reporting Manager Review"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2026-09-22 14:39:15.196554",
+  "name": "Presales Assessment",
+  "style": "Primary",
+  "workflow_state_name": "Presales Assessment"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2026-06-11 14:37:59.665242",
+  "name": "Completed",
+  "style": "Success",
+  "workflow_state_name": "Completed"
  },
  {
   "docstatus": 0,
@@ -66,10 +75,10 @@
   "docstatus": 0,
   "doctype": "Workflow State",
   "icon": "",
-  "modified": "2026-09-15 11:44:36.156725",
-  "name": "Presales Assessment",
-  "style": "",
-  "workflow_state_name": "Presales Assessment"
+  "modified": "2026-06-11 14:37:52.402882",
+  "name": "Draft",
+  "style": "Danger",
+  "workflow_state_name": "Draft"
  },
  {
   "docstatus": 0,
@@ -79,15 +88,6 @@
   "name": "Approved",
   "style": "Success",
   "workflow_state_name": "Approved"
- },
- {
-  "docstatus": 0,
-  "doctype": "Workflow State",
-  "icon": "",
-  "modified": "2026-06-11 14:37:52.402882",
-  "name": "Draft",
-  "style": "Danger",
-  "workflow_state_name": "Draft"
  },
  {
   "docstatus": 0,
