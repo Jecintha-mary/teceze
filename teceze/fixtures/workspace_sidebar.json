@@ -13414,6 +13414,22 @@
     "child": 1,
     "collapsible": 1,
     "filters": null,
+    "icon": null,
+    "indent": 0,
+    "keep_closed": 0,
+    "label": "Employee Attendance Tracker",
+    "link_to": "Employee Attendance Tracker",
+    "link_type": "Report",
+    "navigate_to_tab": null,
+    "route_options": null,
+    "show_arrow": 0,
+    "type": "Link",
+    "url": null
+   },
+   {
+    "child": 1,
+    "collapsible": 1,
+    "filters": null,
     "icon": "",
     "indent": 0,
     "keep_closed": 0,
@@ -13491,7 +13507,7 @@
     "url": null
    }
   ],
-  "modified": "2026-09-25 12:18:15.003597",
+  "modified": "2026-09-28 16:41:38.862319",
   "module": "Teceze",
   "module_onboarding": null,
   "name": "Reports",
@@ -16651,5 +16667,68 @@
   "name": "SDC",
   "standard": 0,
   "title": "SDC"
+ },
+ {
+  "app": "",
+  "docstatus": 0,
+  "doctype": "Workspace Sidebar",
+  "for_user": null,
+  "header_icon": null,
+  "items": [
+   {
+    "child": 0,
+    "collapsible": 1,
+    "filters": null,
+    "icon": "list",
+    "indent": 0,
+    "keep_closed": 0,
+    "label": "Sales Target",
+    "link_to": "Sales Target Assignment",
+    "link_type": "DocType",
+    "navigate_to_tab": null,
+    "route_options": null,
+    "show_arrow": 0,
+    "type": "Link",
+    "url": null
+   },
+   {
+    "child": 0,
+    "collapsible": 1,
+    "filters": null,
+    "icon": "list",
+    "indent": 0,
+    "keep_closed": 0,
+    "label": "Lead",
+    "link_to": "Lead",
+    "link_type": "DocType",
+    "navigate_to_tab": null,
+    "route_options": null,
+    "show_arrow": 0,
+    "type": "Link",
+    "url": null
+   },
+   {
+    "child": 0,
+    "collapsible": 1,
+    "filters": null,
+    "icon": "list",
+    "indent": 0,
+    "keep_closed": 0,
+    "label": "Opportunity",
+    "link_to": "Opportunity",
+    "link_type": "DocType",
+    "navigate_to_tab": null,
+    "route_options": null,
+    "show_arrow": 0,
+    "type": "Link",
+    "url": null
+   }
+  ],
+  "modified": "2026-09-28 14:03:12.686856",
+  "module": "CRM",
+  "module_onboarding": null,
+  "name": "Feature CRM",
+  "standard": 0,
+  "title": "Feature CRM"
  }
 ]

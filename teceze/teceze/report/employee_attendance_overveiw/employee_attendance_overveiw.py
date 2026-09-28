@@ -1,8 +1,6 @@
 import frappe
 from frappe import _
 from frappe.utils import add_days, date_diff, getdate, nowdate
-
-
 def execute(filters=None):
     """Employee Attendance Overview Report."""
     if not filters:
@@ -105,6 +103,9 @@ def get_employees(filters):
 
     if filters.get("country"):
         conditions["custom_country"] = filters.get("country")
+    # Add Location filter support
+    if filters.get("location"):
+        conditions["custom_work_location"] = filters.get("location")
 
     if filters.get("employment_type"):
         conditions["employment_type"] = filters.get("employment_type")
@@ -273,7 +274,7 @@ def get_columns():
             "label": _("Employee Name"),
             "fieldname": "employee_name",
             "fieldtype": "Data",
-            "width": 170,
+            "width": 180,
         },
         {
             "label": _("Department"),
@@ -294,25 +295,25 @@ def get_columns():
             "fieldname": "shift",
             "fieldtype": "Link",
             "options": "Shift Type",
-            "width": 120,
+            "width": 170,
         },
         {
 			"label": _("Date"),
 			"fieldname": "date",
 			"fieldtype": "Date",
-			"width": 105,
+			"width": 130,
 		},
         {
             "label": _("Check In"),
             "fieldname": "check_in",
             "fieldtype": "Data",
-            "width": 100,
+            "width": 240,
         },
         {
             "label": _("Check Out"),
             "fieldname": "check_out",
             "fieldtype": "Data",
-            "width": 100,
+            "width": 240,
         },
         {
             "label": _("W.Hrs"),
@@ -336,12 +337,12 @@ def get_columns():
             "label": _("Att.Status"),
             "fieldname": "attendance_status",
             "fieldtype": "Data",
-            "width": 120,
+            "width": 140,
         },
         {
             "label": _("Request / Leave"),
             "fieldname": "request_details",
             "fieldtype": "Data",
-            "width": 240,
+            "width": 300,
         },
     ]

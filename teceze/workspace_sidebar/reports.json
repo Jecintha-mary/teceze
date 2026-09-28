@@ -77,6 +77,17 @@
   {
    "child": 1,
    "collapsible": 1,
+   "indent": 0,
+   "keep_closed": 0,
+   "label": "Employee Attendance Tracker",
+   "link_to": "Employee Attendance Tracker",
+   "link_type": "Report",
+   "show_arrow": 0,
+   "type": "Link"
+  },
+  {
+   "child": 1,
+   "collapsible": 1,
    "icon": "",
    "indent": 0,
    "keep_closed": 0,
@@ -131,7 +142,7 @@
    "type": "Link"
   }
  ],
- "modified": "2026-09-25 12:18:15.003597",
+ "modified": "2026-09-28 16:41:38.862319",
  "modified_by": "Administrator",
  "module": "Teceze",
  "name": "Reports",

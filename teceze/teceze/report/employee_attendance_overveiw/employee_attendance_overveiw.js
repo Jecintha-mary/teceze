@@ -1,6 +1,3 @@
-// Copyright (c) 2026, Teceze Consultancy Pvt. Ltd. and contributors
-// For license information, please see license.txt
-
 frappe.query_reports["Employee Attendance Overveiw"] = {
     filters: [
         {
@@ -16,6 +13,12 @@ frappe.query_reports["Employee Attendance Overveiw"] = {
             fieldtype: "Date",
             default: frappe.datetime.get_today(),
             reqd: 1,
+        },
+        {
+            fieldname: "location",
+            label: __("Location"),
+            fieldtype: "Link",
+            options: "Location",
         },
         {
             fieldname: "country",
