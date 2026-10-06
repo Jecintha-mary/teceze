@@ -8,7 +8,6 @@ from frappe.utils import (
     date_diff
 )
 from teceze.api.attendance_regularization import get_existing_checkins
-
 class CRUD:
 
     MAX_PAGE_SIZE = 100
@@ -1571,12 +1570,9 @@ class CRUD:
 
 from frappe.utils import add_days, getdate
 
-
-
-
 @frappe.whitelist(allow_guest=True)
 def employee_checkin():
-
+    
     return CRUD.handle(
         doctype="Employee Checkin",
         permission=True
@@ -2766,10 +2762,11 @@ def leave():
                 doc.set(fieldname, value)
 
         doc.employee = get_logged_in_employee()
+        
 
         doc.insert()
 
-        doc = apply_workflow(doc, "Submit")
+        # doc = apply_workflow(doc, "Submit")
 
         return {
             "success": True,
