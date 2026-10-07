@@ -8,7 +8,7 @@
   {
    "child": 0,
    "collapsible": 1,
-   "icon": "",
+   "icon": "list",
    "indent": 0,
    "keep_closed": 0,
    "label": "Reports",
@@ -20,6 +20,7 @@
   {
    "child": 0,
    "collapsible": 1,
+   "icon": "list",
    "indent": 0,
    "keep_closed": 0,
    "label": "Attendance Management",
@@ -30,7 +31,19 @@
   {
    "child": 1,
    "collapsible": 1,
-   "icon": "",
+   "icon": "calendar-days",
+   "indent": 0,
+   "keep_closed": 0,
+   "label": "Attendance Calendar",
+   "link_to": "attendance_calendar",
+   "link_type": "Page",
+   "show_arrow": 0,
+   "type": "Link"
+  },
+  {
+   "child": 1,
+   "collapsible": 1,
+   "icon": "list",
    "indent": 0,
    "keep_closed": 0,
    "label": "Check In/Check Out ",
@@ -42,7 +55,7 @@
   {
    "child": 1,
    "collapsible": 1,
-   "icon": "",
+   "icon": "list",
    "indent": 0,
    "keep_closed": 0,
    "label": "Employee Leave Balance",
@@ -54,7 +67,7 @@
   {
    "child": 1,
    "collapsible": 1,
-   "icon": "",
+   "icon": "list",
    "indent": 0,
    "keep_closed": 0,
    "label": "Employee Leave and Permission",
@@ -66,6 +79,7 @@
   {
    "child": 1,
    "collapsible": 1,
+   "icon": "list",
    "indent": 0,
    "keep_closed": 0,
    "label": "Attendance Tracking",
@@ -77,6 +91,7 @@
   {
    "child": 1,
    "collapsible": 1,
+   "icon": "list",
    "indent": 0,
    "keep_closed": 0,
    "label": "Employee Attendance Tracker",
@@ -88,7 +103,7 @@
   {
    "child": 1,
    "collapsible": 1,
-   "icon": "",
+   "icon": "list",
    "indent": 0,
    "keep_closed": 0,
    "label": "Monthly Attendance Report",
@@ -100,6 +115,7 @@
   {
    "child": 0,
    "collapsible": 1,
+   "icon": "list",
    "indent": 0,
    "keep_closed": 0,
    "label": "Project Management",
@@ -110,7 +126,7 @@
   {
    "child": 1,
    "collapsible": 1,
-   "icon": "",
+   "icon": "list",
    "indent": 0,
    "keep_closed": 0,
    "label": "Project Schedule",
@@ -122,6 +138,7 @@
   {
    "child": 0,
    "collapsible": 1,
+   "icon": "list",
    "indent": 0,
    "keep_closed": 0,
    "label": "Payroll",
@@ -132,7 +149,7 @@
   {
    "child": 1,
    "collapsible": 1,
-   "icon": "",
+   "icon": "list",
    "indent": 0,
    "keep_closed": 0,
    "label": "Salary Structure Assignment",
@@ -142,7 +159,7 @@
    "type": "Link"
   }
  ],
- "modified": "2026-09-28 16:41:38.862319",
+ "modified": "2026-10-07 12:20:55.111656",
  "modified_by": "Administrator",
  "module": "Teceze",
  "name": "Reports",

@@ -1,0 +1,76 @@
+{
+ "actions": [],
+ "allow_bulk_edit": 1,
+ "allow_rename": 1,
+ "creation": "2026-09-23 17:38:44.522376",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "activity_type",
+  "subject",
+  "description",
+  "activity_date",
+  "follow_up_date",
+  "is_follow_completed",
+  "is_followup"
+ ],
+ "fields": [
+  {
+   "fieldname": "activity_type",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Activity_type",
+   "options": "\nCall\nMessage\nEmail\nMeeting\nVisit\nProposal",
+   "reqd": 1
+  },
+  {
+   "fieldname": "subject",
+   "fieldtype": "Select",
+   "label": "Subject",
+   "options": "\nEnquiry\nPresentation\nRequirement Discussion\nProposal Discussion\nNegotiation\nOthers"
+  },
+  {
+   "fieldname": "description",
+   "fieldtype": "Data",
+   "label": "Description"
+  },
+  {
+   "fieldname": "activity_date",
+   "fieldtype": "Datetime",
+   "label": "Activity Date"
+  },
+  {
+   "fieldname": "follow_up_date",
+   "fieldtype": "Datetime",
+   "label": "Follow Up Date"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_follow_completed",
+   "fieldtype": "Check",
+   "label": "is_follow_completed"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_followup",
+   "fieldtype": "Check",
+   "label": "is_followup"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2026-09-24 19:43:06.311675",
+ "modified_by": "Administrator",
+ "module": "Teceze",
+ "name": "Lead Activity",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}

@@ -8,6 +8,8 @@ from frappe.utils import (
     getdate,
     nowdate,
 )
+
+
 def execute(filters=None):
     """Single Employee Attendance Report."""
     if not filters:
@@ -114,6 +116,7 @@ def get_data(filters):
         ("shift", _("Shift")),
         ("check_in", _("Check In")),
         ("check_out", _("Check Out")),
+        ("working_hours", _("Working Hours")),
         ("early_exit", _("Early Exit")),
         ("late_entry", _("Late Entry")),
         ("attendance_status", _("Attendance Status")),
@@ -156,14 +159,22 @@ def get_data(filters):
             format_time_display(check_out_raw) if check_out_raw else "-"
         )
 
-        # 4. Late Entry Calculation (Source of truth: Attendance.late_entry == 1)
+        # 4. Working Hours (Directly from Attendance.working_hours)
+        working_hours_raw = att_info.get("working_hours")
+        working_hours_display = (
+            format_duration(float(working_hours_raw) * 3600)
+            if working_hours_raw
+            else "-"
+        )
+
+        # 5. Late Entry Calculation (Source of truth: Attendance.late_entry == 1)
         late_entry_display = "-"
         if att_info.get("late_entry") and check_in_raw and shift_start_time:
             late_secs = calculate_late_entry(check_in_raw, shift_start_time)
             if late_secs > 0:
                 late_entry_display = format_duration(late_secs)
 
-        # 5. Early Exit Calculation (Source of truth: Attendance.early_exit == 1)
+        # 6. Early Exit Calculation (Source of truth: Attendance.early_exit == 1)
         early_exit_display = "-"
         if att_info.get("early_exit") and check_out_raw and shift_end_time:
             early_secs = calculate_early_exit(
@@ -172,23 +183,31 @@ def get_data(filters):
             if early_secs > 0:
                 early_exit_display = format_duration(early_secs)
 
-        # 6. Attendance Status Resolution
+        # 7. Attendance Status Resolution
         att_status = att_info.get("status")
         if att_status:
-            pass  # Attendance record takes absolute priority
+            # Attendance record exists
+            pass
         elif leave_info and leave_info.get("status") in ["Approved", "Submitted", "Open"]:
+            # Leave
             att_status = leave_info.get("leave_type") or "On Leave"
         elif holiday_type == "Weekly Off":
+            # Weekly off from Holiday List
             att_status = "Weekly Off"
         elif holiday_type == "Holiday":
+            # Holiday from Holiday List
             att_status = "Holiday"
+        elif getdate(d) >= getdate(nowdate()):
+            # Today and future dates without Attendance
+            att_status = "-"
         else:
+            # Past working day without Attendance
             att_status = "Absent"
 
-        # 7. Other Half Status
+        # 8. Other Half Status
         other_half_status = resolve_other_half_status(att_status, leave_info)
 
-        # 8. Details Concatenation
+        # 9. Details Concatenation
         request_parts = []
         if leave_info:
             l_type = leave_info.get("leave_type") or "-"
@@ -206,6 +225,7 @@ def get_data(filters):
         rows_dict["shift"][date_str] = shift_display
         rows_dict["check_in"][date_str] = check_in_display
         rows_dict["check_out"][date_str] = check_out_display
+        rows_dict["working_hours"][date_str] = working_hours_display
         rows_dict["late_entry"][date_str] = late_entry_display
         rows_dict["early_exit"][date_str] = early_exit_display
         rows_dict["attendance_status"][date_str] = att_status
@@ -240,6 +260,7 @@ def get_attendance_map(employee, from_date, to_date):
             "shift",
             "in_time",
             "out_time",
+            "working_hours",
             "late_entry",
             "early_exit",
         ],

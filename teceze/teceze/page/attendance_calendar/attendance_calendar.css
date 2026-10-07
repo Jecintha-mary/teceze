@@ -1,0 +1,1807 @@
+/* =========================================================
+   ATTENDANCE CALENDAR PAGE
+========================================================= */
+
+.attendance-calendar-page {
+    width:100%;
+    max-width:1600px;
+    margin:0 auto;
+    padding:14px 18px 24px;
+    box-sizing:border-box;
+    color:#0f1d3a;
+}
+
+
+/* =========================================================
+   FILTER CARD
+========================================================= */
+
+.attendance-filter-card {
+    width:100%;
+    margin-bottom:14px;
+    padding:14px 18px;
+    box-sizing:border-box;
+    background:#ffffff;
+    border:1px solid #e6e9ef;
+    border-radius:12px;
+    box-shadow:
+        0 1px 2px rgba(15,29,58,.04),
+        0 4px 14px rgba(15,29,58,.03);
+}
+
+
+/* =========================================================
+   EMPLOYEE + EMPLOYEE NAME (side by side)
+========================================================= */
+
+.employee-filter-row {
+    display:flex;
+    flex-wrap:wrap;
+    gap:16px;
+}
+
+.employee-filter-wrapper {
+    flex:1 1 280px;
+    width:auto;
+    max-width:490px;
+}
+
+.employee-filter-wrapper label {
+    display:block;
+    margin-bottom:6px;
+    color:#26344f;
+    font-size:13px;
+    font-weight:600;
+}
+
+
+/* =========================================================
+   FRAPPE LINK FIELD  (Employee)
+========================================================= */
+
+#employee-filter {
+    width:100%;
+}
+
+#employee-filter .frappe-control {
+    width:100%;
+}
+
+#employee-filter .form-group {
+    margin:0;
+}
+
+#employee-filter .control-label {
+    display:none;
+}
+
+#employee-filter .control-input {
+    width:100%;
+}
+
+#employee-filter .input-with-feedback {
+    width:100%;
+    height:40px;
+    padding:8px 12px;
+    box-sizing:border-box;
+    border:1px solid #dfe4ec;
+    border-radius:8px;
+    background:#ffffff;
+    color:#17233f;
+    font-size:13px;
+    box-shadow:none;
+    transition:
+        border-color .15s ease,
+        box-shadow .15s ease;
+}
+
+#employee-filter .input-with-feedback:hover {
+    border-color:#cbd3df;
+}
+
+#employee-filter .input-with-feedback:focus {
+    border-color:#2563eb;
+    box-shadow:0 0 0 2px rgba(37,99,235,.10);
+    outline:none;
+}
+
+
+/* =========================================================
+   EMPLOYEE NAME FIELD  (read-only)
+========================================================= */
+
+#employee-name-filter {
+    width:100%;
+}
+
+#employee-name-filter .frappe-control {
+    width:100%;
+}
+
+#employee-name-filter .form-group {
+    margin:0;
+}
+
+#employee-name-filter .control-label {
+    display:none;
+}
+
+#employee-name-filter .control-input {
+    width:100%;
+}
+
+#employee-name-filter .input-with-feedback {
+    width:100%;
+    height:40px;
+    padding:8px 12px;
+    box-sizing:border-box;
+    border:1px solid #dfe4ec;
+    border-radius:8px;
+    background:#f7f8fa;
+    color:#17233f;
+    font-size:13px;
+    box-shadow:none;
+    cursor:default;
+}
+
+#employee-name-filter .input-with-feedback:focus {
+    border-color:#dfe4ec;
+    box-shadow:none;
+    outline:none;
+}
+
+
+/* =========================================================
+   CALENDAR CARD
+========================================================= */
+
+.attendance-calendar-card {
+    width:100%;
+    max-width:none;
+    margin:0;
+    padding:24px 28px 20px;
+    box-sizing:border-box;
+    background:#ffffff;
+    border:1px solid #e6e9ef;
+    border-radius:12px;
+    box-shadow:
+        0 1px 2px rgba(15,29,58,.04),
+        0 6px 18px rgba(15,29,58,.04);
+    overflow:hidden;
+}
+
+
+/* =========================================================
+   CALENDAR CONTAINER
+========================================================= */
+
+#attendance-calendar {
+    width:100%;
+    min-width:0;
+    padding:0;
+    box-sizing:border-box;
+    overflow:visible;
+}
+
+#attendance-calendar .fc {
+    width:100%;
+    font-family:
+        Inter,
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        Roboto,
+        Arial,
+        sans-serif;
+    color:#0f1d3a;
+    font-size:12px;
+}
+
+
+/* =========================================================
+   REMOVE INTERNAL FULLCALENDAR SCROLL
+========================================================= */
+
+#attendance-calendar .fc-scroller {
+    overflow:visible !important;
+}
+
+#attendance-calendar .fc-scroller-liquid-absolute {
+    position:static !important;
+    overflow:visible !important;
+}
+
+#attendance-calendar .fc-scroller-harness {
+    overflow:visible !important;
+}
+
+#attendance-calendar .fc-daygrid-body {
+    min-height:0 !important;
+}
+
+#attendance-calendar .fc-daygrid-body-natural {
+    min-height:0 !important;
+}
+
+
+/* =========================================================
+   CALENDAR TOOLBAR
+========================================================= */
+
+#attendance-calendar .fc-header-toolbar {
+    display:flex !important;
+    align-items:center;
+    justify-content:space-between;
+    margin:0 0 12px !important;
+}
+
+#attendance-calendar .fc-toolbar-chunk {
+    display:flex;
+    align-items:center;
+    gap:6px;
+}
+
+
+/* =========================================================
+   MONTH TITLE
+========================================================= */
+
+#attendance-calendar .fc-toolbar-title {
+    margin:0 4px;
+    color:#0f1d3a;
+    font-size:18px;
+    font-weight:700;
+    letter-spacing:-.2px;
+}
+
+
+/* =========================================================
+   PREVIOUS / NEXT BUTTONS
+========================================================= */
+
+#attendance-calendar .fc-prev-button,
+#attendance-calendar .fc-next-button {
+    display:flex !important;
+    align-items:center;
+    justify-content:center;
+    width:28px;
+    height:28px;
+    padding:0 !important;
+    border:0 !important;
+    border-radius:50% !important;
+    background:transparent !important;
+    color:#56627a !important;
+    box-shadow:none !important;
+    transition:
+        background-color .15s ease,
+        color .15s ease;
+}
+
+#attendance-calendar .fc-prev-button:hover,
+#attendance-calendar .fc-next-button:hover {
+    background:#f3f5f8 !important;
+    color:#0f1d3a !important;
+}
+
+#attendance-calendar .fc-prev-button .fc-icon,
+#attendance-calendar .fc-next-button .fc-icon {
+    font-size:14px;
+}
+
+
+/* =========================================================
+   TODAY BUTTON
+========================================================= */
+
+#attendance-calendar .fc-today-button {
+    height:36px;
+    padding:0 13px;
+    border:0 !important;
+    border-radius:9px !important;
+    background:#f5f7fa !important;
+    color:#7d8799 !important;
+    box-shadow:none !important;
+    font:
+        500 12px
+        Inter,
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        Roboto,
+        Arial,
+        sans-serif;
+    text-transform:none;
+}
+
+#attendance-calendar .fc-today-button:hover {
+    background:#edf0f4 !important;
+    color:#26344f !important;
+}
+
+#attendance-calendar .fc-today-button:disabled {
+    opacity:.7;
+}
+
+
+/* =========================================================
+   MONTH / WEEK / DAY BUTTON GROUP
+========================================================= */
+
+#attendance-calendar .fc-button-group {
+    display:flex;
+    align-items:center;
+    gap:2px;
+    padding:3px;
+    border-radius:9px;
+    background:#f5f7fa;
+}
+
+#attendance-calendar .fc-button-group .fc-button {
+    height:32px;
+    padding:0 11px;
+    border:0 !important;
+    border-radius:7px !important;
+    background:transparent !important;
+    color:#16233f !important;
+    box-shadow:none !important;
+    font:
+        500 12px
+        Inter,
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        Roboto,
+        Arial,
+        sans-serif;
+    text-transform:capitalize;
+}
+
+#attendance-calendar .fc-button-group .fc-button:hover {
+    background:#ffffff !important;
+    color:#0f1d3a !important;
+}
+
+#attendance-calendar .fc-button-group .fc-button-active,
+#attendance-calendar .fc-button-group .fc-button-active:hover {
+    background:#ffffff !important;
+    color:#0f1d3a !important;
+    font-weight:600;
+    box-shadow:0 1px 3px rgba(15,29,58,.08) !important;
+}
+
+
+/* =========================================================
+   CALENDAR GRID
+========================================================= */
+
+#attendance-calendar .fc-scrollgrid {
+    width:100% !important;
+    border:1px solid #e2e6ec !important;
+    border-radius:9px;
+    overflow:hidden;
+}
+
+#attendance-calendar .fc-scrollgrid td,
+#attendance-calendar .fc-scrollgrid th {
+    border-color:#e2e6ec !important;
+}
+
+
+/* =========================================================
+   DAY HEADERS
+========================================================= */
+
+#attendance-calendar .fc-col-header {
+    background:#f6f8fb;
+}
+
+#attendance-calendar .fc-col-header-cell {
+    height:38px;
+    background:#f6f8fb;
+}
+
+#attendance-calendar .fc-col-header-cell-cushion {
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    height:38px;
+    padding:0 !important;
+    color:#173b70;
+    font-size:11px;
+    font-weight:600;
+    letter-spacing:.04em;
+    text-decoration:none;
+    text-transform:uppercase;
+}
+
+
+/* =========================================================
+   DAY CELLS
+========================================================= */
+
+#attendance-calendar .fc-daygrid-day {
+    background:#ffffff;
+}
+
+#attendance-calendar .fc-daygrid-day-frame {
+    min-height:104px !important;
+    height:auto !important;
+    padding:6px 6px 4px !important;
+    box-sizing:border-box;
+    background:#ffffff;
+    display:flex;
+    flex-direction:column;
+    overflow:visible;
+}
+
+
+/* =========================================================
+   DAY NUMBER
+========================================================= */
+
+#attendance-calendar .fc-daygrid-day-top {
+    order:0;
+    flex-direction:row;
+    justify-content:flex-start;
+}
+
+#attendance-calendar .fc-daygrid-day-number {
+    padding:0 !important;
+    color:#173154;
+    font-size:12px;
+    line-height:21px;
+    text-decoration:none;
+}
+
+
+/* =========================================================
+   OTHER MONTH DAYS
+========================================================= */
+
+#attendance-calendar .fc-day-other {
+    background:#f7f8fa !important;
+}
+
+#attendance-calendar .fc-day-other .fc-daygrid-day-frame {
+    background:#f7f8fa;
+}
+
+#attendance-calendar .fc-day-other .fc-daygrid-day-number {
+    color:#c7cdd6;
+    opacity:.65;
+}
+
+
+/* =========================================================
+   WEEKENDS
+========================================================= */
+
+#attendance-calendar .fc-day-sat .fc-daygrid-day-frame,
+#attendance-calendar .fc-day-sun .fc-daygrid-day-frame {
+    background:#f8f9fb;
+}
+
+
+/* =========================================================
+   TODAY
+========================================================= */
+
+#attendance-calendar .fc-day-today {
+    background:transparent !important;
+}
+
+#attendance-calendar .fc-day-today .fc-daygrid-day-number {
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    width:23px;
+    height:23px;
+    margin:-1px 0 0 -2px;
+    border-radius:50%;
+    background:#16233f;
+    color:#ffffff;
+    font-weight:650;
+}
+
+
+/* =========================================================
+   FULLCALENDAR HEIGHT / TABLE NORMALIZATION
+========================================================= */
+
+#attendance-calendar .fc-view-harness {
+    height:auto !important;
+    padding-bottom:0 !important;
+}
+
+#attendance-calendar .fc-view-harness-active > .fc-view {
+    position:relative !important;
+    inset:auto !important;
+}
+
+#attendance-calendar .fc-scroller,
+#attendance-calendar .fc-scroller-liquid-absolute {
+    position:relative !important;
+    height:auto !important;
+    overflow:visible !important;
+    inset:auto !important;
+}
+
+#attendance-calendar .fc-daygrid,
+#attendance-calendar .fc-daygrid-body,
+#attendance-calendar .fc-scrollgrid-sync-table {
+    height:auto !important;
+}
+
+#attendance-calendar .fc-daygrid-body table {
+    width:100% !important;
+    height:auto !important;
+    table-layout:fixed !important;
+}
+
+#attendance-calendar .fc-daygrid-body tbody tr {
+    height:auto !important;
+}
+
+#attendance-calendar .fc-daygrid-day {
+    height:auto !important;
+}
+
+#attendance-calendar td[role="gridcell"] {
+    padding:0 !important;
+    vertical-align:top !important;
+}
+
+#attendance-calendar .fc-highlight {
+    display:none !important;
+}
+
+
+/* =========================================================
+   EVENTS AREA
+========================================================= */
+
+#attendance-calendar .fc-daygrid-day-events {
+    order:2;
+    min-height:0 !important;
+    margin:2px 0 0 !important;
+}
+
+
+/* =========================================================
+   COMPACT CALENDAR EVENTS
+========================================================= */
+
+#attendance-calendar .fc-daygrid-event {
+    display:block !important;
+    margin:2px 0 0 !important;
+    padding:3px 6px !important;
+    min-height:0 !important;
+    border:1px solid transparent !important;
+    border-left-width:3px !important;
+    border-radius:8px !important;
+    box-shadow:none !important;
+    font-size:11.5px !important;
+    font-weight:600;
+    line-height:1.25;
+    white-space:normal;
+}
+
+
+/* =========================================================
+   EVENT CONTENT
+========================================================= */
+
+#attendance-calendar .fc-event-main,
+#attendance-calendar .fc-event-title,
+#attendance-calendar .fc-event-time {
+    color:inherit !important;
+    font-size:11.5px !important;
+    font-weight:600;
+    line-height:1.3;
+}
+
+#attendance-calendar .fc-daygrid-event-dot {
+    display:none;
+}
+
+
+/* =========================================================
+   PRESENT
+========================================================= */
+
+.cal-event-present {
+    background:#e8f6ed !important;
+    color:#1559a6 !important;
+    border:1px solid transparent !important;
+    border-left-width:3px !important;
+}
+
+
+/* =========================================================
+   ABSENT
+========================================================= */
+
+.cal-event-absent {
+    background:#fdeeee !important;
+    color:#1559a6 !important;
+    border:1px solid transparent !important;
+    border-left-width:3px !important;
+}
+
+
+/* =========================================================
+   ON LEAVE
+========================================================= */
+
+.cal-event-leave {
+    background:#eaf2ff !important;
+    color:#1559a6 !important;
+    border:1px solid transparent !important;
+    border-left-width:3px !important;
+}
+
+
+/* =========================================================
+   HALF DAY
+========================================================= */
+
+.cal-event-halfday {
+    background:#fff5df !important;
+    color:#9a6500 !important;
+    border:1px solid transparent !important;
+    border-left-width:3px !important;
+}
+
+
+/* =========================================================
+   WORK FROM HOME
+========================================================= */
+
+.cal-event-wfh {
+    background:#eaf6fb !important;
+    color:#176889 !important;
+    border:1px solid transparent !important;
+    border-left-width:3px !important;
+}
+
+
+/* =========================================================
+   STATUS LEFT EDGES
+========================================================= */
+
+.cal-event-present {
+    border-left-color:#178a4c !important;
+}
+
+.cal-event-absent {
+    border-left-color:#dc4b4b !important;
+}
+
+.cal-event-leave {
+    border-left-color:#4d83d8 !important;
+}
+
+.cal-event-halfday {
+    border-left-color:#d99a28 !important;
+}
+
+.cal-event-wfh {
+    border-left-color:#2c8aa8 !important;
+}
+
+
+/* =========================================================
+   SECONDARY CALENDAR TEXT
+========================================================= */
+
+.calendar-working-hours,
+.calendar-leave-type,
+.calendar-half-day-status {
+    display:block;
+    margin:2px 0 0;
+    font-size:10.5px;
+    line-height:14px;
+    font-weight:500;
+    opacity:.85;
+    white-space:nowrap;
+}
+
+
+/* =========================================================
+   HALF DAY - "PRESENT" / "ABSENT" LINE (other half)
+========================================================= */
+
+.calendar-half-day-present {
+    display:block;
+    margin:0;
+    font-size:10px;
+    line-height:12px;
+    font-weight:700;
+    white-space:nowrap;
+}
+
+
+/* =========================================================
+   PRESENT / ABSENT / LEAVE TEXT
+========================================================= */
+
+.cal-event-present .calendar-working-hours,
+.cal-event-present .calendar-leave-type,
+.cal-event-present .calendar-half-day-status,
+
+.cal-event-absent .calendar-working-hours,
+.cal-event-absent .calendar-leave-type,
+.cal-event-absent .calendar-half-day-status,
+
+.cal-event-leave .calendar-working-hours,
+.cal-event-leave .calendar-leave-type,
+.cal-event-leave .calendar-half-day-status {
+    color:#1559a6 !important;
+}
+
+
+/* =========================================================
+   HALF DAY TEXT
+========================================================= */
+
+.cal-event-halfday .calendar-leave-type,
+.cal-event-halfday .calendar-half-day-status,
+.cal-event-halfday .calendar-half-day-present,
+.cal-event-halfday .calendar-working-hours {
+    color:#5f35b5 !important;
+}
+
+
+/* =========================================================
+   WFH TEXT
+========================================================= */
+
+.cal-event-wfh .calendar-leave-type,
+.cal-event-wfh .calendar-half-day-status,
+.cal-event-wfh .calendar-working-hours {
+    color:#176889 !important;
+}
+
+
+
+/* =========================================================
+   HALF DAY HIERARCHY
+========================================================= */
+
+.cal-event-halfday .calendar-half-day-status {
+    font-weight:700 !important;
+    color:#9a6500 !important;
+}
+
+.cal-event-halfday .calendar-leave-type,
+.cal-event-halfday .calendar-half-day-present,
+.cal-event-halfday .calendar-working-hours {
+    font-weight:500 !important;
+}
+
+/* =========================================================
+   HOLIDAY
+========================================================= */
+
+.calendar-holiday {
+    order:1;
+    margin-top:2px;
+    padding:2px 5px;
+    background:#fff5df;
+    color:#9a6500;
+    border:1px solid #e6b85c;
+    border-left:3px solid #c98516;
+    border-radius:8px;
+    font-size:9px;
+    line-height:1.15;
+    font-weight:600;
+    white-space:normal;
+    word-break:break-word;
+}
+
+.calendar-holiday-name {
+    display:block;
+}
+
+.calendar-holiday-status {
+    display:block;
+    margin-top:0;
+    font-size:8px;
+    line-height:10px;
+    font-weight:500;
+    opacity:.8;
+}
+
+
+/* =========================================================
+   HOLIDAY + ATTENDANCE
+========================================================= */
+
+#attendance-calendar .fc-daygrid-day.has-holiday
+    .fc-daygrid-day-frame {
+    background:#fffdf8;
+}
+
+
+/* =========================================================
+   CALENDAR LEGEND
+========================================================= */
+
+.calendar-legend {
+    display:flex;
+    flex-wrap:wrap;
+    gap:14px;
+    margin-top:10px;
+    color:#56627a;
+    font-size:11px;
+}
+
+.calendar-legend span {
+    display:inline-flex;
+    align-items:center;
+    gap:5px;
+}
+
+.legend-dot {
+    display:inline-block;
+    width:7px;
+    height:7px;
+    border-radius:50%;
+}
+
+.legend-present {
+    background:#178a4c;
+}
+
+.legend-absent {
+    background:#ef4444;
+}
+
+.legend-leave {
+    background:#2563eb;
+}
+
+.legend-holiday {
+    background:#c98516;
+}
+
+.legend-halfday {
+    background:#d99a28;
+}
+
+
+/* =========================================================
+   FRAPPE LAYOUT ADJUSTMENTS
+========================================================= */
+
+.page-head {
+    margin-bottom:0 !important;
+}
+
+.layout-main-section {
+    padding-bottom:0 !important;
+}
+
+.layout-main-section-wrapper {
+    padding-bottom:0 !important;
+}
+
+
+/* =========================================================
+   REMOVE EXTRA PAGE HEIGHT
+========================================================= */
+
+.attendance-calendar-page,
+.attendance-calendar-card,
+#attendance-calendar {
+    max-height:none;
+}
+
+
+/* =========================================================
+   DESKTOP - COMPACT CALENDAR
+========================================================= */
+
+@media (min-width:901px) {
+
+    #attendance-calendar .fc-daygrid-day-frame {
+        min-height:92px !important;
+    }
+
+    #attendance-calendar .fc-col-header-cell {
+        height:38px;
+    }
+
+    #attendance-calendar .fc-col-header-cell-cushion {
+        height:38px;
+    }
+
+    #attendance-calendar .fc-daygrid-event {
+        padding:2px 4px !important;
+    }
+
+}
+
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media (max-width:900px) {
+
+    .attendance-calendar-page {
+        padding:12px;
+    }
+
+    .attendance-calendar-card {
+        overflow-x:auto;
+    }
+
+    #attendance-calendar {
+        min-width:760px;
+        overflow:visible;
+    }
+
+    .employee-filter-wrapper {
+        max-width:100%;
+    }
+
+}
+
+
+/* =========================================================
+   SMALL MOBILE
+========================================================= */
+
+@media (max-width:600px) {
+
+    .attendance-calendar-page {
+        padding:10px;
+    }
+
+    .attendance-filter-card {
+        padding:12px;
+    }
+
+    #attendance-calendar {
+        padding:10px;
+    }
+
+    #attendance-calendar .fc-toolbar-title {
+        font-size:16px;
+    }
+
+    #attendance-calendar .fc-daygrid-day-frame {
+        min-height:82px !important;
+        padding:4px 5px 3px !important;
+    }
+
+    #attendance-calendar .fc-daygrid-day-number {
+        font-size:11px;
+    }
+
+    #attendance-calendar .fc-daygrid-event {
+        padding:2px 4px !important;
+        font-size:9px !important;
+        line-height:1.15;
+    }
+
+    #attendance-calendar .fc-event-main,
+    #attendance-calendar .fc-event-title,
+    #attendance-calendar .fc-event-time {
+        font-size:9px !important;
+        line-height:1.15;
+    }
+
+    .calendar-working-hours,
+    .calendar-leave-type,
+    .calendar-half-day-status {
+        font-size:8px;
+        line-height:10px;
+    }
+
+    .calendar-half-day-present {
+        font-size:9px;
+        line-height:11px;
+    }
+
+    .calendar-holiday {
+        font-size:8px;
+        padding:2px 4px;
+    }
+
+    .calendar-holiday-status {
+        font-size:7px;
+        line-height:9px;
+    }
+
+}
+
+
+/* =========================================================
+   DARK MODE
+========================================================= */
+
+[data-theme="dark"] .attendance-calendar-page {
+    color:#f1f3f5;
+}
+
+[data-theme="dark"] .attendance-filter-card,
+[data-theme="dark"] .attendance-calendar-card {
+    background:#191c20;
+    border-color:#30353c;
+}
+
+[data-theme="dark"] #employee-filter .input-with-feedback {
+    background:#20242a;
+    border-color:#30353c;
+    color:#f1f3f5;
+}
+
+[data-theme="dark"] #employee-name-filter .input-with-feedback {
+    background:#191c20;
+    border-color:#30353c;
+    color:#f1f3f5;
+}
+
+[data-theme="dark"] #attendance-calendar .fc {
+    color:#f1f3f5;
+}
+
+[data-theme="dark"] #attendance-calendar .fc-toolbar-title {
+    color:#f1f3f5;
+}
+
+[data-theme="dark"] #attendance-calendar .fc-scrollgrid,
+[data-theme="dark"] #attendance-calendar .fc-scrollgrid td,
+[data-theme="dark"] #attendance-calendar .fc-scrollgrid th {
+    border-color:#30353c !important;
+}
+
+[data-theme="dark"] #attendance-calendar .fc-col-header,
+[data-theme="dark"] #attendance-calendar .fc-col-header-cell {
+    background:#20242a;
+}
+
+[data-theme="dark"] #attendance-calendar .fc-daygrid-day,
+[data-theme="dark"] #attendance-calendar .fc-daygrid-day-frame {
+    background:#191c20;
+}
+
+[data-theme="dark"] #attendance-calendar .fc-day-other,
+[data-theme="dark"] #attendance-calendar .fc-day-other .fc-daygrid-day-frame {
+    background:#15181b !important;
+}
+
+[data-theme="dark"] #attendance-calendar .fc-day-sat .fc-daygrid-day-frame,
+[data-theme="dark"] #attendance-calendar .fc-day-sun .fc-daygrid-day-frame {
+    background:#171a1e;
+}
+
+[data-theme="dark"] #attendance-calendar .fc-daygrid-day-number {
+    color:#cbd1d9;
+}
+
+[data-theme="dark"] #attendance-calendar .fc-prev-button,
+[data-theme="dark"] #attendance-calendar .fc-next-button {
+    color:#cbd1d9 !important;
+}
+
+[data-theme="dark"] #attendance-calendar .fc-prev-button:hover,
+[data-theme="dark"] #attendance-calendar .fc-next-button:hover {
+    background:#242930 !important;
+    color:#ffffff !important;
+}
+
+[data-theme="dark"] #attendance-calendar .fc-today-button {
+    background:#242930 !important;
+    color:#aeb6c2 !important;
+}
+
+[data-theme="dark"] #attendance-calendar .fc-button-group {
+    background:#242930;
+}
+
+[data-theme="dark"] #attendance-calendar .fc-button-group .fc-button {
+    color:#d7dce2 !important;
+}
+
+[data-theme="dark"] #attendance-calendar .fc-button-group .fc-button-active,
+[data-theme="dark"] #attendance-calendar .fc-button-group .fc-button-active:hover {
+    background:#30353c !important;
+    color:#ffffff !important;
+}
+
+[data-theme="dark"] #attendance-calendar .fc-day-today .fc-daygrid-day-number {
+    background:#ffffff;
+    color:#16233f;
+}
+
+/* =========================================================
+   FINAL EMPLOYEE ATTENDANCE CALENDAR MATCH
+   Keep attendance_calendar.js unchanged.
+========================================================= */
+
+.attendance-calendar-page {
+    width:100% !important;
+    max-width:1600px !important;
+    margin:0 auto !important;
+    padding:24px 26px 40px !important;
+    box-sizing:border-box;
+}
+
+.attendance-calendar-card {
+    width:100% !important;
+    max-width:none !important;
+    margin:0 !important;
+    padding:18px !important;
+    box-sizing:border-box;
+    border-radius:14px !important;
+    overflow:hidden !important;
+}
+
+#attendance-calendar {
+    width:100% !important;
+    min-width:0 !important;
+    padding:0 !important;
+    margin:0 !important;
+    box-sizing:border-box;
+    overflow:hidden !important;
+}
+
+#attendance-calendar .fc {
+    width:100% !important;
+    font-family:
+        Inter,
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        Roboto,
+        Arial,
+        sans-serif !important;
+    font-size:12px !important;
+    color:#0f1d3a !important;
+}
+
+/* Toolbar */
+#attendance-calendar .fc-header-toolbar {
+    display:flex !important;
+    align-items:center !important;
+    justify-content:space-between !important;
+    margin:0 0 14px !important;
+}
+
+#attendance-calendar .fc-toolbar-chunk {
+    display:flex !important;
+    align-items:center !important;
+    gap:10px !important;
+}
+
+#attendance-calendar .fc-toolbar-chunk:first-child {
+    gap:6px !important;
+}
+
+#attendance-calendar .fc-toolbar-title {
+    margin:0 4px !important;
+    color:#0f1d3a !important;
+    font-size:19px !important;
+    font-weight:700 !important;
+    letter-spacing:-.2px !important;
+}
+
+#attendance-calendar .fc-prev-button,
+#attendance-calendar .fc-next-button {
+    display:flex !important;
+    align-items:center !important;
+    justify-content:center !important;
+    width:30px !important;
+    height:30px !important;
+    padding:0 !important;
+    border:0 !important;
+    border-radius:50% !important;
+    background:transparent !important;
+    color:#56627a !important;
+    box-shadow:none !important;
+}
+
+#attendance-calendar .fc-prev-button:hover,
+#attendance-calendar .fc-next-button:hover {
+    background:#f3f5f8 !important;
+    color:#0f1d3a !important;
+}
+
+#attendance-calendar .fc-today-button {
+    height:30px !important;
+    padding:0 12px !important;
+    border:0 !important;
+    border-radius:8px !important;
+    background:#f5f7fa !important;
+    color:#56627a !important;
+    box-shadow:none !important;
+    font:500 12px Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif !important;
+    text-transform:none !important;
+}
+
+#attendance-calendar .fc-button-group {
+    display:flex !important;
+    align-items:center !important;
+    gap:2px !important;
+    padding:3px !important;
+    border-radius:10px !important;
+    background:#f5f7fa !important;
+}
+
+#attendance-calendar .fc-button-group .fc-button {
+    height:26px !important;
+    padding:0 11px !important;
+    border:0 !important;
+    border-radius:8px !important;
+    background:transparent !important;
+    color:#56627a !important;
+    box-shadow:none !important;
+    font:500 12px Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif !important;
+    text-transform:capitalize !important;
+}
+
+#attendance-calendar .fc-button-group .fc-button:hover,
+#attendance-calendar .fc-button-group .fc-button-active,
+#attendance-calendar .fc-button-group .fc-button-active:hover {
+    background:#ffffff !important;
+    color:#0f1d3a !important;
+}
+
+#attendance-calendar .fc-button-group .fc-button-active {
+    font-weight:650 !important;
+    box-shadow:0 1px 2px rgba(15,29,58,.08) !important;
+}
+
+/* Grid */
+#attendance-calendar .fc-scrollgrid {
+    width:100% !important;
+    border:1px solid #e6e9ef !important;
+    border-radius:10px !important;
+    overflow:hidden !important;
+}
+
+#attendance-calendar .fc-scrollgrid td,
+#attendance-calendar .fc-scrollgrid th {
+    border-color:#e6e9ef !important;
+}
+
+#attendance-calendar .fc-col-header,
+#attendance-calendar .fc-col-header-cell {
+    background:#f6f8fb !important;
+}
+
+#attendance-calendar .fc-col-header-cell {
+    height:36px !important;
+}
+
+#attendance-calendar .fc-col-header-cell-cushion {
+    display:flex !important;
+    align-items:center !important;
+    justify-content:center !important;
+    height:36px !important;
+    padding:0 !important;
+    color:#173b70 !important;
+    font-size:11px !important;
+    font-weight:600 !important;
+    letter-spacing:.04em !important;
+    text-decoration:none !important;
+    text-transform:uppercase !important;
+}
+
+/* Remove FullCalendar's large automatic row sizing */
+#attendance-calendar .fc-view-harness {
+    height:auto !important;
+    padding-bottom:0 !important;
+}
+
+#attendance-calendar .fc-view-harness-active > .fc-view {
+    position:relative !important;
+    inset:auto !important;
+}
+
+#attendance-calendar .fc-scroller,
+#attendance-calendar .fc-scroller-liquid-absolute,
+#attendance-calendar .fc-scroller-harness {
+    position:relative !important;
+    height:auto !important;
+    overflow:visible !important;
+    inset:auto !important;
+}
+
+#attendance-calendar .fc-daygrid,
+#attendance-calendar .fc-daygrid-body,
+#attendance-calendar .fc-scrollgrid-sync-table {
+    height:auto !important;
+}
+
+#attendance-calendar .fc-daygrid-body table {
+    width:100% !important;
+    height:auto !important;
+    table-layout:fixed !important;
+}
+
+#attendance-calendar .fc-daygrid-body tbody tr {
+    height:auto !important;
+}
+
+#attendance-calendar .fc-daygrid-day {
+    height:auto !important;
+}
+
+#attendance-calendar td[role="gridcell"] {
+    padding:0 !important;
+    vertical-align:top !important;
+}
+
+#attendance-calendar .fc-daygrid-day-frame {
+    min-height:104px !important;
+    height:auto !important;
+    padding:6px 6px 4px !important;
+    box-sizing:border-box !important;
+    background:#ffffff !important;
+    display:flex !important;
+    flex-direction:column !important;
+    overflow:visible !important;
+}
+
+#attendance-calendar .fc-daygrid-day-top {
+    order:0 !important;
+    flex-direction:row !important;
+    justify-content:flex-start !important;
+}
+
+#attendance-calendar .fc-daygrid-day-number {
+    padding:0 !important;
+    color:#173154 !important;
+    font-size:12px !important;
+    line-height:20px !important;
+    text-decoration:none !important;
+}
+
+#attendance-calendar .fc-day-other,
+#attendance-calendar .fc-day-other .fc-daygrid-day-frame {
+    background:#f7f8fa !important;
+}
+
+#attendance-calendar .fc-day-other .fc-daygrid-day-number {
+    color:#c7cdd6 !important;
+    opacity:.65 !important;
+}
+
+#attendance-calendar .fc-day-sat .fc-daygrid-day-frame,
+#attendance-calendar .fc-day-sun .fc-daygrid-day-frame {
+    background:#f8f9fb !important;
+}
+
+#attendance-calendar .fc-day-today {
+    background:transparent !important;
+}
+
+#attendance-calendar .fc-day-today .fc-daygrid-day-number {
+    display:flex !important;
+    align-items:center !important;
+    justify-content:center !important;
+    width:24px !important;
+    height:24px !important;
+    margin:-2px 0 0 -3px !important;
+    border-radius:50% !important;
+    background:#16233f !important;
+    color:#ffffff !important;
+    font-weight:650 !important;
+}
+
+#attendance-calendar .fc-highlight {
+    display:none !important;
+}
+
+#attendance-calendar .fc-daygrid-day-events {
+    order:2 !important;
+    min-height:0 !important;
+    margin:2px 0 0 !important;
+}
+
+/* Event chips */
+#attendance-calendar .fc-daygrid-event {
+    display:block !important;
+    margin:3px 0 0 !important;
+    padding:2px 4px !important;
+    min-height:0 !important;
+    border:1px solid transparent !important;
+    border-left-width:3px !important;
+    border-radius:8px !important;
+    box-shadow:none !important;
+    font-size:11.5px !important;
+    font-weight:600 !important;
+    line-height:1.3 !important;
+    white-space:normal !important;
+}
+
+#attendance-calendar .fc-event-main,
+#attendance-calendar .fc-event-title,
+#attendance-calendar .fc-event-time {
+    color:inherit !important;
+    font-size:11.5px !important;
+    font-weight:600 !important;
+    line-height:1.3 !important;
+}
+
+#attendance-calendar .fc-daygrid-event-dot {
+    display:none !important;
+}
+
+/* Present */
+.cal-event-present {
+    background:#e8f6ed !important;
+    color:#1559a6 !important;
+    border:1px solid #c8e8d5 !important;
+    border-left:3px solid #178a4c !important;
+    border-radius:8px !important;
+}
+
+/* Absent */
+.cal-event-absent {
+    background:#fdeeee !important;
+    color:#1559a6 !important;
+    border:1px solid #f3cccc !important;
+    border-left:3px solid #ef4444 !important;
+    border-radius:8px !important;
+}
+
+/* Leave */
+.cal-event-leave {
+    background:#eaf2ff !important;
+    color:#1559a6 !important;
+    border:1px solid #cbdcf8 !important;
+    border-left:3px solid #2563eb !important;
+    border-radius:8px !important;
+}
+
+/* Half Day - purple like employee_attendance */
+.cal-event-halfday {
+    background:#efe8ff !important;
+    color:#5f35b5 !important;
+    border:1px solid #d8c8ff !important;
+    border-left:3px solid #7c3aed !important;
+    border-radius:8px !important;
+}
+
+/* Work From Home */
+.cal-event-wfh {
+    background:#eaf6fb !important;
+    color:#176889 !important;
+    border:1px solid #c9e5ef !important;
+    border-left:3px solid #0b7aa8 !important;
+    border-radius:8px !important;
+}
+
+/* Secondary event lines */
+.calendar-working-hours,
+.calendar-leave-type,
+.calendar-half-day-status {
+    display:block !important;
+    margin:2px 0 0 !important;
+    font-size:10.5px !important;
+    line-height:14px !important;
+    font-weight:500 !important;
+    opacity:.8 !important;
+    white-space:nowrap !important;
+}
+
+/* Half-day hierarchy */
+.cal-event-halfday .calendar-half-day-status {
+    font-weight:700 !important;
+    color:#5f35b5 !important;
+    opacity:1 !important;
+}
+
+.cal-event-halfday .calendar-leave-type,
+.cal-event-halfday .calendar-half-day-present,
+.cal-event-halfday .calendar-working-hours {
+    font-weight:500 !important;
+    color:#5f35b5 !important;
+    opacity:.8 !important;
+}
+
+.calendar-half-day-present {
+    display:block !important;
+    margin:0 !important;
+    font-size:10.5px !important;
+    line-height:14px !important;
+    font-weight:700 !important;
+    white-space:nowrap !important;
+}
+
+/* Holiday */
+.calendar-holiday {
+    order:1 !important;
+    margin-top:3px !important;
+    padding:4px 7px !important;
+    background:#fff5df !important;
+    color:#9a6500 !important;
+    border:1px solid #e6b85c !important;
+    border-left:3px solid #c98516 !important;
+    border-radius:8px !important;
+    font-size:11px !important;
+    line-height:1.25 !important;
+    font-weight:600 !important;
+    white-space:normal !important;
+    word-break:break-word !important;
+}
+
+.calendar-holiday-name {
+    display:block !important;
+}
+
+.calendar-holiday-status {
+    display:block !important;
+    margin-top:1px !important;
+    font-size:10px !important;
+    line-height:12px !important;
+    font-weight:500 !important;
+    opacity:.8 !important;
+}
+
+#attendance-calendar .fc-daygrid-day.has-holiday .fc-daygrid-day-frame {
+    background:#fffdf8 !important;
+}
+
+/* Legend */
+.calendar-legend {
+    display:flex !important;
+    flex-wrap:wrap !important;
+    gap:18px !important;
+    margin-top:14px !important;
+    color:#56627a !important;
+    font-size:12px !important;
+}
+
+.calendar-legend span {
+    display:inline-flex !important;
+    align-items:center !important;
+    gap:6px !important;
+}
+
+.legend-dot {
+    display:inline-block !important;
+    width:8px !important;
+    height:8px !important;
+    border-radius:50% !important;
+}
+
+.legend-present { background:#178a4c !important; }
+.legend-absent { background:#ef4444 !important; }
+.legend-leave { background:#2f5bb7 !important; }
+.legend-holiday { background:#c98516 !important; }
+.legend-halfday { background:#7c3aed !important; }
+
+/* Desktop */
+@media (min-width:901px) {
+    #attendance-calendar .fc-daygrid-day-frame {
+        min-height:104px !important;
+    }
+
+    #attendance-calendar .fc-col-header-cell,
+    #attendance-calendar .fc-col-header-cell-cushion {
+        height:36px !important;
+    }
+
+    #attendance-calendar .fc-daygrid-event {
+        padding:2px 4px !important;
+    }
+}
+
+/* Mobile */
+@media (max-width:900px) {
+    .attendance-calendar-page {
+        padding:12px !important;
+    }
+
+    .attendance-calendar-card {
+        width:100% !important;
+        overflow-x:auto !important;
+    }
+
+    #attendance-calendar {
+        min-width:760px !important;
+        overflow:visible !important;
+    }
+}
+
+/* Dark mode */
+[data-theme="dark"] .attendance-calendar-card {
+    background:#191c20 !important;
+    border-color:#30353c !important;
+}
+
+[data-theme="dark"] #attendance-calendar .fc {
+    color:#f1f3f5 !important;
+}
+
+[data-theme="dark"] #attendance-calendar .fc-toolbar-title {
+    color:#f1f3f5 !important;
+}
+
+[data-theme="dark"] #attendance-calendar .fc-scrollgrid,
+[data-theme="dark"] #attendance-calendar .fc-scrollgrid td,
+[data-theme="dark"] #attendance-calendar .fc-scrollgrid th {
+    border-color:#30353c !important;
+}
+
+[data-theme="dark"] #attendance-calendar .fc-col-header,
+[data-theme="dark"] #attendance-calendar .fc-col-header-cell {
+    background:#20242a !important;
+}
+
+[data-theme="dark"] #attendance-calendar .fc-daygrid-day,
+[data-theme="dark"] #attendance-calendar .fc-daygrid-day-frame {
+    background:#191c20 !important;
+}
+
+[data-theme="dark"] #attendance-calendar .fc-day-other,
+[data-theme="dark"] #attendance-calendar .fc-day-other .fc-daygrid-day-frame {
+    background:#15181b !important;
+}
+
+[data-theme="dark"] #attendance-calendar .fc-day-sat .fc-daygrid-day-frame,
+[data-theme="dark"] #attendance-calendar .fc-day-sun .fc-daygrid-day-frame {
+    background:#171a1e !important;
+}
+
+[data-theme="dark"] #attendance-calendar .fc-daygrid-day-number {
+    color:#cbd1d9 !important;
+}
+
+/* =========================================================
+   FINAL OVERRIDE — MATCH EMPLOYEE ATTENDANCE EVENT CARDS
+   IMPORTANT: keep this block at the VERY END of the file.
+========================================================= */
+
+#attendance-calendar .fc-daygrid-event {
+    display:block !important;
+    margin:3px 0 0 !important;
+    padding:4px 7px !important;
+    border:1px solid transparent !important;
+    border-left-width:3px !important;
+    border-radius:8px !important;
+    box-shadow:none !important;
+    font-size:11.5px !important;
+    font-weight:600 !important;
+    line-height:1.3 !important;
+    white-space:normal !important;
+}
+
+#attendance-calendar .fc-daygrid-event .fc-event-main,
+#attendance-calendar .fc-daygrid-event .fc-event-title,
+#attendance-calendar .fc-daygrid-event .fc-event-time {
+    color:inherit !important;
+    font-size:11.5px !important;
+}
+
+#attendance-calendar .fc-daygrid-event-dot {
+    display:none !important;
+}
+
+/* Present */
+#attendance-calendar .fc-daygrid-event.cal-event-present {
+    background:#e8f6ed !important;
+    color:#1559a6 !important;
+    border:1px solid #c7e8d5 !important;
+    border-left:3px solid #269b5a !important;
+    border-radius:8px !important;
+}
+
+/* Absent */
+#attendance-calendar .fc-daygrid-event.cal-event-absent {
+    background:#fdeeee !important;
+    color:#1559a6 !important;
+    border:1px solid #f2d0d0 !important;
+    border-left:3px solid #e05252 !important;
+    border-radius:8px !important;
+}
+
+/* Leave */
+#attendance-calendar .fc-daygrid-event.cal-event-leave {
+    background:#eaf2ff !important;
+    color:#1559a6 !important;
+    border:1px solid #cbdcf7 !important;
+    border-left:3px solid #4f83cc !important;
+    border-radius:8px !important;
+}
+
+/* Half Day */
+#attendance-calendar .fc-daygrid-event.cal-event-halfday {
+    background:#eee6ff !important;
+    color:#5f36b3 !important;
+    border:1px solid #d8c8fa !important;
+    border-left:3px solid #7c3aed !important;
+    border-radius:8px !important;
+}
+
+/* Work From Home */
+#attendance-calendar .fc-daygrid-event.cal-event-wfh {
+    background:#eaf6fb !important;
+    color:#176889 !important;
+    border:1px solid #c9e6f0 !important;
+    border-left:3px solid #2697b8 !important;
+    border-radius:8px !important;
+}
+
+/* Half Day text hierarchy */
+#attendance-calendar .fc-daygrid-event.cal-event-halfday .calendar-half-day-status {
+    color:#5f36b3 !important;
+    font-weight:700 !important;
+    opacity:1 !important;
+}
+
+#attendance-calendar .fc-daygrid-event.cal-event-halfday .calendar-leave-type,
+#attendance-calendar .fc-daygrid-event.cal-event-halfday .calendar-half-day-present,
+#attendance-calendar .fc-daygrid-event.cal-event-halfday .calendar-working-hours {
+    color:#5f36b3 !important;
+    font-weight:500 !important;
+    opacity:.9 !important;
+}
+
+/* Holiday */
+#attendance-calendar .calendar-holiday {
+    background:#fff4dc !important;
+    color:#a66a00 !important;
+    border:1px solid #e9c982 !important;
+    border-left:3px solid #b96d00 !important;
+    border-radius:8px !important;
+    padding:4px 7px !important;
+}
+
+/* Calendar width / spacing matching employee_attendance */
+.attendance-calendar-page {
+    width:100% !important;
+    max-width:1600px !important;
+    margin:0 auto !important;
+    box-sizing:border-box !important;
+}
+
+.attendance-calendar-page .attendance-filter-card,
+.attendance-calendar-page .attendance-calendar-card {
+    width:100% !important;
+    max-width:none !important;
+    box-sizing:border-box !important;
+}
+
+.attendance-calendar-page .attendance-calendar-card {
+    padding:18px !important;
+}
+
+#attendance-calendar {
+    width:100% !important;
+    min-height:650px;
+    padding:0 !important;
+    margin:0 !important;
+}
+
+/* FullCalendar cell sizing */
+#attendance-calendar .fc-daygrid-day-frame {
+    min-height:104px !important;
+    padding:6px 6px 4px !important;
+    box-sizing:border-box !important;
+}
+
+#attendance-calendar .fc-col-header-cell,
+#attendance-calendar .fc-col-header-cell-cushion {
+    height:36px !important;
+}
+
+#attendance-calendar .fc-col-header-cell-cushion {
+    color:#0f3d7d !important;
+    font-size:11px !important;
+    font-weight:600 !important;
+    letter-spacing:.04em !important;
+}
+
+/* Keep event chips compact like employee_attendance */
+@media (min-width:901px) {
+    #attendance-calendar .fc-daygrid-event {
+        padding:4px 7px !important;
+    }
+}

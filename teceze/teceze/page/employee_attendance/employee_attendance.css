@@ -1,438 +1,944 @@
 /* =========================================================
-   EMPLOYEE ATTENDANCE DASHBOARD
-   Frappe Desk - Full Width Layout
+   TOKENS
+========================================================= */
+
+:root {
+    --bg:#f7f8fa;
+    --surface:#fff;
+    --soft:#f6f8fb;
+    --border:#e6e9ef;
+    --border-soft:#eef1f5;
+    --text:#0f1d3a;
+    --text-2:#56627a;
+    --muted:#8b94a7;
+
+    --primary:#16233f;
+    --primary-hover:#0d172b;
+
+    --accent:#2563eb;
+    --accent-soft:#e8f0ff;
+    --chip-blue:#1d4ed8;
+
+    --success-bg:#e7f6ee;
+    --success:#178a4c;
+
+    --danger-bg:#fdecec;
+    --danger:#ef4444;
+
+    --warning-bg:#fff4dc;
+    --warning:#a66a00;
+
+    --info-bg:#e8f0ff;
+    --info:#2f5bb7;
+
+    --wfh-bg:#e3f4fb;
+    --wfh:#0b7aa8;
+
+    --neutral-bg:#eef0f4;
+    --neutral:#5b6473;
+
+    --radius:14px;
+    --radius-sm:8px;
+
+    --shadow:
+        0 1px 2px rgba(15,29,58,.04),
+        0 6px 18px rgba(15,29,58,.04);
+
+    --row-h:104px;
+
+    --font:
+        Inter,
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        Roboto,
+        Arial,
+        sans-serif;
+}
+
+[data-theme="dark"] {
+    --bg:#111315;
+    --surface:#191c20;
+    --soft:#20242a;
+    --border:#30353c;
+    --border-soft:#272c32;
+    --text:#f1f3f5;
+    --text-2:#aeb4bc;
+    --muted:#7f8790;
+
+    --primary:#e8eaed;
+    --primary-hover:#fff;
+
+    --accent:#6c9bff;
+    --accent-soft:#202b42;
+    --chip-blue:#9db8ff;
+
+    --success-bg:#173524;
+    --success:#65d391;
+
+    --danger-bg:#3a2020;
+    --danger:#ff8b82;
+
+    --warning-bg:#3a2d16;
+    --warning:#f2bd55;
+
+    --info-bg:#202b42;
+    --info:#91a9df;
+
+    --wfh-bg:#16323d;
+    --wfh:#7cc9e8;
+
+    --neutral-bg:#2a2e34;
+    --neutral:#aeb4bc;
+
+    --shadow:
+        0 1px 2px rgba(0,0,0,.15),
+        0 4px 16px rgba(0,0,0,.12);
+}
+
+@media (prefers-color-scheme:dark) {
+
+    :root:not([data-theme="light"]) {
+        --bg:#111315;
+        --surface:#191c20;
+        --soft:#20242a;
+        --border:#30353c;
+        --border-soft:#272c32;
+        --text:#f1f3f5;
+        --text-2:#aeb4bc;
+        --muted:#7f8790;
+
+        --primary:#e8eaed;
+        --primary-hover:#fff;
+
+        --accent:#6c9bff;
+        --accent-soft:#202b42;
+        --chip-blue:#9db8ff;
+
+        --success-bg:#173524;
+        --success:#65d391;
+
+        --danger-bg:#3a2020;
+        --danger:#ff8b82;
+
+        --warning-bg:#3a2d16;
+        --warning:#f2bd55;
+
+        --info-bg:#202b42;
+        --info:#91a9df;
+
+        --wfh-bg:#16323d;
+        --wfh:#7cc9e8;
+
+        --neutral-bg:#2a2e34;
+        --neutral:#aeb4bc;
+    }
+}
+
+
+/* =========================================================
+   LAYOUT
 ========================================================= */
 
 .attendance-container {
-    width: 100% !important;
-    max-width: none !important;
-    margin: 0 !important;
-    padding: 20px 24px !important;
-    box-sizing: border-box;
-    font-family: Inter, "Segoe UI", sans-serif;
-    color: #1f272e;
+    width:100%;
+    max-width:1600px;
+    margin:auto;
+    padding:24px 32px 40px;
+    box-sizing:border-box;
+    font-family:var(--font);
+    color:var(--text);
 }
-
-.layout-main-section:has(.attendance-container) {
-    width: 100% !important;
-    max-width: none !important;
-    flex: 1 1 100% !important;
-}
-
-.layout-main-section-wrapper:has(.attendance-container) {
-    width: 100% !important;
-    max-width: none !important;
-}
-
-.page-container:has(.attendance-container) {
-    width: 100% !important;
-    max-width: none !important;
-}
-
-
-/* =========================================================
-   HEADER
-========================================================= */
 
 .attendance-header {
-    width: 100%;
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: 24px;
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    gap:20px;
+    margin-bottom:18px;
 }
 
 .header-left {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    flex-wrap: wrap;
+    display:flex;
+    align-items:flex-start;
+    gap:14px;
 }
 
 .header-title-block h2 {
-    margin: 0;
-    font-size: 32px;
-    font-weight: 700;
-    color: #1f272e;
+    margin:0;
+    font-size:28px;
+    line-height:1.15;
+    font-weight:700;
+    letter-spacing:-.6px;
+    color:var(--text);
 }
 
 .header-subtitle {
-    margin: 4px 0 0;
-    font-size: 14px;
-    color: #68737d;
+    margin:6px 0 0;
+    color:var(--text-2);
+    font-size:14px;
+}
+
+#status {
+    display:none;
 }
 
 .header-right {
-    text-align: right;
+    display:flex;
+    flex-direction:column;
+    align-items:flex-end;
+    gap:3px;
+    padding-top:4px;
+    font-style:normal;
 }
 
-#current-date-main {
-    font-size: 15px;
-    font-weight: 600;
-    color: #1f272e;
+.header-right strong {
+    font-size:15px;
+    font-weight:650;
 }
 
-#current-date-sub {
-    font-size: 13px;
-    color: #68737d;
-    margin-top: 2px;
+.header-right small {
+    color:var(--text-2);
+    font-size:13px;
 }
 
-
-/* =========================================================
-   STATUS BADGE
-========================================================= */
-
-.status-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 6px 16px;
-    border-radius: 30px;
-    font-size: 14px;
-    font-weight: 600;
+.section-title {
+    margin:0 0 8px;
+    font-size:14px;
+    font-weight:650;
+    color:var(--text);
 }
-
-.status-dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-}
-
-.status-in { background: #ddf5e1; color: #1f9d55; }
-.status-in .status-dot { background: #1f9d55; }
-
-.status-out { background: #e6f1fb; color: #0c447c; }
-.status-out .status-dot { background: #2490ef; }
-
-.status-warning { background: #fff4de; color: #b7791f; }
-.status-warning .status-dot { background: #f2b23d; }
-
-.status-none { background: #fdecec; color: #c0392b; }
-.status-none .status-dot { background: #e05c5c; }
-
-
-/* =========================================================
-   MAIN GRID
-========================================================= */
 
 .attendance-main-grid {
-    display: grid !important;
-    grid-template-columns: 400px minmax(0, 1fr) !important;
-    gap: 24px;
-    width: 100% !important;
-    align-items: start;
-    box-sizing: border-box;
+    display:grid;
+    grid-template-columns:320px minmax(0,1fr);
+    gap:16px;
+    width:100%;
+    align-items:stretch;
 }
 
 .attendance-left {
-    width: 100% !important;
-    min-width: 0;
-    box-sizing: border-box;
-    display: flex;
-    flex-direction: column;
-    gap: 24px;
-    /* height is NOT set here - CSS grid stretch can't track the
-       calendar's real height because FullCalendar sets it via JS
-       after initial layout. JS (sync_left_column_height, in the
-       .js file) measures the rendered calendar card and sets an
-       explicit inline px height on this element instead - that's
-       what lets Associate Members grow to match the bottom edge. */
+    display:flex;
+    flex-direction:column;
+    gap:14px;
+    min-width:0;
 }
 
 .attendance-right {
-    width: 100% !important;
-    min-width: 0;
-    box-sizing: border-box;
+    width:100%;
+    min-width:0;
 }
-
-
-/* =========================================================
-   CARD BASE
-========================================================= */
 
 .card {
-    background: #ffffff;
-    border: 1px solid #e3e5e8;
-    border-radius: 16px;
-    box-shadow: none;
-    box-sizing: border-box;
+    box-sizing:border-box;
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    box-shadow:var(--shadow);
+    transition:
+        background-color .2s,
+        border-color .2s;
 }
-
-.attendance-card { padding: 28px 30px; }
 
 
 /* =========================================================
-   CENTERED PROFILE / CHECK-IN CARD
+   AVATARS
 ========================================================= */
 
-.attendance-card-centered {
-    text-align: center;
-}
-
 .avatar {
-    width: 60px;
-    height: 60px;
-    border-radius: 50%;
-    background: #e6f1fb;
-    color: #0c447c;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-size: 24px;
-    font-weight: 600;
-    flex-shrink: 0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    flex-shrink:0;
+    border-radius:50%;
+    background:var(--accent-soft);
+    color:var(--accent);
+    font-weight:650;
 }
 
 .avatar-large {
-    width: 84px;
-    height: 84px;
-    font-size: 30px;
-    margin: 0 auto 14px;
-}
-
-.profile-name {
-    margin: 0;
-    font-size: 19px;
-    font-weight: 700;
-    color: #1f272e;
-}
-
-.profile-role {
-    margin: 4px 0 0;
-    font-size: 13px;
-    color: #68737d;
-}
-
-.status-text {
-    margin-top: 10px;
-    font-size: 13px;
-    font-weight: 700;
-    letter-spacing: 0.3px;
-}
-
-
-/* =========================================================
-   DIGIT-BOX WORKING TIMER
-========================================================= */
-
-.digit-timer {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 8px;
-    margin: 20px 0 4px;
-}
-
-.digit-box {
-    background: #f5f7f9;
-    border: 1px solid #e8eaed;
-    border-radius: 10px;
-    padding: 10px 4px;
-    min-width: 56px;
-    font-size: 24px;
-    font-weight: 700;
-    color: #1f272e;
-    font-variant-numeric: tabular-nums;
-}
-
-.digit-colon {
-    font-size: 20px;
-    font-weight: 700;
-    color: #a7afb6;
-}
-
-
-/* =========================================================
-   CHECK IN / CHECK OUT BOXES
-========================================================= */
-
-.attendance-card .divider {
-    height: 1px;
-    background: #e3e5e8;
-    margin: 24px 0;
-}
-
-.checkinout-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 14px;
-    margin: 0;
-}
-
-.checkinout-box {
-    background: #f5f7f9;
-    border-radius: 10px;
-    padding: 14px 16px;
-    text-align: center;
-}
-
-.cio-label {
-    display: block;
-    font-size: 13px;
-    color: #68737d;
-    margin-bottom: 6px;
-}
-
-.cio-value {
-    display: block;
-    font-size: 16px;
-    font-weight: 700;
-    color: #1f272e;
-}
-
-
-/* =========================================================
-   CHECK IN / OUT BUTTON
-========================================================= */
-
-.button-area {
-    margin-top: 20px;
-    text-align: center;
-}
-
-#attendance_btn {
-    width: 100%;
-    min-width: 160px;
-    height: 44px;
-    padding: 0 28px;
-    border: 1.5px solid transparent;
-    border-radius: 10px;
-    font-size: 14px;
-    font-weight: 700;
-    transition: 0.2s;
-    cursor: pointer;
-    background: #ffffff;
-}
-
-#attendance_btn.checkin {
-    background: #2490ef;
-    border-color: #2490ef;
-    color: #ffffff;
-}
-
-#attendance_btn.checkout {
-    background: #ffffff;
-    border-color: #e05c5c;
-    color: #e05c5c;
-}
-
-#attendance_btn:hover { opacity: 0.9; }
-#attendance_btn:disabled { opacity: 0.6; cursor: not-allowed; }
-
-
-/* =========================================================
-   REPORTING MANAGER CARD
-========================================================= */
-
-.manager-card {
-    padding: 20px 22px;
-}
-
-.manager-card-title {
-    font-size: 13px;
-    font-weight: 700;
-    color: #68737d;
-    text-transform: uppercase;
-    letter-spacing: 0.4px;
-    margin-bottom: 14px;
-}
-
-.manager-row {
-    display: flex;
-    align-items: center;
-    gap: 12px;
+    width:76px;
+    height:76px;
+    font-size:30px;
+    background:var(--accent-soft);
+    color:var(--accent);
 }
 
 .avatar-small {
-    width: 42px;
-    height: 42px;
-    font-size: 15px;
-    border-radius: 50%;
+    width:34px;
+    height:34px;
+    font-size:13px;
 }
 
-.manager-info,
-.member-info {
-    display: flex;
-    flex-direction: column;
-    min-width: 0;
+.avatar-tint-0 {
+    background:#ece6ff;
+    color:#6d47d9;
 }
 
-.manager-info strong,
-.member-info strong {
-    font-size: 14px;
-    font-weight: 600;
-    color: #1f272e;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+.avatar-tint-1 {
+    background:#e3f1ff;
+    color:#2a6fd1;
 }
 
-.member-status {
-    font-size: 12px;
-    font-weight: 600;
-    margin-top: 2px;
+.avatar-tint-2 {
+    background:#e2f6ea;
+    color:#178a4c;
 }
 
-.status-in-text { color: #1f9d55; }
-.status-out-text { color: #c0392b; }
+.avatar-tint-3 {
+    background:#fff0dc;
+    color:#c56b00;
+}
+
+.avatar-tint-4 {
+    background:#eceff3;
+    color:#56627a;
+}
 
 
 /* =========================================================
-   ASSOCIATE MEMBERS CARD
+   PROFILE CARD
 ========================================================= */
 
+.attendance-card {
+    padding:24px 18px 18px;
+    text-align:center;
+}
+
+.profile-row {
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:12px;
+    margin-bottom:16px;
+}
+
+.profile-info {
+    min-width:0;
+    width:100%;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:3px;
+}
+
+.profile-name {
+    max-width:100%;
+    margin:0;
+    overflow:hidden;
+    font-size:19px;
+    font-weight:700;
+    white-space:nowrap;
+    text-overflow:ellipsis;
+}
+
+.profile-role {
+    max-width:100%;
+    margin:0 0 6px;
+    overflow:hidden;
+    color:var(--text-2);
+    font-size:13px;
+    white-space:nowrap;
+    text-overflow:ellipsis;
+}
+
+.status-text {
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    padding:5px 12px;
+    border-radius:999px;
+    background:var(--neutral-bg);
+    color:var(--neutral);
+    font-size:12px;
+    font-weight:650;
+    line-height:1;
+}
+
+.status-text::before {
+    content:"";
+    width:6px;
+    height:6px;
+    border-radius:50%;
+    background:currentColor;
+}
+
+.status-text.st-in {
+    background:var(--success-bg);
+    color:var(--success);
+}
+
+.status-text.st-out {
+    background:var(--info-bg);
+    color:var(--info);
+}
+
+.status-text.st-missed {
+    background:var(--warning-bg);
+    color:var(--warning);
+}
+
+.status-text.st-none {
+    background:var(--danger-bg);
+    color:var(--danger);
+}
+
+.digit-timer {
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:6px;
+    margin:4px 0 6px;
+    font-variant-numeric:tabular-nums;
+}
+
+.digit-box {
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    width:58px;
+    height:54px;
+    border-radius:12px;
+    background:var(--soft);
+    border:1px solid var(--border-soft);
+    font-size:28px;
+    font-weight:700;
+    color:var(--text);
+}
+
+.digit-colon {
+    color:var(--muted);
+    font-size:22px;
+    font-weight:600;
+}
+
+.timer-caption {
+    margin-bottom:16px;
+    text-align:center;
+    color:var(--text-2);
+    font-size:12.5px;
+}
+
+#live-timer,
+#working_hours {
+    display:none!important;
+}
+
+.button-area {
+    width:100%;
+}
+
+
+/* =========================================================
+   CHECK IN / CHECK OUT BUTTONS
+========================================================= */
+
+.attendance-button {
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+    width:100%;
+    height:46px;
+    padding:0 14px;
+
+    border-radius:12px;
+
+    font:650 14px var(--font);
+    cursor:pointer;
+
+    transition:
+        background-color .15s ease,
+        color .15s ease,
+        border-color .15s ease,
+        transform .05s ease;
+}
+
+
+/* =========================================================
+   CHECK IN
+   VIEW ALL BLUE
+========================================================= */
+
+.attendance-button.checkin {
+    background:#2563EB !important;
+    color:#ffffff !important;
+    border:1px solid #2563EB !important;
+    box-shadow:none !important;
+}
+
+.attendance-button.checkin:hover {
+    background:#1D4ED8 !important;
+    color:#ffffff !important;
+    border-color:#1D4ED8 !important;
+}
+
+.attendance-button.checkin:active {
+    background:#1E40AF !important;
+    color:#ffffff !important;
+    border-color:#1E40AF !important;
+}
+
+
+/* =========================================================
+   CHECK OUT
+   WHITE BACKGROUND + RED BORDER + RED TEXT
+========================================================= */
+
+.attendance-button.checkout {
+    background:#ffffff !important;
+    color:#ef4444 !important;
+    border:1px solid #ef4444 !important;
+    box-shadow:none !important;
+}
+
+.attendance-button.checkout:hover {
+    background:#fff7f7 !important;
+    color:#dc2626 !important;
+    border-color:#dc2626 !important;
+}
+
+.attendance-button.checkout:active {
+    background:#fef0f0 !important;
+    color:#b91c1c !important;
+    border-color:#b91c1c !important;
+}
+
+
+/* =========================================================
+   DISABLED / FOCUS
+========================================================= */
+
+.attendance-button:disabled {
+    opacity:.6;
+    cursor:progress;
+}
+
+.attendance-button:focus-visible {
+    outline:2px solid #93B4F5;
+    outline-offset:2px;
+}
+
+.attendance-button:active {
+    transform:translateY(1px);
+}
+
+.divider {
+    display:none;
+}
+
+
+/* =========================================================
+   CHECK IN / CHECK OUT INFORMATION
+========================================================= */
+
+.checkinout-grid {
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:10px;
+    margin:16px 0 0;
+    padding-top:16px;
+    border-top:1px solid var(--border-soft);
+}
+
+.checkinout-box {
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:4px;
+    min-width:0;
+    padding:12px 8px;
+    border-radius:12px;
+    background:var(--soft);
+}
+
+.cio-icon {
+    display:none;
+}
+
+.cio-text {
+    min-width:0;
+}
+
+.checkinout-box dt {
+    margin:0 0 4px;
+    color:var(--text-2);
+    font-size:12px;
+    font-weight:400;
+}
+
+.checkinout-box dd {
+    margin:0;
+    font-size:15px;
+    font-weight:700;
+    white-space:nowrap;
+    font-variant-numeric:tabular-nums;
+}
+
+
+/* =========================================================
+   MANAGER + MEMBERS
+========================================================= */
+
+.manager-card,
 .members-card {
-    padding: 20px 22px;
-    /* fill whatever vertical space is left in the stretched left
-       column, after the attendance card and manager card take
-       their natural (content) height - this is what makes the
-       card's bottom edge land on the calendar's bottom edge */
-    flex: 1 1 auto;
-    min-height: 0;
-    display: flex;
-    flex-direction: column;
+    width:100%;
+    padding:16px;
+}
+
+.card-label {
+    margin:0;
+    font-size:14px;
+    font-weight:650;
+}
+
+.manager-row {
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin-top:12px;
+}
+
+.manager-info {
+    display:flex;
+    flex-direction:column;
+    align-items:flex-start;
+    gap:2px;
+    min-width:0;
+    flex:1;
+}
+
+.manager-info strong {
+    max-width:100%;
+    overflow:hidden;
+    font-size:13.5px;
+    font-weight:650;
+    white-space:nowrap;
+    text-overflow:ellipsis;
+}
+
+.manager-code {
+    color:var(--text-2);
+    font-size:11.5px;
+}
+
+.manager-chevron {
+    color:var(--muted);
+    font-size:18px;
+}
+
+.member-status {
+    display:inline-flex;
+    align-items:center;
+    gap:5px;
+    margin-top:3px;
+    padding:3px 8px;
+    border-radius:999px;
+    font-size:10.5px;
+    font-weight:600;
+    line-height:1;
+}
+
+.member-status::before {
+    content:"";
+    width:5px;
+    height:5px;
+    border-radius:50%;
+    background:currentColor;
+}
+
+.status-in-text {
+    background:var(--success-bg);
+    color:var(--success);
+}
+
+.status-out-text {
+    background:var(--danger-bg);
+    color:var(--danger);
 }
 
 .members-card-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 14px;
-    flex-shrink: 0;
-}
-
-.members-card-title {
-    font-size: 13px;
-    font-weight: 700;
-    color: #68737d;
-    text-transform: uppercase;
-    letter-spacing: 0.4px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
 }
 
 .members-list {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    /* grow to fill the card, scroll internally instead of the old
-       hard max-height cutoff (which sliced through the last row) */
-    flex: 1 1 auto;
-    min-height: 0;
-    overflow-y: auto;
+    display:flex;
+    flex-wrap:wrap;
+    gap:12px 6px;
+    margin-top:14px;
+    color:var(--text-2);
+    font-size:12px;
 }
 
-.member-row {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 8px;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: background 0.15s;
+.members-empty {
+    width:100%;
+    padding:14px 0;
+    text-align:center;
+    color:var(--muted);
+    font-size:12px;
 }
 
-.member-row:hover {
-    background: #f5f7f9;
+.member-chip {
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:5px;
+    width:52px;
+    flex:0 0 52px;
+    cursor:pointer;
+    background:none;
+    border:0;
+    padding:0;
+    font-family:var(--font);
+}
+
+.member-chip .avatar {
+    position:relative;
+    width:38px;
+    height:38px;
+    font-size:12px;
+    font-weight:700;
+}
+
+.member-chip .presence {
+    position:absolute;
+    right:-1px;
+    bottom:-1px;
+
+    width:10px;
+    height:10px;
+
+    border-radius:50%;
+
+    border:2px solid var(--surface);
+
+    background:var(--muted);
+}
+
+
+/* =========================================================
+   ASSOCIATE MEMBER STATUS DOTS
+========================================================= */
+
+/* Checked In */
+.member-chip .presence.in {
+    background:var(--success);
+}
+
+
+/* Not Checked In / Checked Out */
+.member-chip .presence.out {
+    background:var(--danger);
+}
+
+
+/* On Leave */
+.member-chip .presence.leave {
+    background:var(--info);
+}
+
+
+/* Half Day */
+.member-chip .presence.half-day {
+    background:#7c3aed;
+}
+
+
+/* Work From Home */
+.member-chip .presence.wfh {
+    background:var(--wfh);
+}
+
+.member-chip .member-short {
+    max-width:100%;
+    overflow:hidden;
+    color:var(--text-2);
+    font-size:10.5px;
+    white-space:nowrap;
+    text-overflow:ellipsis;
+}
+
+.member-chip:hover .member-short {
+    color:var(--text);
+}
+
+.member-chip.more .avatar {
+    background:var(--neutral-bg);
+    color:var(--neutral);
+}
+
+
+/* =========================================================
+   LEAVE BALANCE CARDS
+========================================================= */
+
+.leave-balance-section {
+    display:flex;
+    gap:14px;
+    width:100%;
+    margin-bottom:16px;
+    overflow-x:auto;
+    padding:2px 2px 8px;
+    box-sizing:border-box;
+}
+
+.leave-balance-section .leave-balance-card {
+    --lc:var(--accent);
+    --lc-soft:var(--accent-soft);
+
+    flex:1 1 200px;
+    min-width:200px;
+    min-height:0;
+
+    display:flex;
+    flex-direction:column;
+    align-items:stretch;
+    gap:12px;
+
+    padding:14px 16px;
+    box-sizing:border-box;
+    text-align:left;
+}
+
+.leave-card-top {
+    display:flex;
+    align-items:center;
+    gap:12px;
+    min-width:0;
+}
+
+.leave-card-icon {
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    flex-shrink:0;
+
+    width:40px;
+    height:40px;
+
+    border-radius:50%;
+
+    background:var(--lc-soft);
+    color:var(--lc);
+
+    font-size:17px;
+}
+
+.leave-card-info {
+    min-width:0;
+
+    display:flex;
+    flex-direction:column;
+    gap:3px;
+}
+
+.leave-card-title {
+    margin:0;
+    overflow:hidden;
+
+    color:var(--text);
+    font-size:13.5px;
+    font-weight:650;
+
+    white-space:nowrap;
+    text-overflow:ellipsis;
+}
+
+.leave-card-balance {
+    display:flex;
+    align-items:baseline;
+    gap:5px;
+
+    line-height:1.1;
+    white-space:nowrap;
+}
+
+.leave-card-balance strong {
+    color:var(--text);
+    font-size:20px;
+    font-weight:700;
+    font-variant-numeric:tabular-nums;
+}
+
+.leave-card-total {
+    color:var(--muted);
+    font-size:13px;
+}
+
+.leave-card-days {
+    margin-left:2px;
+    color:var(--text-2);
+    font-size:11.5px;
+}
+
+.leave-card-progress {
+    width:100%;
+    height:6px;
+    overflow:hidden;
+
+    background:var(--border-soft);
+    border-radius:999px;
+}
+
+.leave-card-progress-bar {
+    height:100%;
+
+    background:var(--lc);
+    border-radius:inherit;
+
+    transition:width .4s ease;
+}
+
+.leave-balance-card.is-negative .leave-card-balance strong {
+    color:var(--danger);
+}
+
+.leave-balance-card.is-negative {
+    --lc:var(--danger);
+    --lc-soft:var(--danger-bg);
+}
+
+
+/* =========================================================
+   PASTEL LEAVE TYPES
+========================================================= */
+
+.lt-privilege {
+    --lc:#6b8fc4;
+    --lc-soft:#edf3fb;
+}
+
+.lt-restricted {
+    --lc:#8b78b8;
+    --lc-soft:#f1eef8;
+}
+
+.lt-sick {
+    --lc:#5f8fc7;
+    --lc-soft:#edf4fb;
+}
+
+.lt-casual {
+    --lc:#6b91c8;
+    --lc-soft:#eef4fb;
+}
+
+.lt-marriage {
+    --lc:#b77b9b;
+    --lc-soft:#f9eef4;
+}
+
+.lt-lwp {
+    --lc:#c98787;
+    --lc-soft:#faeeee;
+}
+
+.lt-compoff {
+    --lc:#b28a5b;
+    --lc-soft:#faf3e8;
 }
 
 
@@ -441,222 +947,673 @@
 ========================================================= */
 
 .attendance-calendar-card {
-    min-height: 560px;
-    padding: 24px;
-    overflow: hidden;
+    width:100%;
+    padding:18px;
+    overflow:hidden;
 }
 
-.attendance-calendar-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 18px;
+.attendance-calendar-header h3 {
+    margin:0 0 12px;
+    font-size:18px;
+    font-weight:700;
 }
 
-.attendance-calendar-header h4 {
-    margin: 0;
-    font-size: 20px;
-    font-weight: 700;
-    color: #1f272e;
-}
-
+#attendance-calendar,
 .attendance-calendar-container {
-    width: 100% !important;
-    min-width: 0;
-    min-height: 420px;
-    box-sizing: border-box;
+    width:100%;
+    min-width:0;
+    overflow:hidden;
+}
+
+#attendance-calendar .fc {
+    width:100%;
+    font-family:var(--font);
+    font-size:12px;
+    color:var(--text);
 }
 
 
 /* =========================================================
-   CALENDAR TOOLBAR (prev / month title / next)
+   TOOLBAR / MONTH NAVIGATION
 ========================================================= */
 
-.calendar-toolbar {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 16px;
+#attendance-calendar .fc-header-toolbar {
+    display:flex!important;
+    align-items:center;
+    justify-content:space-between;
+    margin:0 0 14px!important;
 }
 
-.cal-title {
-    font-size: 18px;
-    font-weight: 700;
-    color: #1f272e;
+#attendance-calendar .fc-toolbar-chunk {
+    display:flex;
+    align-items:center;
+    gap:10px;
 }
 
-.cal-nav-btn {
-    width: 32px;
-    height: 32px;
-    border: 1px solid #e3e5e8;
-    border-radius: 8px;
-    background: #ffffff;
-    color: #1f272e;
-    font-size: 16px;
-    line-height: 1;
-    cursor: pointer;
+#attendance-calendar .fc-toolbar-chunk:first-child {
+    gap:6px;
 }
 
-.cal-nav-btn:hover {
-    background: #f5f7f9;
+#attendance-calendar .fc-toolbar-title {
+    margin:0 4px;
+    font-size:19px;
+    font-weight:700;
+    letter-spacing:-.2px;
+    color:var(--text);
+    order:2;
+}
+
+#attendance-calendar .fc-prev-button,
+#attendance-calendar .fc-next-button {
+    display:flex!important;
+    align-items:center;
+    justify-content:center;
+
+    width:30px;
+    height:30px;
+    padding:0!important;
+
+    border:0!important;
+    border-radius:50%!important;
+
+    background:transparent!important;
+    color:var(--text-2)!important;
+
+    box-shadow:none!important;
+    font-size:13px;
+
+    order:1;
+
+    transition:
+        background-color .12s,
+        color .12s;
+}
+
+#attendance-calendar .fc-prev-button {
+    order:1;
+}
+
+#attendance-calendar .fc-next-button {
+    order:3;
+}
+
+#attendance-calendar .fc-prev-button:hover,
+#attendance-calendar .fc-next-button:hover {
+    background:var(--soft)!important;
+    color:var(--text)!important;
+}
+
+#attendance-calendar .fc-prev-button:active,
+#attendance-calendar .fc-next-button:active {
+    background:var(--neutral-bg)!important;
+}
+
+#attendance-calendar .fc-prev-button .fc-icon,
+#attendance-calendar .fc-next-button .fc-icon {
+    font-size:15px;
+}
+
+#attendance-calendar .fc-today-button {
+    height:30px;
+    padding:0 12px;
+
+    border:0!important;
+    border-radius:8px!important;
+
+    background:var(--soft)!important;
+    color:var(--text-2)!important;
+
+    box-shadow:none!important;
+
+    font:500 12px var(--font);
+    text-transform:none;
+}
+
+#attendance-calendar .fc-today-button:hover {
+    background:var(--neutral-bg)!important;
+    color:var(--text)!important;
+}
+
+#attendance-calendar .fc-today-button:disabled {
+    opacity:.5;
+}
+
+#attendance-calendar .fc-button-group {
+    padding:3px;
+    border-radius:10px;
+    background:var(--soft);
+    gap:2px;
+}
+
+#attendance-calendar .fc-button-group .fc-button {
+    height:26px;
+    padding:0 11px;
+
+    border:0!important;
+    border-radius:8px!important;
+
+    background:transparent!important;
+    color:var(--text-2)!important;
+
+    box-shadow:none!important;
+
+    font:500 12px var(--font);
+    text-transform:capitalize;
+}
+
+#attendance-calendar .fc-button-group .fc-button:hover {
+    color:var(--text)!important;
+}
+
+#attendance-calendar .fc-button-group .fc-button-active,
+#attendance-calendar .fc-button-group .fc-button-active:hover {
+    background:var(--surface)!important;
+    color:var(--text)!important;
+
+    font-weight:650;
+
+    box-shadow:
+        0 1px 2px rgba(15,29,58,.08)!important;
 }
 
 
 /* =========================================================
-   CALENDAR MONTH GRID
+   CALENDAR GRID
 ========================================================= */
 
-.calendar-grid {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    gap: 6px;
+#attendance-calendar .fc-scrollgrid {
+    width:100%!important;
+
+    border:1px solid var(--border)!important;
+    border-radius:10px;
+
+    overflow:hidden;
 }
 
-.calendar-day-header {
-    text-align: center;
-    font-size: 12px;
-    font-weight: 600;
-    color: #68737d;
-    padding-bottom: 8px;
+#attendance-calendar .fc-scrollgrid td,
+#attendance-calendar .fc-scrollgrid th {
+    border-color:var(--border)!important;
 }
 
-.calendar-cell {
-    aspect-ratio: 1 / 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 8px;
-    font-size: 13px;
-    color: #1f272e;
-    background: transparent;
+#attendance-calendar .fc-col-header,
+#attendance-calendar .fc-col-header-cell {
+    background:var(--soft);
 }
 
-.calendar-cell-empty {
-    background: transparent;
+#attendance-calendar .fc-col-header-cell {
+    height:36px;
 }
 
-.calendar-cell-date {
-    font-weight: 500;
+#attendance-calendar .fc-col-header-cell-cushion {
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    height:36px;
+    padding:0!important;
+
+    color:var(--text-2);
+
+    font-size:11px;
+    font-weight:600;
+
+    letter-spacing:.04em;
+    text-decoration:none;
 }
 
-.calendar-cell-today {
-    border: 1.5px solid #2490ef;
-    font-weight: 700;
+#attendance-calendar .fc-view-harness {
+    height:auto!important;
+    padding-bottom:0!important;
 }
 
-.calendar-cell.cal-present {
-    background: #ddf5e1;
-    color: #1f9d55;
-    font-weight: 700;
+#attendance-calendar .fc-view-harness-active > .fc-view {
+    position:relative!important;
+    inset:auto!important;
 }
 
-.calendar-cell.cal-absent {
-    background: #fdecec;
-    color: #c0392b;
-    font-weight: 700;
+#attendance-calendar .fc-scroller,
+#attendance-calendar .fc-scroller-liquid-absolute {
+    position:relative!important;
+    height:auto!important;
+    overflow:visible!important;
+    inset:auto!important;
 }
 
-.calendar-cell.cal-leave {
-    background: #e6f1fb;
-    color: #0c447c;
-    font-weight: 700;
+#attendance-calendar .fc-daygrid,
+#attendance-calendar .fc-daygrid-body,
+#attendance-calendar .fc-scrollgrid-sync-table {
+    height:auto!important;
 }
 
-.calendar-cell.cal-holiday {
-    background: #eceff1;
-    color: #4a4a4a;
-    font-weight: 700;
+#attendance-calendar .fc-daygrid-body table {
+    width:100%!important;
+    height:auto!important;
+    table-layout:fixed!important;
+}
+
+#attendance-calendar .fc-daygrid-body tbody tr {
+    height:auto!important;
+}
+
+#attendance-calendar .fc-daygrid-day {
+    height:auto!important;
+}
+
+#attendance-calendar .fc-daygrid-day-frame {
+    min-height:var(--row-h)!important;
+    height:auto!important;
+    box-sizing:border-box!important;
+}
+
+#attendance-calendar td[role=gridcell] {
+    padding:0!important;
+    vertical-align:top!important;
+}
+
+#attendance-calendar .fc-daygrid-day-frame {
+    padding:6px 6px 4px!important;
+
+    background:var(--surface);
+
+    display:flex;
+    flex-direction:column;
+
+    overflow:visible;
+}
+
+#attendance-calendar .fc-daygrid-day-top {
+    order:0;
+    flex-direction:row;
+    justify-content:flex-start;
+}
+
+#attendance-calendar .fc-daygrid-day-number {
+    padding:0!important;
+
+    color:var(--text-2);
+
+    font-size:12px;
+    line-height:20px;
+
+    text-decoration:none;
+}
+
+#attendance-calendar .fc-day-other {
+    background:var(--soft)!important;
+}
+
+#attendance-calendar .fc-day-other .fc-daygrid-day-frame {
+    background:var(--soft);
+}
+
+#attendance-calendar .fc-day-other .fc-daygrid-day-number {
+    color:var(--muted);
+    opacity:.55;
+}
+
+#attendance-calendar .fc-day-sat .fc-daygrid-day-frame,
+#attendance-calendar .fc-day-sun .fc-daygrid-day-frame {
+    background:var(--soft);
+}
+
+#attendance-calendar .fc-day-today {
+    background:transparent!important;
+}
+
+#attendance-calendar .fc-day-today .fc-daygrid-day-number {
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    width:24px;
+    height:24px;
+
+    margin:-2px 0 0 -3px;
+
+    border-radius:50%;
+
+    background:var(--primary);
+    color:var(--surface);
+
+    font-weight:650;
+}
+
+#attendance-calendar .fc-highlight {
+    display:none!important;
+}
+
+#attendance-calendar .fc-daygrid-day-events {
+    order:2;
+    min-height:0!important;
+    margin:2px 0 0!important;
+}
+
+#attendance-calendar .fc-daygrid-day.has-holiday .fc-daygrid-day-frame {
+    background:
+        color-mix(
+            in srgb,
+            var(--warning) 5%,
+            var(--surface)
+        );
 }
 
 
 /* =========================================================
-   CALENDAR LEGEND
+   CALENDAR EVENT CHIPS
+========================================================= */
+
+#attendance-calendar .fc-daygrid-event {
+    display:block!important;
+
+    margin:3px 0 0!important;
+    padding:2px 4px!important;
+
+    border:1px solid transparent!important;
+    border-left-width:0!important;
+
+    border-radius:8px!important;
+
+    box-shadow:none!important;
+
+    font-size:11.5px!important;
+    font-weight:600;
+    line-height:1.3;
+
+    white-space:normal;
+}
+
+#attendance-calendar .fc-event-main,
+#attendance-calendar .fc-event-title,
+#attendance-calendar .fc-event-time {
+    color:inherit!important;
+    font-size:11.5px!important;
+    font-weight:600;
+}
+
+#attendance-calendar .fc-daygrid-event-dot {
+    display:none;
+}
+
+
+/* =========================================================
+   PRESENT
+   LIGHT GREEN BACKGROUND + BLUE TEXT
+========================================================= */
+
+.cal-event-present {
+    background:#e8f6ed!important;
+    color:#1559a6!important;
+
+    border:1px solid transparent!important;
+    border-left:0!important;
+
+    border-radius:8px!important;
+}
+
+
+/* =========================================================
+   ABSENT
+   LIGHT RED BACKGROUND + BLUE TEXT
+========================================================= */
+
+.cal-event-absent {
+    background:#fdeeee!important;
+    color:#1559a6!important;
+
+    border:1px solid transparent!important;
+    border-left:0!important;
+
+    border-radius:8px!important;
+}
+
+
+/* =========================================================
+   ON LEAVE
+   LIGHT BLUE BACKGROUND + BLUE TEXT
+========================================================= */
+
+.cal-event-leave {
+    background:#eaf2ff!important;
+    color:#1559a6!important;
+
+    border:1px solid transparent!important;
+    border-left:0!important;
+
+    border-radius:8px!important;
+}
+
+
+/* =========================================================
+   HALF DAY
+   LIGHT YELLOW BACKGROUND + GOLD TEXT
+========================================================= */
+
+.cal-event-halfday {
+    background:#fff5df!important;
+    color:#9a6500!important;
+
+    border:1px solid transparent!important;
+    border-left:0!important;
+
+    border-radius:8px!important;
+}
+
+
+/* =========================================================
+   WORK FROM HOME
+========================================================= */
+
+.cal-event-wfh {
+    background:#eaf6fb!important;
+    color:#176889!important;
+
+    border:1px solid transparent!important;
+    border-left:0!important;
+
+    border-radius:8px!important;
+}
+
+
+/* =========================================================
+   CALENDAR SECONDARY TEXT
+========================================================= */
+
+.calendar-working-hours,
+.calendar-leave-type,
+.calendar-half-day-status {
+    display:block;
+
+    margin:2px 0 0;
+
+    font-size:10.5px;
+    line-height:14px;
+    font-weight:500;
+
+    opacity:.8;
+
+    white-space:nowrap;
+}
+
+
+/* =========================================================
+   PRESENT SECONDARY TEXT
+========================================================= */
+
+.cal-event-present .calendar-working-hours,
+.cal-event-present .calendar-leave-type,
+.cal-event-present .calendar-half-day-status {
+    color:#1559a6!important;
+}
+
+
+/* =========================================================
+   ABSENT SECONDARY TEXT
+========================================================= */
+
+.cal-event-absent .calendar-working-hours,
+.cal-event-absent .calendar-leave-type,
+.cal-event-absent .calendar-half-day-status {
+    color:#1559a6!important;
+}
+
+
+/* =========================================================
+   LEAVE SECONDARY TEXT
+========================================================= */
+
+.cal-event-leave .calendar-working-hours,
+.cal-event-leave .calendar-leave-type,
+.cal-event-leave .calendar-half-day-status {
+    color:#1559a6!important;
+}
+
+
+/* =========================================================
+   HALF DAY SECONDARY TEXT
+========================================================= */
+
+.cal-event-halfday .calendar-working-hours,
+.cal-event-halfday .calendar-leave-type,
+.cal-event-halfday .calendar-half-day-status {
+    color:#9a6500!important;
+}
+/* =========================================================
+   HALF DAY TEXT WEIGHT
+========================================================= */
+
+/* Half Day should be bold */
+.cal-event-halfday .calendar-half-day-status {
+    font-weight:700!important;
+    opacity:1!important;
+}
+
+/* Leave type should remain normal */
+.cal-event-halfday .calendar-leave-type {
+    font-weight:500!important;
+    opacity:.8;
+}
+
+/* Present / Absent should remain normal */
+.cal-event-halfday .calendar-half-day-present {
+    font-weight:500!important;
+    opacity:.8;
+}
+
+/* Working hours should remain normal */
+.cal-event-halfday .calendar-working-hours {
+    font-weight:500!important;
+    opacity:.8;
+}
+
+/* =========================================================
+   WORK FROM HOME SECONDARY TEXT
+========================================================= */
+
+.cal-event-wfh .calendar-working-hours,
+.cal-event-wfh .calendar-leave-type,
+.cal-event-wfh .calendar-half-day-status {
+    color:#176889!important;
+}
+
+
+/* =========================================================
+   HOLIDAY CHIP
+========================================================= */
+
+.calendar-holiday {
+    order:1;
+
+    margin-top:3px;
+    padding:4px 7px;
+
+    cursor:default;
+
+    background:var(--warning-bg);
+    color:var(--warning);
+
+    border:1px solid
+        color-mix(
+            in srgb,
+            var(--warning) 35%,
+            transparent
+        );
+
+    border-left:3px solid var(--warning);
+
+    border-radius:8px;
+
+    font-size:11px;
+    line-height:1.25;
+    font-weight:600;
+
+    white-space:normal;
+    word-break:break-word;
+}
+
+.calendar-holiday-name {
+    display:block;
+}
+
+.calendar-holiday-status {
+    display:block;
+
+    margin-top:1px;
+
+    font-size:10px;
+    font-weight:500;
+
+    opacity:.8;
+}
+
+
+/* =========================================================
+   LEGEND
 ========================================================= */
 
 .calendar-legend {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 18px;
-    margin-top: 16px;
-    padding-top: 14px;
-    border-top: 1px solid #f1f2f4;
+    display:flex;
+    flex-wrap:wrap;
+    gap:18px;
+
+    margin-top:14px;
+
+    color:var(--text-2);
+    font-size:12px;
 }
 
-.legend-item {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 13px;
-    color: #68737d;
+.calendar-legend span {
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
 }
 
 .legend-dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    display: inline-block;
+    display:inline-block;
+
+    width:8px;
+    height:8px;
+
+    border-radius:50%;
 }
 
-.legend-present { background: #1f9d55; }
-.legend-absent { background: #e05c5c; }
-.legend-leave { background: #2490ef; }
-.legend-holiday { background: #9aa2a9; }
-.legend-halfday { background: #f2b23d; }
-
-
-/* =========================================================
-   CALENDAR EVENT CHIP COLORS
-   Matches the legend dots above. Applied via JS
-   (colorize_calendar_events) based on each event chip's status
-   text, since FullCalendar renders every event with identical
-   default styling otherwise.
-========================================================= */
-
-#attendance-calendar .cal-event-present {
-    background-color: #ddf5e1 !important;
-    border-color: #1f9d55 !important;
-    color: #1f9d55 !important;
+.legend-present {
+    background:var(--success);
 }
 
-#attendance-calendar .cal-event-absent {
-    background-color: #fdecec !important;
-    border-color: #e05c5c !important;
-    color: #c0392b !important;
+.legend-absent {
+    background:var(--danger);
 }
 
-#attendance-calendar .cal-event-leave {
-    background-color: #e6f1fb !important;
-    border-color: #2490ef !important;
-    color: #0c447c !important;
+.legend-leave {
+    background:var(--info);
 }
 
-#attendance-calendar .cal-event-holiday {
-    background-color: #eceff1 !important;
-    border-color: #9aa2a9 !important;
-    color: #4a4a4a !important;
+.legend-holiday {
+    background:#7a56d8;
 }
 
-#attendance-calendar .cal-event-halfday {
-    background-color: #fff4de !important;
-    border-color: #f2b23d !important;
-    color: #b7791f !important;
-}
-
-/* FullCalendar nests a dot + title inside each chip in most
-   month-view builds - force those to inherit rather than keep
-   their own default color so the whole chip reads as one color. */
-#attendance-calendar .cal-event-present .fc-event-title,
-#attendance-calendar .cal-event-present .fc-daygrid-event-dot,
-#attendance-calendar .cal-event-absent .fc-event-title,
-#attendance-calendar .cal-event-absent .fc-daygrid-event-dot,
-#attendance-calendar .cal-event-leave .fc-event-title,
-#attendance-calendar .cal-event-leave .fc-daygrid-event-dot,
-#attendance-calendar .cal-event-holiday .fc-event-title,
-#attendance-calendar .cal-event-holiday .fc-daygrid-event-dot,
-#attendance-calendar .cal-event-halfday .fc-event-title,
-#attendance-calendar .cal-event-halfday .fc-daygrid-event-dot {
-    color: inherit !important;
-    border-color: currentColor !important;
+.legend-halfday {
+    background:var(--warning);
 }
 
 
@@ -665,75 +1622,105 @@
 ========================================================= */
 
 .history-card {
-    width: 100%;
-    margin-top: 24px;
-    padding: 24px 30px;
+    width:100%;
+    margin-top:16px;
+    padding:18px 20px 12px;
 }
 
 .history-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 16px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    margin-bottom:10px;
 }
 
-.history-header h4 {
-    margin: 0;
-    font-size: 18px;
-    font-weight: 700;
-    color: #1f272e;
+.history-header h3 {
+    margin:0;
+    font-size:18px;
+    font-weight:700;
 }
 
 .view-all-link {
-    font-size: 13px;
-    font-weight: 600;
-    color: #2490ef;
-    text-decoration: none;
+    color:#2563EB;
+    font-size:12.5px;
+    font-weight:600;
+    text-decoration:none;
 }
 
 .view-all-link:hover {
-    text-decoration: underline;
+    text-decoration:underline;
 }
 
-
-/* =========================================================
-   TABLE
-========================================================= */
-
 .attendance-table-wrapper {
-    width: 100%;
-    overflow-x: auto;
+    width:100%;
+    overflow-x:auto;
 }
 
 .attendance-table {
-    width: 100%;
-    margin: 0;
-    color: #1f272e;
+    width:100%;
+    min-width:520px;
+
+    border-collapse:collapse;
+
+    color:var(--text);
+    font-size:13px;
+}
+
+.attendance-table thead {
+    background:var(--soft);
 }
 
 .attendance-table th {
-    padding: 10px 12px;
-    font-weight: 600;
-    color: #68737d;
-    font-size: 13px;
-    border-bottom: 1px solid #e3e5e8;
-    text-align: left;
+    height:34px;
+    padding:0 14px;
+
+    border-bottom:1px solid var(--border);
+
+    color:var(--text-2);
+
+    font-size:11px;
+    font-weight:650;
+
+    text-align:left;
+    white-space:nowrap;
+
+    text-transform:uppercase;
+    letter-spacing:.04em;
 }
 
 .attendance-table td {
-    padding: 14px 12px;
-    vertical-align: middle;
-    font-size: 14px;
-    border-bottom: 1px solid #f1f2f4;
-    color: #1f272e;
+    height:38px;
+    padding:0 14px;
+
+    border-bottom:1px solid var(--border-soft);
+
+    vertical-align:middle;
+    white-space:nowrap;
+
+    font-variant-numeric:tabular-nums;
 }
 
-.attendance-table tbody tr:last-child td {
-    border-bottom: none;
+.attendance-table td:first-child {
+    font-weight:500;
+}
+
+.attendance-table td.is-empty {
+    color:var(--muted);
 }
 
 .attendance-table tbody tr:hover {
-    background: #f8fafc;
+    background:var(--soft);
+}
+
+.attendance-table tbody tr:last-child td {
+    border-bottom:0;
+}
+
+.attendance-table tbody td[colspan] {
+    height:64px;
+
+    color:var(--muted);
+    text-align:center;
 }
 
 
@@ -741,129 +1728,418 @@
    RESPONSIVE
 ========================================================= */
 
-@media (min-width: 1400px) {
+@media (max-width:1100px) {
+
     .attendance-main-grid {
-        grid-template-columns: 400px minmax(700px, 1fr) !important;
+        grid-template-columns:290px minmax(0,1fr);
+    }
+
+    .digit-box {
+        font-size:26px;
+        min-width:30px;
     }
 }
 
-@media (min-width: 1101px) and (max-width: 1399px) {
-    .attendance-main-grid {
-        grid-template-columns: 340px minmax(500px, 1fr) !important;
-    }
-}
 
-@media (min-width: 901px) and (max-width: 1100px) {
-    .attendance-main-grid {
-        grid-template-columns: 320px minmax(400px, 1fr) !important;
-        gap: 18px;
-    }
-}
+@media (max-width:900px) {
 
-@media (max-width: 850px) {
-    .attendance-main-grid {
-        display: grid !important;
-        grid-template-columns: 1fr !important;
-        gap: 20px;
-    }
-    /* single column now - the JS height sync (sync_left_column_height)
-       already skips setting an inline height below 850px, so
-       .attendance-left falls back to its natural content height here */
-    .members-card {
-        flex: 0 0 auto;
-    }
-    .members-list {
-        flex: 0 0 auto;
-        max-height: 320px;
-    }
-    .attendance-calendar-card { min-height: 500px; }
-}
-
-@media (max-width: 768px) {
     .attendance-container {
-        width: 100% !important;
-        padding: 12px !important;
-        margin: 10px auto !important;
+        padding:20px;
     }
-    .attendance-header {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 12px;
+
+    .attendance-main-grid {
+        grid-template-columns:1fr;
     }
-    .header-right { text-align: left; }
-    .header-title-block h2 { font-size: 26px; }
-    .checkinout-grid { grid-template-columns: 1fr 1fr; }
+
+    .attendance-left {
+        display:grid;
+        grid-template-columns:1fr 1fr;
+    }
+
+    .attendance-card {
+        grid-row:span 2;
+    }
 }
 
-@media (max-width: 600px) {
-    .attendance-container { padding: 10px !important; margin: 5px auto !important; }
-    .attendance-card { padding: 20px; }
-    .attendance-calendar-card { padding: 15px; }
-    .history-card { padding: 20px; }
-}
-/* =====================================
-   MOBILE CALENDAR FIX
-===================================== */
 
-@media (max-width: 768px) {
+@media (max-width:600px) {
 
-    /* Calendar card */
+    :root {
+        --row-h:76px;
+    }
+
+    .attendance-container {
+        padding:16px 12px 30px;
+    }
+
+    .header-title-block h2 {
+        font-size:22px;
+    }
+
+    .header-subtitle {
+        font-size:12px;
+    }
+
+    .header-right strong {
+        font-size:13px;
+    }
+
+    .attendance-left {
+        display:flex;
+    }
+
     .attendance-calendar-card {
-        overflow: hidden;
+        padding:12px;
     }
 
-    /* FullCalendar toolbar */
-    .fc .fc-toolbar {
-        display: flex !important;
-        flex-wrap: wrap !important;
-        gap: 8px;
-        justify-content: center !important;
-        align-items: center !important;
+    .leave-balance-section .leave-balance-card {
+        flex-basis:170px;
+        min-width:170px;
     }
 
-    .fc .fc-toolbar-title {
-        font-size: 22px !important;
-        text-align: center;
-        width: 100%;
-        margin-bottom: 10px !important;
-        white-space: nowrap;
+    #attendance-calendar .fc-daygrid-event {
+        font-size:10px!important;
+        padding:2px 4px!important;
     }
 
-    /* Month Week Day buttons */
-    .fc .fc-button-group {
-        display: flex !important;
-        flex-wrap: wrap !important;
-        justify-content: center;
+    #attendance-calendar .fc-event-main,
+    #attendance-calendar .fc-event-title {
+        font-size:10px!important;
     }
 
-    .fc .fc-button {
-        padding: 6px 10px !important;
-        font-size: 13px !important;
+    .calendar-working-hours,
+    .calendar-leave-type,
+    .calendar-half-day-status {
+        font-size:9px;
     }
 
-    /* Calendar area scroll */
-    #attendance-calendar {
-        overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
+    #attendance-calendar .fc-toolbar-title {
+        font-size:16px;
+    }
+}
+
+
+/* =========================================================
+   FRAPPE OVERRIDES
+========================================================= */
+
+.fc-theme-standard {
+    padding:2px;
+    color:var(--text)!important;
+}
+
+.pb-4,
+.py-4 {
+    padding-bottom:1px!important;
+}
+
+.fc-toolbar {
+    padding-bottom:5px;
+    margin-bottom:0!important;
+}
+
+/* =========================================================
+   FINAL CALENDAR EVENT STYLE
+   ROUNDED CARDS + COLORED LEFT EDGE
+========================================================= */
+
+/* ---------------------------------------------------------
+   COMMON SHAPE
+--------------------------------------------------------- */
+
+#attendance-calendar .fc-daygrid-event.cal-event-present,
+#attendance-calendar .fc-daygrid-event.cal-event-absent,
+#attendance-calendar .fc-daygrid-event.cal-event-leave,
+#attendance-calendar .fc-daygrid-event.cal-event-halfday,
+#attendance-calendar .fc-daygrid-event.cal-event-wfh {
+
+    display:block !important;
+
+    margin:3px 0 0 !important;
+
+    padding:4px 7px !important;
+
+    border:1px solid transparent !important;
+
+    border-radius:8px !important;
+
+    box-sizing:border-box !important;
+
+    box-shadow:none !important;
+
+    font-size:11.5px !important;
+
+    line-height:1.25 !important;
+
+    font-weight:600 !important;
+
+    white-space:normal !important;
+}
+
+
+/* =========================================================
+   PRESENT
+   LIGHT GREEN + GREEN LEFT EDGE
+========================================================= */
+
+#attendance-calendar .fc-daygrid-event.cal-event-present {
+
+    background:#e8f6ed !important;
+
+    color:#1559a6 !important;
+
+    border:1px solid #cfe8d9 !important;
+
+    border-left:3px solid #62a878 !important;
+
+    border-radius:8px !important;
+}
+
+
+/* =========================================================
+   ABSENT
+   LIGHT RED + RED LEFT EDGE
+========================================================= */
+
+#attendance-calendar .fc-daygrid-event.cal-event-absent {
+
+    background:#fdeeee !important;
+
+    color:#1559a6 !important;
+
+    border:1px solid #f2d6d6 !important;
+
+    border-left:3px solid #d98282 !important;
+
+    border-radius:8px !important;
+}
+
+
+/* =========================================================
+   ON LEAVE
+   LIGHT BLUE + BLUE LEFT EDGE
+========================================================= */
+
+#attendance-calendar .fc-daygrid-event.cal-event-leave {
+
+    background:#eaf2ff !important;
+
+    color:#1559a6 !important;
+
+    border:1px solid #d4e2f8 !important;
+
+    border-left:3px solid #6f9bd6 !important;
+
+    border-radius:8px !important;
+}
+
+
+/* =========================================================
+   HALF DAY
+   DIFFERENT COLOUR
+   SOFT LAVENDER + PURPLE LEFT EDGE
+========================================================= */
+
+#attendance-calendar .fc-daygrid-event.cal-event-halfday {
+
+    background:#f1eaff !important;
+
+    color:#6d47b8 !important;
+
+    border:1px solid #dfd0f7 !important;
+
+    border-left:3px solid #8b5cf6 !important;
+
+    border-radius:8px !important;
+}
+
+
+/* =========================================================
+   WORK FROM HOME
+   LIGHT CYAN + TEAL LEFT EDGE
+========================================================= */
+
+#attendance-calendar .fc-daygrid-event.cal-event-wfh {
+
+    background:#eaf6fb !important;
+
+    color:#176889 !important;
+
+    border:1px solid #cfe7ef !important;
+
+    border-left:3px solid #5c9db5 !important;
+
+    border-radius:8px !important;
+}
+
+
+/* =========================================================
+   EVENT CONTENT
+========================================================= */
+
+#attendance-calendar .cal-event-present .fc-event-main,
+#attendance-calendar .cal-event-present .fc-event-title,
+#attendance-calendar .cal-event-present .fc-event-time,
+
+#attendance-calendar .cal-event-absent .fc-event-main,
+#attendance-calendar .cal-event-absent .fc-event-title,
+#attendance-calendar .cal-event-absent .fc-event-time,
+
+#attendance-calendar .cal-event-leave .fc-event-main,
+#attendance-calendar .cal-event-leave .fc-event-title,
+#attendance-calendar .cal-event-leave .fc-event-time,
+
+#attendance-calendar .cal-event-halfday .fc-event-main,
+#attendance-calendar .cal-event-halfday .fc-event-title,
+#attendance-calendar .cal-event-halfday .fc-event-time,
+
+#attendance-calendar .cal-event-wfh .fc-event-main,
+#attendance-calendar .cal-event-wfh .fc-event-title,
+#attendance-calendar .cal-event-wfh .fc-event-time {
+
+    color:inherit !important;
+
+    font-size:11.5px !important;
+
+    font-weight:600 !important;
+}
+
+
+/* =========================================================
+   SECONDARY TEXT
+========================================================= */
+
+#attendance-calendar .cal-event-present .calendar-working-hours,
+#attendance-calendar .cal-event-present .calendar-leave-type,
+#attendance-calendar .cal-event-present .calendar-half-day-status {
+
+    color:#1559a6 !important;
+}
+
+
+#attendance-calendar .cal-event-absent .calendar-working-hours,
+#attendance-calendar .cal-event-absent .calendar-leave-type,
+#attendance-calendar .cal-event-absent .calendar-half-day-status {
+
+    color:#1559a6 !important;
+}
+
+
+#attendance-calendar .cal-event-leave .calendar-working-hours,
+#attendance-calendar .cal-event-leave .calendar-leave-type,
+#attendance-calendar .cal-event-leave .calendar-half-day-status {
+
+    color:#1559a6 !important;
+}
+
+
+/* HALF DAY SECONDARY TEXT */
+
+#attendance-calendar .cal-event-halfday .calendar-working-hours,
+#attendance-calendar .cal-event-halfday .calendar-leave-type,
+#attendance-calendar .cal-event-halfday .calendar-half-day-status {
+
+    color:#6d47b8 !important;
+}
+
+
+/* WFH SECONDARY TEXT */
+
+#attendance-calendar .cal-event-wfh .calendar-working-hours,
+#attendance-calendar .cal-event-wfh .calendar-leave-type,
+#attendance-calendar .cal-event-wfh .calendar-half-day-status {
+
+    color:#176889 !important;
+}
+
+
+/* =========================================================
+   HALF DAY TEXT WEIGHT
+========================================================= */
+
+#attendance-calendar .cal-event-halfday .calendar-half-day-status {
+
+    color:#6d47b8 !important;
+
+    font-weight:700 !important;
+
+    opacity:1 !important;
+}
+
+
+#attendance-calendar .cal-event-halfday .calendar-leave-type,
+#attendance-calendar .cal-event-halfday .calendar-half-day-present,
+#attendance-calendar .cal-event-halfday .calendar-working-hours {
+
+    color:#6d47b8 !important;
+
+    font-weight:500 !important;
+
+    opacity:.8 !important;
+}
+
+
+/* =========================================================
+   HOLIDAY
+   SAME ROUNDED SHAPE + LEFT EDGE
+========================================================= */
+
+#attendance-calendar .calendar-holiday {
+
+    margin-top:3px !important;
+
+    padding:4px 7px !important;
+
+    border:1px solid
+        color-mix(
+            in srgb,
+            var(--warning) 35%,
+            transparent
+        ) !important;
+
+    border-left:3px solid var(--warning) !important;
+
+    border-radius:8px !important;
+
+    box-sizing:border-box !important;
+}
+
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media (max-width:600px) {
+
+    #attendance-calendar .fc-daygrid-event.cal-event-present,
+    #attendance-calendar .fc-daygrid-event.cal-event-absent,
+    #attendance-calendar .fc-daygrid-event.cal-event-leave,
+    #attendance-calendar .fc-daygrid-event.cal-event-halfday,
+    #attendance-calendar .fc-daygrid-event.cal-event-wfh {
+
+        padding:3px 5px !important;
+
+        border-radius:8px !important;
+
+        font-size:10px !important;
     }
 
-    .fc {
-        min-width: 650px;
-    }
 
-    /* Event text */
-    .fc-event-title,
-    .fc-event-main {
-        font-size: 11px !important;
-    }
+    #attendance-calendar .cal-event-present .fc-event-main,
+    #attendance-calendar .cal-event-present .fc-event-title,
 
-    /* Hide weekends button */
-    .fc-hideWeekends-button {
-        margin-top: 8px !important;
-    }
+    #attendance-calendar .cal-event-absent .fc-event-main,
+    #attendance-calendar .cal-event-absent .fc-event-title,
 
-    /* Remove unwanted instruction text */
-    .fc .fc-view-harness + div {
-        display: none !important;
+    #attendance-calendar .cal-event-leave .fc-event-main,
+    #attendance-calendar .cal-event-leave .fc-event-title,
+
+    #attendance-calendar .cal-event-halfday .fc-event-main,
+    #attendance-calendar .cal-event-halfday .fc-event-title,
+
+    #attendance-calendar .cal-event-wfh .fc-event-main,
+    #attendance-calendar .cal-event-wfh .fc-event-title {
+
+        font-size:10px !important;
     }
 }

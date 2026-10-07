@@ -1,10 +1,10 @@
-<div class="attendance-container">
+<main class="attendance-container">
 
-    <!-- ================================================= -->
-    <!-- HEADER -->
-    <!-- ================================================= -->
+    <!-- =========================================================
+         Header
+    ========================================================== -->
 
-    <div class="attendance-header">
+    <header class="attendance-header">
 
         <div class="header-left">
 
@@ -18,71 +18,90 @@
 
             </div>
 
-            <span id="status">
-                <span class="status-badge status-none">
-                    <span class="status-dot"></span>
-                    Loading...
-                </span>
-            </span>
+            <span id="status"></span>
 
         </div>
 
-        <div class="header-right">
+        <time class="header-right">
 
-            <div id="current-date-main"></div>
+            <strong id="current-date-main"></strong>
 
-            <div id="current-date-sub" class="text-muted"></div>
+            <small id="current-date-sub"></small>
 
-        </div>
+        </time>
 
-    </div>
-
-
-    <!-- ================================================= -->
-    <!-- MAIN GRID -->
-    <!-- ================================================= -->
-
-    <div class="attendance-main-grid">
+    </header>
 
 
-        <!-- ================================================= -->
-        <!-- LEFT - EMPLOYEE ATTENDANCE -->
-        <!-- ================================================= -->
+    <!-- =========================================================
+         Leave Balance Cards
+    ========================================================== -->
 
-        <div class="attendance-left">
+    <section class="leave-balance-section">
 
-            <div class="card attendance-card attendance-card-centered">
+       
 
-                <!-- Avatar -->
+    </section>
 
-                <div class="avatar avatar-large" id="avatar_initial">
+
+    <!-- =========================================================
+         Dashboard
+    ========================================================== -->
+
+    <section class="attendance-main-grid">
+
+
+        <!-- =====================================================
+             Employee
+        ====================================================== -->
+
+        <section class="attendance-left">
+
+
+            <!-- Attendance Card -->
+
+            <article class="card attendance-card">
+
+                <div
+                    class="avatar avatar-large"
+                    id="avatar_initial"
+                >
                     A
                 </div>
 
-
-                <!-- Employee -->
-
-                <h3 id="Employee_name" class="profile-name">
+                <h3
+                    id="Employee_name"
+                    class="profile-name"
+                >
                     Loading...
                 </h3>
 
-                <p id="Employee_role" class="profile-role">
+                <p
+                    id="Employee_role"
+                    class="profile-role"
+                >
                     Loading...
                 </p>
 
-
-                <!-- Status -->
-
-                <div id="status_text" class="status-text">
+                <p
+                    id="status_text"
+                    class="status-text"
+                >
                     --
-                </div>
+                </p>
 
 
-                <!-- Working Timer -->
+                <!-- Timer -->
 
-                <div class="digit-timer">
+                <div
+                    class="digit-timer"
+                    aria-label="Working hours"
+                >
 
-                    <span class="digit-box" id="timer_hh">
+                    <span
+                        class="digit-box"
+                        id="timer_hh"
+                    >
                         00
                     </span>
 
@@ -90,7 +109,10 @@
                         :
                     </span>
 
-                    <span class="digit-box" id="timer_mm">
+                    <span
+                        class="digit-box"
+                        id="timer_mm"
+                    >
                         00
                     </span>
 
@@ -98,7 +120,10 @@
                         :
                     </span>
 
-                    <span class="digit-box" id="timer_ss">
+                    <span
+                        class="digit-box"
+                        id="timer_ss"
+                    >
                         00
                     </span>
 
@@ -107,220 +132,262 @@
 
                 <!-- Backward compatibility -->
 
-                <span id="live-timer" style="display:none;">
+                <span
+                    id="live-timer"
+                    hidden
+                >
                     00:00:00
                 </span>
 
-                <span id="working_hours" style="display:none;">
+                <span
+                    id="working_hours"
+                    hidden
+                >
                     00:00:00
                 </span>
 
 
-                <!-- Check In / Check Out -->
+                <!-- Action -->
 
                 <div class="button-area">
 
                     <button
-                        class="btn attendance-button"
-                        id="attendance_btn">
+                        type="button"
+                        id="attendance_btn"
+                        class="attendance-button"
+                    >
                         Loading...
                     </button>
 
                 </div>
 
 
-                <div class="divider"></div>
+                <hr class="divider">
 
 
-                <!-- Check In / Check Out Times -->
+                <!-- Times -->
 
-                <div class="checkinout-grid">
+                <dl class="checkinout-grid">
 
                     <div class="checkinout-box">
 
-                        <span class="cio-label">
+                        <dt>
                             Check In
-                        </span>
+                        </dt>
 
-                        <strong
-                            id="checkin_time"
-                            class="cio-value">
+                        <dd id="checkin_time">
                             --
-                        </strong>
+                        </dd>
 
                     </div>
 
 
                     <div class="checkinout-box">
 
-                        <span class="cio-label">
+                        <dt>
                             Check Out
-                        </span>
+                        </dt>
 
-                        <strong
-                            id="checkout_time"
-                            class="cio-value">
+                        <dd id="checkout_time">
                             --
+                        </dd>
+
+                    </div>
+
+                </dl>
+
+            </article>
+
+
+            <!-- =================================================
+                 Reporting Manager
+            ================================================== -->
+
+            <article class="card manager-card">
+
+                <h4 class="card-label">
+                    Reporting Manager
+                </h4>
+
+                <div class="manager-row">
+
+                    <div class="avatar avatar-small">
+                        D
+                    </div>
+
+                    <div class="manager-info">
+
+                        <strong>
+                            TCZ-IN-0065 - Dinesh Kumar M
                         </strong>
+
+                        <span class="member-status status-out-text">
+                            Out
+                        </span>
 
                     </div>
 
                 </div>
 
-            </div>
-
-        </div>
+            </article>
 
 
-        <!-- ================================================= -->
-        <!-- RIGHT - FRAPPE CALENDAR -->
-        <!-- ================================================= -->
+            <!-- =================================================
+                 Associate Members
+            ================================================== -->
 
-        <div class="attendance-right">
+            <article class="card members-card">
 
-            <div class="card attendance-calendar-card">
+                <header class="members-card-header">
 
-                <div class="attendance-calendar-header">
-
-                    <h4>
-                        Attendance Calendar
+                    <h4 class="card-label">
+                        Associate Members
                     </h4>
 
+                </header>
+
+                <div class="members-list">
+                    <!-- Existing JS-generated members go here -->
                 </div>
 
+            </article>
 
-                <!-- IMPORTANT:
-                     Leave this EMPTY.
-                     Frappe Calendar will render here.
-                -->
+        </section>
+
+
+        <!-- =====================================================
+             Calendar
+        ====================================================== -->
+
+        <section class="attendance-right">
+
+            <article class="card attendance-calendar-card">
+
+                <header class="attendance-calendar-header">
+
+                    <h3>
+                        Attendance Calendar
+                    </h3>
+
+                </header>
 
                 <div
                     id="attendance-calendar"
-                    class="attendance-calendar-container">
+                    class="attendance-calendar-container"
+                >
                 </div>
 
+                <footer class="calendar-legend">
 
-                <!-- Legend -->
+                    <span>
 
-                <div class="calendar-legend">
-
-                    <span class="legend-item">
-
-                        <span
-                            class="legend-dot legend-present">
-                        </span>
+                        <i class="legend-dot legend-present"></i>
 
                         Present
 
                     </span>
 
+                    <span>
 
-                    <span class="legend-item">
-
-                        <span
-                            class="legend-dot legend-absent">
-                        </span>
+                        <i class="legend-dot legend-absent"></i>
 
                         Absent
 
                     </span>
 
+                    <span>
 
-                    <span class="legend-item">
-
-                        <span
-                            class="legend-dot legend-leave">
-                        </span>
+                        <i class="legend-dot legend-leave"></i>
 
                         Leave
 
                     </span>
 
+                    <span>
 
-                    <span class="legend-item">
-
-                        <span
-                            class="legend-dot legend-holiday">
-                        </span>
+                        <i class="legend-dot legend-holiday"></i>
 
                         Holiday
 
                     </span>
 
-                </div>
+                </footer>
 
-            </div>
+            </article>
 
-        </div>
+        </section>
 
-    </div>
+    </section>
 
 
-    <!-- ================================================= -->
-    <!-- RECENT ATTENDANCE -->
-    <!-- ================================================= -->
+    <!-- =========================================================
+         Recent Attendance
+    ========================================================== -->
 
-    <div class="card history-card">
+    <section class="card history-card">
 
-        <div class="history-header">
+        <header class="history-header">
 
-            <h4>
+            <h3>
                 Recent Attendance
-            </h4>
+            </h3>
 
             <a
                 href="#"
                 id="view_all_attendance"
-                class="view-all-link">
+                class="view-all-link"
+            >
                 View All
             </a>
 
+        </header>
+
+
+        <div class="attendance-table-wrapper">
+
+            <table class="attendance-table">
+
+                <thead>
+
+                    <tr>
+
+                        <th>
+                            Date
+                        </th>
+
+                        <th>
+                            Check In
+                        </th>
+
+                        <th>
+                            Check Out
+                        </th>
+
+                        <th>
+                            Hours
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody id="attendance_history">
+
+                    <tr>
+
+                        <td colspan="4">
+                            Loading...
+                        </td>
+
+                    </tr>
+
+                </tbody>
+
+            </table>
+
         </div>
 
+    </section>
 
-        <table class="table attendance-table">
-
-            <thead>
-
-                <tr>
-
-                    <th>
-                        Date
-                    </th>
-
-                    <th>
-                        Check In
-                    </th>
-
-                    <th>
-                        Check Out
-                    </th>
-
-                    <th>
-                        Hours
-                    </th>
-
-                </tr>
-
-            </thead>
-
-
-            <tbody id="attendance_history">
-
-                <tr>
-
-                    <td
-                        colspan="4"
-                        class="text-center">
-                        Loading...
-                    </td>
-
-                </tr>
-
-            </tbody>
-
-        </table>
-
-    </div>
-
-</div>
+</main>

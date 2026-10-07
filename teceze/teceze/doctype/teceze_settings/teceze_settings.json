@@ -11,11 +11,16 @@
   "engineer_prefix",
   "work_anniversary",
   "birthday",
+  "custom_session_expire_hours",
+  "custom_session_reset_hours",
   "column_break_qrqi",
   "process_auto_attendance_after",
   "max_monthly_regularization",
   "shift",
-  "payslip"
+  "payslip",
+  "max_regularization_working_hours",
+  "regularization_full_day_hours",
+  "min_regularization_allowed_hours"
  ],
  "fields": [
   {
@@ -72,13 +77,44 @@
    "fieldname": "birthday",
    "fieldtype": "Check",
    "label": "Birthdays"
+  },
+  {
+   "fieldname": "custom_session_expire_hours",
+   "fieldtype": "Float",
+   "label": "Session Expire Hours",
+   "reqd": 1
+  },
+  {
+   "fieldname": "custom_session_reset_hours",
+   "fieldtype": "Float",
+   "label": "Session Reset Hours",
+   "reqd": 1
+  },
+  {
+   "default": "15",
+   "fieldname": "max_regularization_working_hours",
+   "fieldtype": "Float",
+   "label": "Maximum Regularization Working Hours",
+   "precision": "2"
+  },
+  {
+   "default": "8",
+   "fieldname": "regularization_full_day_hours",
+   "fieldtype": "Float",
+   "label": "Regularization Full Day Hours"
+  },
+  {
+   "default": "4",
+   "fieldname": "min_regularization_allowed_hours",
+   "fieldtype": "Float",
+   "label": "Minimum Regularization Hours"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-09-25 14:43:20.239747",
+ "modified": "2026-10-05 12:06:36.054460",
  "modified_by": "Administrator",
  "module": "Teceze",
  "name": "Teceze Settings",

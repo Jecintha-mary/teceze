@@ -2,7 +2,7 @@
  "app": "teceze",
  "charts": [],
  "content": "[{\"id\":\"V8qGngEySy\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Reports</b></span>\",\"col\":12}},{\"id\":\"NqEjhLboBt\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Total Active Employees\",\"col\":4}},{\"id\":\"jaBW-TiCVU\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Inactive Employee\",\"col\":4}},{\"id\":\"Lo5mclHCTQ\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Total Engineers\",\"col\":4}},{\"id\":\"KKMiNtzV6i\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"India Employees\",\"col\":4}},{\"id\":\"LqnanZLrYQ\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"SriLanka Employees\",\"col\":4}},{\"id\":\"4NFSodhmXH\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"UK employees\",\"col\":4}},{\"id\":\"QPD9qOB0X6\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"US Employees\",\"col\":4}},{\"id\":\"tMeOthxE6g\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"China Employees\",\"col\":4}},{\"id\":\"MQl6Q5Tjb7\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Canada Employees\",\"col\":4}},{\"id\":\"uYJ5UKDjV_\",\"type\":\"card\",\"data\":{\"card_name\":\"Attendance And Leaves\",\"col\":4}},{\"id\":\"IqpL4ui-KC\",\"type\":\"card\",\"data\":{\"card_name\":\"Payroll\",\"col\":4}},{\"id\":\"NjyKeDPmh3\",\"type\":\"card\",\"data\":{\"card_name\":\"Project Managemnet\",\"col\":4}}]",
- "creation": "2026-08-18 11:43:13.342415",
+ "creation": "2026-09-17 15:59:35.941984",
  "custom_blocks": [],
  "docstatus": 0,
  "doctype": "Workspace",
@@ -55,10 +55,20 @@
    "hidden": 0,
    "is_query_report": 0,
    "label": "Attendance And Leaves",
-   "link_count": 4,
+   "link_count": 5,
    "link_type": "DocType",
    "onboard": 0,
    "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Attendance Calendar",
+   "link_count": 0,
+   "link_to": "attendance_calendar",
+   "link_type": "Page",
+   "onboard": 0,
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -101,7 +111,7 @@
    "type": "Link"
   }
  ],
- "modified": "2026-08-18 19:23:06.633149",
+ "modified": "2026-10-07 12:21:55.046370",
  "modified_by": "Administrator",
  "module": "Teceze",
  "name": "Reports",

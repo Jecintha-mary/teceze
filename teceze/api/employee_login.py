@@ -5,7 +5,7 @@ from frappe.utils import now_datetime, time_diff_in_seconds, add_to_date, cint
 
 # Import the 24-hour session timeout constant from employee_attendance.py
 # so both login and attendance modules use the same session expiry value.
-from teceze.api.employee_attendance import SESSION_RESET_SECONDS
+from teceze.api.employee_attendance import  get_attendance_session_settings
 
 
 # ==========================================================
@@ -133,6 +133,7 @@ def get_logged_employee():
 
 @frappe.whitelist()
 def get_today_status(employee=None):
+    session_settings = get_attendance_session_settings()
 
     if not employee:
 
@@ -224,7 +225,7 @@ def get_today_status(employee=None):
 
         session_expires_at = add_to_date(
             session_start,
-            seconds=SESSION_RESET_SECONDS
+            seconds=session_settings["session_reset_seconds"]
         )
 
         previous_seconds = int(
@@ -246,14 +247,14 @@ def get_today_status(employee=None):
             stint_seconds
         )
 
-        if worked_seconds > SESSION_RESET_SECONDS:
-            worked_seconds = SESSION_RESET_SECONDS
+        if worked_seconds > session_settings["session_reset_seconds"]:
+            worked_seconds = session_settings["session_reset_seconds"]
 
         # ==================================================
         # 24-Hour Session Expired
         # ==================================================
 
-        if session_age >= SESSION_RESET_SECONDS:
+        if session_age >= session_settings["session_reset_seconds"]:
 
             return {
                 "status": "MISSED CHECK OUT",
@@ -262,7 +263,7 @@ def get_today_status(employee=None):
                 "session_start": session_start.isoformat(),
                 "checkout_time": "--",
                 "working_hours": "24:00:00",
-                "previous_seconds": SESSION_RESET_SECONDS,
+                "previous_seconds": session_settings["session_reset_seconds"],
                 "session_expires_at": session_expires_at.isoformat(),
                 "button": "Check In",
                 "is_system_manager": False

@@ -14,14 +14,6 @@ from datetime import timedelta
 
 
 # ==========================================================
-# Global Configuration
-# ==========================================================
-
-REGULARIZATION_MIN_ALLOWED_HOURS = 4
-REGULARIZATION_MIN_WORKING_HOURS = 8
-
-
-# ==========================================================
 # Get Regularization Configuration
 # ==========================================================
 
@@ -36,6 +28,23 @@ def get_max_monthly_regularization():
         return 2
 
     return int(max_monthly_regularization)
+
+
+def get_regularization_working_hour_settings():
+
+    settings = frappe.get_single("Teceze Settings")
+
+    return {
+        "min_allowed_hours": float(
+            settings.min_regularization_allowed_hours or 4
+        ),
+        "full_day_hours": float(
+            settings.regularization_full_day_hours or 8
+        ),
+        "max_allowed_hours": float(
+            settings.max_regularization_working_hours or 15
+        )
+    }
 
 
 # ==========================================================
@@ -275,6 +284,32 @@ def validate_regularization_limit(doc, method=None):
 
     from_date = getdate(doc.from_date)
 
+    # ======================================================
+    # Existing Attendance Validation
+    # ======================================================
+
+    existing_attendance = frappe.db.get_value(
+        "Attendance",
+        {
+            "employee": doc.employee,
+            "attendance_date": from_date,
+            "docstatus": ["!=", 2]
+        },"status"
+
+    )
+
+    if existing_attendance == "Present":
+
+        frappe.throw(
+            _(
+                "Attendance is already marked as Present for employee {0} "
+                "on {1}. Regularization is not required for this date."
+            ).format(
+                doc.employee,
+                from_date
+            )
+        )
+
     # ------------------------------------------------------
     # Regularization is a single-day request
     # ------------------------------------------------------
@@ -357,6 +392,26 @@ def validate_regularization_limit(doc, method=None):
         )
 
     # ======================================================
+    # Get Working Hour Configuration
+    # ======================================================
+
+    regularization_settings = (
+        get_regularization_working_hour_settings()
+    )
+
+    min_allowed_hours = (
+        regularization_settings["min_allowed_hours"]
+    )
+
+    full_day_hours = (
+        regularization_settings["full_day_hours"]
+    )
+
+    max_allowed_hours = (
+        regularization_settings["max_allowed_hours"]
+    )
+
+    # ======================================================
     # Working Hours Calculation
     # ======================================================
 
@@ -387,6 +442,21 @@ def validate_regularization_limit(doc, method=None):
                 )
             )
 
+        # ==================================================
+        # Maximum Working Hours Validation
+        # ==================================================
+
+        if hours > max_allowed_hours:
+
+            frappe.throw(
+                _(
+                    "Regularization is not allowed when "
+                    "working hours are greater than {0} hours."
+                ).format(
+                    max_allowed_hours
+                )
+            )
+
         # --------------------------------------------------
         # Store Working Hours
         # --------------------------------------------------
@@ -394,17 +464,17 @@ def validate_regularization_limit(doc, method=None):
         doc.custom_working_hours = hours
 
         # ==================================================
-        # Less than 4 Hours
+        # Minimum Working Hours Validation
         # ==================================================
 
-        if hours < REGULARIZATION_MIN_ALLOWED_HOURS:
+        if hours < min_allowed_hours:
 
             frappe.throw(
                 _(
                     "Regularization is not allowed when "
                     "working hours are less than {0} hours."
                 ).format(
-                    REGULARIZATION_MIN_ALLOWED_HOURS
+                    min_allowed_hours
                 )
             )
 
@@ -412,7 +482,7 @@ def validate_regularization_limit(doc, method=None):
         # Half Day Calculation
         # ==================================================
 
-        if hours < REGULARIZATION_MIN_WORKING_HOURS:
+        if hours < full_day_hours:
 
             doc.half_day = 1
 

@@ -17,21 +17,19 @@ frappe.ui.form.on("Employee", {
     
    
     //Shift filter
-    frm.set_query("default_shift", function () {
-            if (!frm.doc.custom_work_location) {
-                return {
-                    filters: {
-                        custom_work_location: ""
-                    }
-                };
-            }
+        frm.set_query("default_shift", function () {
+        const location = frm.doc.custom_work_location;
 
-            return {
-                filters: {
-                    custom_location: frm.doc.custom_work_location
-                }
-            };
-        });
+        if (!location) {
+            return {};
+        }
+
+        return {
+            filters: {
+                custom_location: location
+            }
+        };
+    });
     },
     refresh(frm) {
 
