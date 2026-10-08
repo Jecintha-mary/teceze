@@ -1636,6 +1636,8 @@ def timesheet():
             child_map = {}
 
             for child in child_rows:
+                if child.get("hours") is not None:
+                    child["hours"] = round(child["hours"], 2)
                 child_map.setdefault(child.parent, []).append(child)
 
             for record in records:
@@ -2970,7 +2972,6 @@ def regularization_date(employee, from_date):
         }
     }
 
-from frappe.model.workflow import apply_workflow
 from frappe.utils import getdate, today
 @frappe.whitelist(allow_guest=False)
 def attendance_request():
@@ -3023,11 +3024,11 @@ def attendance_request():
             doc.insert()
             
 
-            # Draft → Pending Approval
-            doc = apply_workflow(
-                doc,
-                "Submit"
-            )
+            # # Draft → Pending Approval
+            # doc = apply_workflow(
+            #     doc,
+            #     "Submit"
+            # )
 
             return {
                 "success": True,
