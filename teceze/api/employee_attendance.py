@@ -19,6 +19,7 @@ from math import (
 )
 from frappe import _dict
 from hrms.hr.doctype.employee_checkin.employee_checkin import calculate_working_hours
+from hrms.hr.utils import get_distance_between_coordinates
 import uuid
 
 
@@ -197,12 +198,13 @@ def validate_employee_location(
     user_lat = float(latitude)
     user_lon = float(longitude)
 
-    distance = calculate_distance(
+    distance = get_distance_between_coordinates(
         office_lat,
         office_lon,
         user_lat,
         user_lon
     )
+    frappe.log_error(distance)
 
     allowed_radius = float(
         location.custom_attendance_radius or 500
@@ -1984,17 +1986,16 @@ def get_associate_members(employee=None):
         })
 
     return result
+
+
 # ==========================================================
 # Employee Holiday Details
 # ==========================================================
 
 @frappe.whitelist()
-def get_employee_holiday_details(
-    employee=None
-):
+def get_employee_holiday_details(employee=None):
 
     if not employee:
-
         frappe.throw(
             _("Employee is required.")
         )
@@ -2010,7 +2011,6 @@ def get_employee_holiday_details(
     )
 
     if not default_shift:
-
         return {
             "default_shift": None,
             "holiday_list": None,
@@ -2028,7 +2028,6 @@ def get_employee_holiday_details(
     )
 
     if not holiday_list:
-
         return {
             "default_shift": default_shift,
             "holiday_list": None,
@@ -2038,23 +2037,37 @@ def get_employee_holiday_details(
     # ------------------------------------------------------
     # Holiday List -> Holiday
     #
-    # ORM only - NO SQL
+    # Include both public holidays and weekly offs.
+    #
+    # If weekly_off = 1:
+    #     description = 'WO'
+    #
+    # Otherwise:
+    #     description = original holiday description
     # ------------------------------------------------------
 
-    holidays = frappe.get_all(
-        "Holiday",
-        filters={
-            "parent": holiday_list,
-            "weekly_off": 0
-        },
-        fields=[
-            "parent as holiday_list",
-            "holiday_date",
-            "description",
-            "custom_status"
-        ],
-        order_by="holiday_date asc"
+    holidays = frappe.db.sql(
+        """
+        SELECT
+            parent AS holiday_list,
+            holiday_date,
+            CASE
+                WHEN weekly_off = 1 THEN 'WO'
+                ELSE description
+            END AS description,
+            custom_status,
+            weekly_off
+        FROM `tabHoliday`
+        WHERE parent = %s
+        ORDER BY holiday_date ASC
+        """,
+        (holiday_list,),
+        as_dict=True
     )
+
+    # ------------------------------------------------------
+    # Return Holiday Details
+    # ------------------------------------------------------
 
     return {
         "default_shift": default_shift,

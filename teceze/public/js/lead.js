@@ -449,13 +449,9 @@ function render_lead_activity_report(frm) {
     border-radius: 10px;
 
     background:
-        linear-gradient(
-            135deg,
-            #ffffff 0%,
-            #f8f7ff 100%
-        );
+        linear-gradient(90deg, #0CA79C 0%, #2A3D8F 100%);
 
-    color: #3e3970;
+    color: #ffffff;
 
     font-size: 12px;
 
@@ -484,11 +480,11 @@ function render_lead_activity_report(frm) {
 
     border-color: #c5c9ef;
 
-    background:
+       background:
         linear-gradient(
-            135deg,
-            #ffffff,
-            #f3f1ff
+            145deg,
+            #0e0d0d,
+            #0f0f13
         );
 
     box-shadow:
@@ -767,7 +763,7 @@ function render_lead_activity_report(frm) {
 
     margin-bottom: 9px;
 
-    color: #9ba2ad;
+    color: #010306;
 
     font-size: 9px;
 
@@ -1590,13 +1586,9 @@ function render_lead_activity_report(frm) {
     border-radius: 9px;
 
     background:
-        linear-gradient(
-            145deg,
-            #ffffff,
-            #f5f7fb
-        );
+         linear-gradient(90deg, #0CA79C 0%, #2A3D8F 100%);
 
-    color: #505964;
+    color: #ffffff;
 
     font-size: 17px;
 
@@ -1625,8 +1617,8 @@ function render_lead_activity_report(frm) {
     background:
         linear-gradient(
             145deg,
-            #ffffff,
-            #f0efff
+            #0e0d0d,
+            #0f0f13
         );
 
     box-shadow:
@@ -2023,11 +2015,12 @@ function render_lead_activity_report(frm) {
     border-color: #8dccaa !important;
 
     background:
+           background:
         linear-gradient(
-            135deg,
-            #eafaf1,
-            #ddf6e9
-        ) !important;
+            145deg,
+            #0e0d0d,
+            #0f0f13
+        ); !important;
 
     color: #176943 !important;
 
@@ -3984,20 +3977,26 @@ function open_lead_activity_form(
                    FOLLOW-UP DATE
                 ========================================== */
 
+                                
                 {
-                    label:
-                        __("Follow Up Date"),
+                    label: __("Follow Up Date"),
+                    fieldname: "follow_up_date",
+                    fieldtype: "Datetime",
+                    reqd: is_follow_up,
+                    default: frappe.datetime.now_datetime(),
+                    onchange: function () {
+                        const value = this.get_value();
+                        const now = frappe.datetime.now_datetime();
 
-                    fieldname:
-                        "follow_up_date",
-
-                    fieldtype:
-                        "Datetime",
-
-                    reqd:
-                        is_follow_up
-
+                        if (value && value < now) {
+                            frappe.msgprint(
+                                __("Follow-up date cannot be in the past.")
+                            );
+                            this.set_value(now);
+                        }
+                    }
                 }
+
 
             ],
 
@@ -4026,6 +4025,18 @@ function open_lead_activity_form(
 
                     return;
 
+                }
+                                
+                if (is_follow_up && values.follow_up_date) {
+                    const selectedDate = values.follow_up_date;
+                    const currentDate = frappe.datetime.now_datetime();
+
+                    if (selectedDate < currentDate) {
+                        frappe.msgprint(
+                            __("Follow-up date cannot be in the past.")
+                        );
+                        return;
+                    }
                 }
 
 

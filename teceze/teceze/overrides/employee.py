@@ -67,7 +67,7 @@ def create_shift_and_holiday_assignment(doc):
         "employee": doc.name,
         "shift_type": doc.default_shift,
         "start_date": start_date,
-        "end_date": end_date
+        #"end_date": end_date
     })
 
     shift_assignment.insert(ignore_permissions=True)
@@ -78,7 +78,8 @@ def create_shift_and_holiday_assignment(doc):
         "doctype": "Holiday List Assignment",
         "assigned_to": doc.name,
         "holiday_list": holiday_list,
-        "from_date": start_date
+        "from_date": start_date,
+        "end_date": end_date
     })
 
     holiday_assignment.insert(ignore_permissions=True)
@@ -151,7 +152,9 @@ def after_insert(doc, method):
 
 def on_update(doc, method):
 
-    if doc.has_value_changed("default_shift"):
+    # if doc.has_value_changed("default_shift"):
+    #     update_shift_and_holiday_assignment(doc)
+    if (not frappe.flags.get("shift_request_update") and doc.has_value_changed("default_shift")):
         update_shift_and_holiday_assignment(doc)
 
     if not doc.resignation_letter_date:

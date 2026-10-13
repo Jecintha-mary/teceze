@@ -20,6 +20,18 @@
   {
    "child": 0,
    "collapsible": 1,
+   "icon": "cake",
+   "indent": 0,
+   "keep_closed": 0,
+   "label": "Employee Birthday Report",
+   "link_to": "Employee Birthday",
+   "link_type": "Report",
+   "show_arrow": 0,
+   "type": "Link"
+  },
+  {
+   "child": 0,
+   "collapsible": 1,
    "icon": "list",
    "indent": 0,
    "keep_closed": 0,
@@ -159,7 +171,7 @@
    "type": "Link"
   }
  ],
- "modified": "2026-10-07 12:20:55.111656",
+ "modified": "2026-10-12 18:43:07.918429",
  "modified_by": "Administrator",
  "module": "Teceze",
  "name": "Reports",

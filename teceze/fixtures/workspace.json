@@ -16273,7 +16273,7 @@
   "link_to": null,
   "link_type": "DocType",
   "links": [],
-  "modified": "2026-09-28 13:08:47.102784",
+  "modified": "2026-10-12 11:40:09.841524",
   "module": null,
   "name": "Feature CRM",
   "number_cards": [],
@@ -16281,7 +16281,20 @@
   "public": 1,
   "quick_lists": [],
   "restrict_to_domain": null,
-  "roles": [],
+  "roles": [
+   {
+    "role": "Sales User"
+   },
+   {
+    "role": "Sales Manager"
+   },
+   {
+    "role": "Presales User"
+   },
+   {
+    "role": "Presales Manager"
+   }
+  ],
   "sequence_id": 0.0,
   "shortcuts": [],
   "title": "Feature CRM",

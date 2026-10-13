@@ -1,9 +1,6 @@
 (function () {
 
-    // =========================================================
-    // CONFIG
-    // =========================================================
-
+ 
     const SUPPLIER_DOCTYPE = "Quotation Supplier";
     const SUPPLIER_TABLE_DEFAULT = "custom_supplier_item";
 
@@ -30,10 +27,6 @@
     };
 
 
-    // =========================================================
-    // GET SUPPLIER TABLE
-    // =========================================================
-
     function qs_table(frm) {
 
         const field = Object.values(
@@ -49,11 +42,6 @@
             : SUPPLIER_TABLE_DEFAULT;
     }
 
-
-    // =========================================================
-    // HELPERS
-    // =========================================================
-
     const clean = value =>
         String(value ?? "")
             .toLowerCase()
@@ -67,9 +55,6 @@
         );
 
 
-    // =========================================================
-    // FULL REFRESH
-    // =========================================================
 
     const refresh_all =
         frappe.utils.debounce(
@@ -111,11 +96,6 @@
             200
         );
 
-
-    // =========================================================
-    // QUOTATION EVENTS
-    // =========================================================
-
     frappe.ui.form.on("Quotation", {
 
         refresh(frm) {
@@ -125,10 +105,17 @@
             load_quotation_service_vertical_items(
                 frm
             );
+            
 
         },
 
-
+ validate(frm) {
+        (frm.doc.items || []).forEach(item => {
+            if (flt(item.qty) <= 0) {
+                item.qty = 1;
+            }
+        });
+    },
         onload_post_render(frm) {
 
             refresh_all(frm);
@@ -164,7 +151,44 @@
 
         },
 
+before_workflow_action(frm) {
+    if (frm.selected_workflow_action !== "Sent Quotation To Sales") {
+        return;
+    }
 
+    if (!frm.doc.opportunity) {
+        frappe.throw(__("Opportunity is not linked to this Quotation."));
+    }
+
+    return frappe.call({
+        method: "frappe.client.set_value",
+        args: {
+            doctype: "Opportunity",
+            name: frm.doc.opportunity,
+            fieldname: {
+                workflow_state: "Quotation Submitted",
+                status: "Quotation",
+                custom_quotation_number: frm.doc.name
+            }
+        }
+    }).then(r => {
+        if (!r.message || r.exc) {
+            frappe.throw(
+                __("Failed to update the linked Opportunity. Workflow transition cancelled.")
+            );
+        }
+
+        frappe.show_alert({
+            message: __("Opportunity updated successfully."),
+            indicator: "green"
+        });
+    }).catch(error => {
+        frappe.validated = false;
+        frappe.throw(
+            __("Could not update the Opportunity. The Quotation workflow transition was not completed.")
+        );
+    });
+},
         items_add(frm) {
 
             refresh_options(frm);
@@ -185,9 +209,6 @@
     });
 
 
-    // =========================================================
-    // QUOTATION ITEM EVENTS
-    // =========================================================
 
     frappe.ui.form.on(
         "Quotation Item",
@@ -245,9 +266,6 @@
     );
 
 
-    // =========================================================
-    // SERVICE VERTICAL CACHE
-    // =========================================================
 
     const sv_cache = {};
 
@@ -267,10 +285,6 @@
         return sv_cache[name];
     }
 
-
-    // =========================================================
-    // GET VISIBLE SUPPLIER FIELDS
-    // =========================================================
 
     async function qs_visible_fields(frm) {
 
@@ -401,10 +415,6 @@
     }
 
 
-    // =========================================================
-    // GET QUOTATION ITEM ROWS
-    // =========================================================
-
     function qs_get_item_rows(frm) {
 
         return frm.doc.items || [];
@@ -412,9 +422,6 @@
     }
 
 
-    // =========================================================
-    // GET ITEM DROPDOWN VALUES
-    // =========================================================
 
     function qs_get_item_values(frm) {
 
@@ -442,10 +449,6 @@
 
     }
 
-
-    // =========================================================
-    // FIND QUOTATION ITEM
-    // =========================================================
 
     function qs_find_quotation_item(
         frm,
@@ -477,9 +480,6 @@
     }
 
 
-    // =========================================================
-    // APPLY SUPPLIER GRID
-    // =========================================================
 
     async function qs_apply(
         frm,
@@ -638,7 +638,6 @@
                     )
                 )
             );
-
 
         // -----------------------------------------------------
         // SHOW / HIDE FIELDS
@@ -865,17 +864,10 @@
     }
 
 
-    // =========================================================
-    // QUOTATION SUPPLIER EVENTS
-    // =========================================================
-
     frappe.ui.form.on(
         SUPPLIER_DOCTYPE,
         {
 
-            // -------------------------------------------------
-            // ITEM SELECTED
-            // -------------------------------------------------
 
             items(frm, cdt, cdn) {
 
@@ -913,9 +905,6 @@
                 }
 
 
-                // -------------------------------------------------
-                // SAVE ITEM REFERENCE
-                // -------------------------------------------------
 
                 frappe.model.set_value(
                     cdt,
@@ -960,10 +949,6 @@
 
             },
 
-
-            // -------------------------------------------------
-            // QTY
-            // -------------------------------------------------
 
             qty(frm, cdt, cdn) {
 
@@ -1203,23 +1188,28 @@
     }
 
 
-    // -----------------------------------------------------
-    // QTY → QUOTATION ITEM QTY
-    // -----------------------------------------------------
 
-    if (
-        row.qty !== undefined &&
-        row.qty !== null
-    ) {
+ // -----------------------------------------------------
+// QTY → QUOTATION ITEM QTY
+// Default to 1 when quantity is empty or zero
+// -----------------------------------------------------
 
-        frappe.model.set_value(
-            item.doctype,
-            item.name,
-            "qty",
-            flt(row.qty)
-        );
+const supplierQty = flt(row.qty);
 
-    }
+const finalQty = supplierQty > 0 ? supplierQty : 1;
+
+// Update supplier row
+row.qty = finalQty;
+
+// Update corresponding Quotation Item
+item.qty = finalQty;
+
+frappe.model.set_value(
+    item.doctype,
+    item.name,
+    "qty",
+    finalQty
+);
 
 
     // -----------------------------------------------------
@@ -1344,7 +1334,8 @@ async function load_quotation_service_vertical_items(
 
                             is_sales_item: 1,
 
-                            is_purchase_item: 0
+                            is_purchase_item: 0,
+                            
 
                         });
 

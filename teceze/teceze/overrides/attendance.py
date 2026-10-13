@@ -117,7 +117,6 @@ def update_last_sync_of_checkin():
         return
 
     sync_datetime = f"{today()} 01:00:00"
-    frappe.log_error("settings.shift",str(settings.shift))
     for row in settings.shift:
         shift_type = row.shift
 

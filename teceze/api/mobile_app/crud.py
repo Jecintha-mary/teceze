@@ -7,6 +7,8 @@ from frappe.utils import (
     add_to_date,
     date_diff
 )
+from frappe import _
+from teceze.api.employee_attendance import validate_employee_location
 from teceze.api.attendance_regularization import get_existing_checkins
 class CRUD:
 
@@ -1572,6 +1574,32 @@ from frappe.utils import add_days, getdate
 
 @frappe.whitelist(allow_guest=True)
 def employee_checkin():
+    payload = CRUD.get_json_payload()
+    data = payload.get("data", payload)
+
+    employee = data.get("employee")
+    latitude = data.get("latitude")
+    longitude = data.get("longitude")
+
+    if not employee:
+        frappe.throw(_("Employee ID is required."))
+
+    if latitude is None or longitude is None:
+        frappe.throw(_("Latitude and Longitude are required."))
+
+    result = validate_employee_location(
+        employee,
+        latitude,
+        longitude
+    )
+
+    if not result.get("success"):
+        frappe.throw(
+            result.get(
+                "message",
+                _("You are outside of the geolocation.")
+            )
+        )
     
     return CRUD.handle(
         doctype="Employee Checkin",

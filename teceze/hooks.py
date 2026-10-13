@@ -69,6 +69,8 @@ doctype_js = {
 	"Timesheet" : ["public/js/timesheet.js"],
     "Lead" : ["public/js/lead.js"],
     "Compensatory Leave Request" : ["public/js/compensatory_leave_request.js"],
+    "Shift Request" : ["public/js/shift_request.js"],
+    
 
 }
 doctype_list_js = {
@@ -104,7 +106,13 @@ doc_events = {
     },
 	"Leave Application": {
         "validate": ["teceze.teceze.overrides.leave_application.validate"]
-    }
+    },
+    "Shift Request": {
+    	"before_submit": "teceze.teceze.overrides.shift_request.before_submit",
+        "on_submit": "teceze.teceze.overrides.shift_request.on_submit",
+        "on_cancel": "teceze.teceze.overrides.shift_request.on_cancel",
+	},
+
 
 }
 
@@ -112,6 +120,7 @@ extend_doctype_class = {
     "Salary Slip": [
         "teceze.teceze.overrides.salary_slip.CustomSalarySlip"
     ]
+	
 }
 
 # Svg Icons
@@ -370,18 +379,18 @@ fixtures = [
 	# },
    	"Custom Field",
    	"Property Setter",
-	"Workflow",
-   	"Workflow Action Master",
-   	"Workflow State",
+	# "Workflow",
+   	# "Workflow Action Master",
+   	# "Workflow State",
    	# "Role",
    	"Workspace",
 	# "Print Format",
-   	# "Custom DocPerm",
+   	"Custom DocPerm",
    	"Report",
 	# "Number Card",
 	# "Web Form",
     # "Web Page",
-	# "Desktop Icon",
+	"Desktop Icon",
 	"Workspace Sidebar",
 ]
 
