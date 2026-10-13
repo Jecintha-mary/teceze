@@ -4,9 +4,12 @@ import base64
 import mimetypes
 import random
 from pathlib import Path
-import frappe
+import frappe 
+from urllib.parse import quote
 from frappe.utils import getdate, today, get_url
 from html import escape
+from datetime import date
+
 ASSET_ROOT = Path(
     "/home/frappe/frappe-bench/apps/teceze/teceze/teceze/overrides/reminder/birthday_mail_assets"
 )
@@ -147,6 +150,8 @@ def _logo_html():
         f'border:0;'
         f'outline:none;'
         f'text-decoration:none;'
+        f'background-color:transparent !important;'
+        f'color-scheme: light dark;'
         f'">'
     )
 def _initials(name):
@@ -178,38 +183,48 @@ def _completed_years(start_date, current_date):
     ):
         years -= 1
     return max(years, 0)
-def _employee_image(employee):
-    """
-    Return Employee image as an email-safe source.
-    """
-    image_url = getattr(
-        employee,
-        "image",
-        None,
-    )
-    if not image_url:
-        return ""
-    if image_url.startswith("/files/"):
-        return f"{get_url()}{image_url}"
-    if image_url.startswith("/private/files/"):
-        file_path = Path(
-            frappe.get_site_path(
-                image_url.lstrip("/")
-            )
+def _get_empoyee_image(employee):
+    if not employee.image:
+        return None, None, None
+    # default_image = ("https://d16dkiu68lwia0.cloudfront.net/teceze/2026/10/12/Employee/DFCPW2P5_Mugilan.png")
+    if employee.image.startswith(("http://", "https://")):
+        return None, None, employee.image
+    # return None,None,get_url(default_image)
+    try:
+        file_name = frappe.db.get_value(
+            "File",
+            {
+                "file_url": employee.image,
+                "attached_to_name": employee.name,
+            },
+            "file_name",
         )
-        if file_path.is_file():
-            mime_type = (
-                mimetypes.guess_type(file_path.name)[0]
-                or "application/octet-stream"
+        print("file_name",file_name)
+        if not file_name:
+            frappe.logger("birthday_reminder").warning("No File record found for employee image: %s",
+                employee.image,
             )
-            encoded = base64.b64encode(
-                file_path.read_bytes()
-            ).decode("ascii")
-            return (
-                f"data:{mime_type};base64,{encoded}"
-            )
-    return ""
-def _birthday_html(employee, current_date):
+            return None, None, None
+
+        file_doc = frappe.get_doc("File", file_name)
+        content = file_doc.get_content()
+
+        if isinstance(content, str):
+            content = content.encode("utf-8")
+
+        ext = Path(file_doc.file_name or "").suffix or ".jpg"
+
+        image_filename = f"employee_{employee.name}{ext}"
+        return image_filename, content, None
+
+    except Exception:
+        frappe.log_error(
+            frappe.get_traceback(),
+            "Birthday employee image failed",
+        )
+        return None, None, None
+
+def _birthday_html(employee, current_date,employee_image_filename=None,employee_image_url=None):
     name_raw = (
         employee.employee_name
         or "Team Member"
@@ -224,6 +239,7 @@ def _birthday_html(employee, current_date):
     )
     name = escape(name_raw)
     role = escape(role_raw)
+    location = escape(employee.custom_work_location or "")
     department = escape(department_raw)
     department_group = escape(
         department_raw.upper()
@@ -231,9 +247,8 @@ def _birthday_html(employee, current_date):
     initials = escape(
         _initials(name_raw)
     )
-    employee_image = _employee_image(
-        employee
-    )
+    employee_image = _get_empoyee_image(employee)
+
     years = _completed_years(
         employee.date_of_joining,
         current_date,
@@ -277,23 +292,15 @@ def _birthday_html(employee, current_date):
             "border-radius:14px;"
         ),
     )
-    if employee_image:
+    if employee_image_filename:
         avatar_html = (
-            f'<img '
-            f'src="{employee_image}" '
-            f'alt="{name}" '
-            f'width="120" '
-            f'height="120" '
-            f'style="'
-            f'display:block;'
-            f'width:120px;'
-            f'height:120px;'
-            f'object-fit:cover;'
-            f'border-radius:60px;'
-            f'border:0;'
-            f'outline:none;'
-            f'text-decoration:none;'
-            f'">'
+            f'<img embed="{employee_image_filename}" alt="{name}" width="114" height="114" '
+            f'style="display:block;width:114px;height:114px;border:0;border-radius:57px;object-fit:cover;">'
+        )
+    elif employee_image_url:
+        avatar_html = (
+            f'<img src="{escape(employee_image_url)}" alt="{name}" width="114" height="114" '
+            f'style="display:block;width:114px;height:114px;border:0;border-radius:57px;object-fit:cover;">'
         )
     else:
         avatar_html = (
@@ -323,6 +330,7 @@ def _birthday_html(employee, current_date):
                 '</div>'
             )
         )
+
     return f'''
 <!DOCTYPE html>
 <html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office" style=" margin:0; padding:0; background:#FFFFFF !important; background-color:#FFFFFF !important; background-image:linear-gradient(#FFFFFF,#FFFFFF) !important; " >
@@ -374,7 +382,7 @@ def _birthday_html(employee, current_date):
                                                                 <td align="center" valign="middle" width="154" height="154" style=" width:154px; height:154px; border-radius:77px; padding:8px; " >
                                                                     <table role="presentation" width="138" height="138" cellpadding="0" cellspacing="0" border="0" bgcolor="#FFFFFF" style=" width:138px; height:138px; background:#FFFFFF !important; background-color:#FFFFFF !important; border-radius:69px; " >
                                                                         <tr>
-                                                                            <td align="center" valign="middle" bgcolor="#F0FDFA" style=" border:1px solid #99F6E4; border-radius:69px; " >
+                                                                            <td align="center" valign="middle" bgcolor="#F0FDFA" style="width:138px;height:138px;border:1px solid #99F6E4;border-radius:69px;overflow:hidden;padding:0;">
                                                                                 {avatar_html}
                                                                             </td>
                                                                         </tr>
@@ -391,9 +399,10 @@ def _birthday_html(employee, current_date):
                                                         <div style=" font-size:15px; line-height:24px; color:#007B88; padding-top:3px; " >
                                                             {role} &bull; {department}
                                                         </div>
-                                                        <div style=" font-size:12px; line-height:20px; letter-spacing:1px; text-transform:uppercase; color:#64748B; padding-top:2px; " >
-                                                            {department_group} &bull; {escape(milestone)}
+                                                        <div style=" font-size:15px; line-height:24px; color:#007B88; " >
+                                                            {location}
                                                         </div>
+                                                     
                                                         <div style=" height:26px; line-height:26px; font-size:1px; " >
                                                             &nbsp;
                                                         </div>
@@ -403,11 +412,11 @@ def _birthday_html(employee, current_date):
                                                         <div style=" height:14px; line-height:14px; font-size:1px; " >
                                                             &nbsp;
                                                         </div>
-                                                        <div style=" font-size:17px; line-height:28px; color:#334155; " >
-                                                            &ldquo;Another year. Another chapter.
+                                                       <div style="font-size:17px; line-height:28px; color:#334155;">
+                                                            Wishing you a birthday filled with joy,
                                                             <br>
-                                                            Another reason to celebrate.&rdquo;
-                                                        </div>
+                                                                laughter, and unforgettable moments.
+                                                            </div>
                                                         <div style=" padding-top:12px; color:#0EA39E; font-size:18px; letter-spacing:8px; " >
                                                             &#10022; &#10022; &#10022;
                                                         </div>
@@ -490,6 +499,7 @@ def send_birthday_wishes():
         )
         return "Birthday reminders disabled in Teceze Settings."
     today_date = getdate(today())
+    # today_date = getdate("2026-10-11")
     employees = frappe.db.sql(
         """
         SELECT
@@ -501,13 +511,15 @@ def send_birthday_wishes():
             date_of_joining,
             designation,
             department,
-            image
+            custom_work_location,
+            image,
+            user_id 
         FROM `tabEmployee`
         WHERE status = 'Active'
-          AND (
-                employment_type IS NULL
-                OR employment_type != 'Engineer'
-              )
+        #   AND (
+        #         employment_type IS NULL
+        #         OR employment_type != 'Engineer'
+        #       )
           AND date_of_birth IS NOT NULL
           AND MONTH(date_of_birth) = %s
           AND DAY(date_of_birth) = %s
@@ -519,6 +531,7 @@ def send_birthday_wishes():
         ),
         as_dict=True,
     )
+    print("employees",employees)
     if not employees:
         frappe.logger(
             "birthday_reminder"
@@ -542,9 +555,13 @@ def send_birthday_wishes():
     queued = 0
     skipped = 0
     failed = 0
-    all_recipients =get_all_employees()
+    # recipient = ["jecintha.mary@teceze.com"]
+    all_recipient =get_all_employees() 
+    recipient = all_recipient
+ 
     for employee in employees:
-        recipient = all_recipients
+        print(f"Sending email to recipient: {recipient}")
+        
         if not recipient:
             skipped += 1
             frappe.logger(
@@ -556,10 +573,20 @@ def send_birthday_wishes():
             )
             continue
         try:
+            inline_images = [
+                {"filename": LOGO_FILENAME, "filecontent": logo_content}
+            ]
+
+            img_filename, img_content, img_url = _get_empoyee_image(employee)
+            if img_filename and img_content:
+                inline_images.append({"filename": img_filename, "filecontent": img_content})
+            print("img_url",img_url)
+            print("imag_filename",img_filename)
             message = _birthday_html(
-                employee,
-                today_date,
-            )
+                        employee,
+                        today_date,
+                        img_filename, img_url
+                    )
             subject = (
                f"🥳 It's {employee.employee_name}'s Birthday — Let's Celebrate!"
             )
@@ -567,12 +594,7 @@ def send_birthday_wishes():
                 recipients=recipient,
                 subject=subject,
                 message=message,
-                inline_images=[
-                    {
-                        "filename": LOGO_FILENAME,
-                        "filecontent": logo_content,
-                    }
-                ],
+                inline_images=inline_images,
                 raw_html=True,
                 add_css=False,
             )

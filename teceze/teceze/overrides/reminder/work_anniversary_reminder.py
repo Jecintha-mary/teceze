@@ -2,32 +2,31 @@ import base64
 import mimetypes
 from html import escape
 from pathlib import Path 
+import random
 
 import frappe
 from frappe.utils import get_url, getdate, today
 
 # Folder where your local anniversary email app module resides
-ASSET_ROOT = Path(
-    "/home/frappe/frappe-bench/apps/teceze/teceze/teceze/overrides/reminder/work_anniversary"
-)
-
+ASSET_ROOT = Path("/home/frappe/frappe-bench/apps/teceze/teceze/teceze/overrides/reminder/work_anniversary/assets")
+    # __file__).resolve().parent / "work_anniversary" / "assets"
+LOGO_FILENAME = "teceze-logo.png"
 
 def _data_uri(relative_path):
-    """Return a local birthday asset as a base64 data URI."""
     path = ASSET_ROOT / relative_path
- 
     if not path.is_file():
-        frappe.logger("Anniversary").warning(
+        frappe.logger("work_anniversary").warning(
             "Anniversary asset not found: %s", path
         )
         return ""
- 
-    mime_type = mimetypes.guess_type(path.name)[0] or "application/octet-stream"
+    mime_type = (
+        mimetypes.guess_type(path.name)[0]
+        or "application/octet-stream"
+    )
     encoded = base64.b64encode(path.read_bytes()).decode("ascii")
     return f"data:{mime_type};base64,{encoded}"
 
 def _initials(name):
-    """Generate up to 2 uppercase initials from the employee's name."""
     parts = [part for part in name.split() if part]
     if not parts:
         return "TM"
@@ -53,29 +52,70 @@ def _img(relative_path, alt="", width=None, height=None, style=""):
         f'<img src="{src}" alt="{escape(alt)}"{dimensions} '
         f'style="display:block;border:0;outline:none;text-decoration:none;{style}">'
     )
-
-
-def _employee_image(employee):
-    """Return the Employee image as an email-safe source."""
-    image_url = getattr(employee, "image", None)
- 
-    if not image_url:
+def _logo_html():
+    logo_path = ASSET_ROOT / LOGO_FILENAME
+    if not logo_path.is_file():
+        frappe.logger("birthday_reminder").warning(
+            "Birthday logo not found: %s",
+            logo_path,
+        )
         return ""
- 
-    if image_url.startswith("/files/"):
-        return f"{get_url()}{image_url}"
- 
-    if image_url.startswith("/private/files/"):
-        file_path = Path(frappe.get_site_path(image_url.lstrip("/")))
-        if file_path.is_file():
-            mime_type = mimetypes.guess_type(file_path.name)[0] or "application/octet-stream"
-            encoded = base64.b64encode(file_path.read_bytes()).decode("ascii")
-            return f"data:{mime_type};base64,{encoded}"
- 
-    return ""
+    return (
+        f'<img '
+        f'embed="{LOGO_FILENAME}" '
+        f'alt="TECEZE" '
+        f'width="250" '
+        f'style="'
+        f'display:block;'
+        f'width:250px;'
+        f'max-width:250px;'
+        f'height:auto;'
+        f'border:0;'
+        f'outline:none;'
+        f'text-decoration:none;'
+        f'background-color:transparent !important;'
+        f'color-scheme: light dark;'
+        f'">'
+    )
 
-def _anniversary_html(employee, current_date, years_completed):
-    """Generate the Outlook-safe Work Anniversary two-column email HTML using local assets."""
+def _get_empoyee_image(employee):
+    if not employee.image:
+        return None, None, None
+    # default_image = ("https://d16dkiu68lwia0.cloudfront.net/teceze/2026/10/12/Employee/DFCPW2P5_Mugilan.png")
+    if employee.image.startswith(("http://", "https://")):
+        return None, None, employee.image
+    # return None,None,get_url(default_image)
+    try:
+        file_id  = frappe.db.get_value(
+                    "File",
+                    {
+                        "file_url": employee.image,
+                        "attached_to_name": employee.name,
+                    },
+                    "name",
+                )
+        print("file_name",file_id )
+        if not file_id :
+            frappe.logger("Anniversary_reminder").warning("No File record found for employee image: %s",
+                employee.image,
+            )
+            return None, None, None
+
+        file_doc = frappe.get_doc("File", file_id )
+        content = file_doc.get_content()
+        if isinstance(content, str):
+            content = content.encode()
+
+        ext = Path(file_doc.file_name or "").suffix or ".jpg"
+        image_filename = f"employee_{employee.name}{ext}"
+        return image_filename, content, None
+
+    except Exception:
+        frappe.log_error(frappe.get_traceback(), "Anniversary image failed")
+        return None, None, None
+    
+def _anniversary_html(employee, current_date, years_completed, employee_image_filename=None,employee_image_url=None):
+
     name_raw = employee.employee_name or "Team Member"
     role_raw = employee.designation or "Team Member"
     department_raw = (employee.department or "Team").split(" - ")[0]
@@ -85,16 +125,12 @@ def _anniversary_html(employee, current_date, years_completed):
     department = escape(department_raw)
     department_group = escape(department_raw.upper())
     initials = escape(_initials(name_raw))
-    employee_image = _employee_image(employee) 
-    print("EMPLOYEE IMAGE URL:", employee_image)
+    employee_image = _get_empoyee_image(employee) 
+    
 
     year_label = "YEAR" if years_completed == 1 else "YEARS"
-    milestone = escape(f"{years_completed} {year_label} OF SERVICE")
-
-    # Asset helpers 
-    # For the TECEZE logo:
-    logo = f'<img src="https://teceze.com/wp-content/uploads/2026/05/logo.webp" alt="TECEZE Logo" width="180" style="display:block;border:0;outline:none;text-decoration:none;background-color:transparent !important;">'
-    # logo = f'<img src="https://teceze.com/wp-content/uploads/2026/05/logo.webp" alt="TECEZE Logo" width="180" style="display:block;border:0;outline:none;text-decoration:none;">'
+    milestone = f"{years_completed} {year_label} WITH US"
+    logo = _logo_html()
     logo_swirl_svg =_img("assets/card-logo-swirl.png","logo",width=50)
     medal_img = (
         '<img src="https://erp.teceze.com/files/medal1-removebg.png" '
@@ -102,54 +138,42 @@ def _anniversary_html(employee, current_date, years_completed):
         'style="display:block;border:0;outline:none;text-decoration:none;'
         'background-color:transparent !important;">'
     )
-    card_img2 = _img("assets/card-img2.png", "TECEZE Logo", width=120, height=30)
-    monogram_star = _img("assets/card-employee-monogram-star.svg", "Star", width=20, height=20)
-    # card_logo_swirl = _img("assets/card-logo-swirl.png", "Card Logo", width=24) 
-    card_logo_swirl =f'<img src="https://teceze.com/wp-content/uploads/2026/05/logo.webp" alt="TECEZE Logo" width="90" style="display:block;border:0;outline:none;text-decoration:none;background-color:transparent !important;">'
-    # Dynamic Avatar Logic
-    if employee_image:
-        avatar_content = f"""
-        <table role="presentation"
-               width="114"
-               height="114"
-               cellpadding="0"
-               cellspacing="0"
-               border="0"
-               style="width:114px;height:114px;border-collapse:separate;border-radius:57px;overflow:hidden;">
-            <tr>
-                <td width="114"
-                    height="114"
-                    align="center"
-                    valign="middle"
-                    style="width:114px;
-                           height:114px;
-                           padding:0;
-                           border-radius:50px;
-                           overflow:hidden;
-                           background-color:#f0fdfa;">
-                    <img src="{employee_image}"
-                         alt="{name}"
-                         width="114"
-                         height="114"
-                         style="display:block;
-                                width:114px;
-                                height:114px;
-                                object-fit:cover;
-                                border:0;
-                                outline:none;
-                                text-decoration:none;
-                                border-radius:57px;">
-                </td>
-            </tr>
-        </table>
-    """
+    card_logo_swirl = _img("assets/card-logo-swirl.png", alt="Card Logo", width=90) or logo
+    monogram_icon = _img("card-employee-icon.png", "", width=28, height=28)
+    if employee_image_filename:
+        avatar_content = f"""<img embed="{employee_image_filename}" alt="{name}" width="114" height="114"
+            style="display:block;width:114px;height:114px;border:0;border-radius:57px;object-fit:cover;">"""
+    elif employee_image_url:
+        avatar_content = f"""<img src="{escape(employee_image_url)}" alt="{name}" width="114" height="114"
+            style="display:block;width:114px;height:114px;border:0;border-radius:57px;object-fit:cover;">"""
     else:
-        avatar_content = f"""
-            <table role="presentation" border="0" cellpadding="0" cellspacing="0" align="center">
-                <tr><td align="center" style="padding-bottom:4px;">{monogram_star}</td></tr>
-                <tr><td align="center" style="font-size:24px;line-height:28px;font-weight:700;color:#215092;">{initials}</td></tr>
-            </table>
-        """ 
+        avatar_content = (
+            monogram_icon
+            +
+            (
+                f'<div style="'
+                f'font-size:28px;'
+                f'line-height:34px;'
+                f'font-weight:700;'
+                f'color:#215092;'
+                f'padding-top:5px;'
+                f'">'
+                f'{initials}'
+                f'</div>'
+            )
+            +
+            (
+                '<div style="'
+                'font-size:9px;'
+                'line-height:12px;'
+                'font-weight:600;'
+                'letter-spacing:1.4px;'
+                'color:#64748b;'
+                '">'
+                'DYNAMIC AVATAR'
+                '</div>'
+            )
+        )
 
     return f"""<!DOCTYPE html>
 <html>
@@ -160,37 +184,24 @@ def _anniversary_html(employee, current_date, years_completed):
 <meta name="color-scheme" content="light">
 <meta name="supported-color-schemes" content="light">
 <title>Happy Work Anniversary, {name}!</title>
-
-<style>
-:root {{
-    color-scheme: light only !important;
-    supported-color-schemes: light !important;
-}}
-
-body, table, td, div, span {{
-    color-scheme: light !important;
-    forced-color-adjust: none !important;
-}}
-
-@media only screen and (max-width: 600px) {{
-    .email-shell {{
-        width: 100% !important;
-    }}
-    .column {{
-        display: block !important;
-        width: 100% !important;
-        max-width: 100% !important;
-        box-sizing: border-box !important;
-    }}
-    .column-pad-left {{
-        padding-right: 0 !important;
-        padding-bottom: 20px !important;
-    }}
-    .column-pad-right {{
-        padding-left: 0 !important;
-    }}
-}}
-</style>
+        <style>
+            :root{{color-scheme:light only !important;supported-color-schemes:light !important;}}
+            html{{margin:0 !important;padding:0 !important;background:#FFFFFF !important;background-color:#FFFFFF !important;background-image:linear-gradient(#FFFFFF,#FFFFFF) !important;}}
+            body{{margin:0 !important;padding:0 !important;background:#FFFFFF !important;background-color:#FFFFFF !important;background-image:linear-gradient(#FFFFFF,#FFFFFF) !important;color:#0F172A !important;font-family:Arial,Helvetica,sans-serif !important;color-scheme:light only !important;-webkit-text-size-adjust:100%;-ms-text-size-adjust:100%;}}
+            .email-background{{background:#FFFFFF !important;background-color:#FFFFFF !important;background-image:linear-gradient(#FFFFFF,#FFFFFF) !important;}}
+            .email-shell{{width:100% !important;background:#FFFFFF !important;background-color:#FFFFFF !important;background-image:linear-gradient(#FFFFFF,#FFFFFF) !important;}}
+            .email-shell > tbody > tr{{height:100% !important;}}
+            .email-shell > tbody > tr > td{{height:100% !important;}}
+            .right-card{{width:100% !important;height:100% !important;background:#FBFDFF !important;background-color:#FBFDFF !important;}}
+            img{{border:0 !important;outline:none !important;text-decoration:none !important;}}
+            @media only screen and (max-width:900px){{
+                html, body, .email-background, .email-shell{{background:#FFFFFF !important;background-color:#FFFFFF !important;background-image:linear-gradient(#FFFFFF,#FFFFFF) !important;}}
+                .email-shell{{width:100% !important;max-width:100% !important;}}
+                .column{{display:block !important;width:100% !important;max-width:100% !important;height:auto !important;}}
+                .column-pad{{padding-left:12px !important;padding-right:12px !important;}}
+                .right-card{{width:100% !important;height:auto !important;}}
+            }}
+        </style>
 </head>
 
 <body style="margin:0;padding:0;background-color:#f8fafc;font-family:'Inter',Arial,Helvetica,sans-serif;color:#0f172a;">
@@ -370,7 +381,6 @@ body, table, td, div, span {{
 </html>""" 
 
 def _ordinal_year(years):
-    """Return 1st, 2nd, 3rd, 4th, etc."""
     if 10 <= years % 100 <= 20:
         suffix = "th"
     else:
@@ -393,14 +403,15 @@ def get_all_employees():
     )
     return all_recipients
 
-
 def send_work_anniversary_wishes():  
     if not frappe.db.get_single_value("Teceze Settings", "work_anniversary"):
         frappe.logger("work_anniversary").info(
             "Work anniversary reminders are disabled in Teceze Settings. Skipping."
         )
         return "Work anniversary reminders disabled in Teceze Setting."
+    # today_date = getdate(today())
     today_date = getdate(today())
+    
 
     employees = frappe.db.sql("""
         SELECT 
@@ -410,7 +421,8 @@ def send_work_anniversary_wishes():
             department, 
             company_email, 
             date_of_joining, 
-            image 
+            image,
+            user_id 
         FROM `tabEmployee` 
         WHERE status = 'Active' 
             AND (employment_type IS NULL OR employment_type != 'Engineer') 
@@ -418,18 +430,27 @@ def send_work_anniversary_wishes():
             AND MONTH(date_of_joining) = MONTH(CURDATE())
             AND DAY(date_of_joining) = DAY(CURDATE())
     """, as_dict=True)
+    print("employees",employees)
 
     if not ASSET_ROOT.is_dir():
         frappe.throw(
             f"Anniversary email folder not found: {ASSET_ROOT}"
         )
-
+    logo_path = ASSET_ROOT / LOGO_FILENAME
+    if not logo_path.is_file():
+            frappe.throw(
+                "Birthday email logo not found: "
+                f"{logo_path}"
+            )
+    logo_content = logo_path.read_bytes()
     queued = 0
     skipped = 0
     failed = 0
     all_recipient=get_all_employees()
+    # target_email = ["jecintha.mary@teceze.com"]
+    target_email =all_recipient
     for employee in employees:
-        recipient = all_recipient
+        recipient = target_email
         doj = getdate(employee.date_of_joining)
 
         if doj.month == today_date.month and doj.day == today_date.day:
@@ -445,28 +466,35 @@ def send_work_anniversary_wishes():
                 continue
 
             try:
+                print(f"Sending email to recipient: {recipient}")
+                image_filename, image_content,img_url= _get_empoyee_image(employee)
+
+                inline_images = [{"filename": LOGO_FILENAME, "filecontent": logo_content}]
+                if image_filename and image_content:
+                    inline_images.append({"filename":image_filename, "filecontent": image_content})
+                
+                print("image_filename",image_filename)
                 message = _anniversary_html(
                     employee,
                     today_date,
-                    years_completed
+                    years_completed,
+                    employee_image_filename=image_filename,
+                    employee_image_url=img_url
                 )
-
                 ordinal_year = _ordinal_year(years_completed)
 
                 subject = (
                     f"Happy {ordinal_year} Work Anniversary, "
                     f"{employee.employee_name}! 🎉"
                 )
-                if recipient != ["priya.ramesh@teceze.com"]:
-                    frappe.logger("work_anniversary").warning(
-                        "Email blocked: unauthorized recipient %s", recipient,
-                    )
-                    continue
 
                 frappe.sendmail(
                     recipients=recipient,
                     subject=subject,
-                    message=message
+                    message=message,
+                    inline_images=inline_images,
+                    raw_html=True,
+                    add_css=False,
                 )
 
                 queued += 1
