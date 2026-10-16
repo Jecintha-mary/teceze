@@ -24,7 +24,7 @@
    "indent": 0,
    "keep_closed": 0,
    "label": "Employee Birthday Report",
-   "link_to": "Employee Birthday",
+   "link_to": "Employee Birthday Report",
    "link_type": "Report",
    "show_arrow": 0,
    "type": "Link"
@@ -171,7 +171,7 @@
    "type": "Link"
   }
  ],
- "modified": "2026-10-12 18:43:07.918429",
+ "modified": "2026-10-13 12:07:09.619048",
  "modified_by": "Administrator",
  "module": "Teceze",
  "name": "Reports",

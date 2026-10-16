@@ -17,6 +17,21 @@ frappe.pages["employee_attendance"].on_page_load = function (wrapper) {
     let employee_default_shift = null;
 
     // =========================================================
+    // LEAVE TYPE LIST (standard "Leave Type" DocType)
+    //
+    // Fetched ONCE per page load and shared by the leave balance
+    // cards and the attendance calendar.
+    //
+    //   leave_type_names : lowercase name -> official Leave Type name
+    //   leave_type_meta  : official name  -> { is_lwp, is_compensatory }
+    // =========================================================
+
+    let leave_type_names = {};
+    let leave_type_meta = {};
+    let leave_types_loaded = false;
+    let leave_types_promise = null;
+
+    // =========================================================
     // ASSOCIATE MEMBERS - DISPLAY CAP
     // =========================================================
 
@@ -56,6 +71,11 @@ frappe.pages["employee_attendance"].on_page_load = function (wrapper) {
 
     // =========================================================
     // LEAVE TYPE ICONS + COLORS
+    //
+    // This is PRESENTATION ONLY (which colour / icon a card gets).
+    // It is never used as the source of leave type names - those
+    // come from the Leave Type list / API data. A leave type that
+    // matches nothing here simply gets the default style below.
     // =========================================================
 
     const LEAVE_TYPE_STYLE = [
@@ -68,17 +88,192 @@ frappe.pages["employee_attendance"].on_page_load = function (wrapper) {
         { match: "comp",        cls: "lt-compoff",    icon: "fa-exchange" }
     ];
 
+    // style used for Leave Types set up by Leave Type flags
+
+    const LEAVE_FLAG_STYLE = {
+        lwp:          { cls: "lt-lwp",     icon: "fa-money" },
+        compensatory: { cls: "lt-compoff", icon: "fa-exchange" }
+    };
+
 
     function get_leave_style(leave_type) {
 
-        const t = String(leave_type || "").toLowerCase();
+        const official = resolve_leave_type(leave_type);
+
+        const meta = leave_type_meta[official] || {};
+
+        // 1) Leave Type flags (reliable, configured in Leave Type)
+
+        if (meta.is_lwp) {
+            return LEAVE_FLAG_STYLE.lwp;
+        }
+
+        if (meta.is_compensatory) {
+            return LEAVE_FLAG_STYLE.compensatory;
+        }
+
+        // 2) keyword look (existing behaviour)
+
+        const t = String(official || "").toLowerCase();
 
         return LEAVE_TYPE_STYLE.find(function (s) {
             return t.indexOf(s.match) !== -1;
         }) || {
+            // 3) fallback for any new leave type
             cls: "",
             icon: "fa-calendar-check-o"
         };
+
+    }
+
+
+    // =========================================================
+    // LOAD LEAVE TYPES (once, cached, never blocks the page)
+    //
+    // The returned promise ALWAYS resolves. On any error the maps
+    // stay empty and every stored leave type is shown as saved.
+    //
+    // First try also asks for the Leave Type flags
+    // "is_lwp" and "is_compensatory". If this installation does
+    // not allow / have those fields the call is repeated once with
+    // only "name".
+    // =========================================================
+
+    function load_leave_types() {
+
+        if (leave_types_promise) {
+            return leave_types_promise;
+        }
+
+        leave_types_promise = new Promise(function (resolve) {
+
+            const fetch_list = function (fields, allow_fallback) {
+
+                frappe.call({
+
+                    method: "frappe.client.get_list",
+
+                    args: {
+
+                        doctype: "Leave Type",
+
+                        fields: fields,
+
+                        limit_page_length: 0
+
+                    },
+
+                    callback: function (r) {
+
+                        const names = {};
+                        const meta = {};
+
+                        (r.message || []).forEach(function (row) {
+
+                            if (!row.name) {
+                                return;
+                            }
+
+                            const key =
+                                String(row.name).trim().toLowerCase();
+
+                            // duplicates collapse onto one entry
+
+                            if (names[key]) {
+                                return;
+                            }
+
+                            names[key] = row.name;
+
+                            meta[row.name] = {
+                                is_lwp: Number(row.is_lwp) === 1,
+                                is_compensatory:
+                                    Number(row.is_compensatory) === 1
+                            };
+
+                        });
+
+                        leave_type_names = names;
+                        leave_type_meta = meta;
+                        leave_types_loaded = true;
+
+                        // console.log("Leave Types:", leave_type_names);
+
+                        resolve();
+
+                    },
+
+                    error: function (error) {
+
+                        if (allow_fallback) {
+
+                            fetch_list(["name"], false);
+
+                            return;
+
+                        }
+
+                        console.error(
+                            "Unable to load Leave Type list. " +
+                            "Stored leave types will be shown as saved:",
+                            error
+                        );
+
+                        leave_type_names = {};
+                        leave_type_meta = {};
+                        leave_types_loaded = false;
+
+                        // allow a retry on the next call
+
+                        leave_types_promise = null;
+
+                        resolve();
+
+                    }
+
+                });
+
+            };
+
+            fetch_list(["name", "is_lwp", "is_compensatory"], true);
+
+        });
+
+        return leave_types_promise;
+
+    }
+
+
+    // Official Leave Type name when known, otherwise the stored
+    // value unchanged. Names are never shortened or replaced.
+
+    function resolve_leave_type(value) {
+
+        const stored = String(value || "").trim();
+
+        if (!stored) {
+            return "";
+        }
+
+        return leave_type_names[stored.toLowerCase()] || stored;
+
+    }
+
+
+    // Leave Without Pay: taken from the Leave Type "is_lwp" flag.
+    // Only when the Leave Type list could not be loaded does it
+    // fall back to the old name check, so today's behaviour is kept.
+
+    function is_leave_without_pay(leave_type) {
+
+        const official = resolve_leave_type(leave_type);
+
+        if (leave_type_meta[official]) {
+            return !!leave_type_meta[official].is_lwp;
+        }
+
+        return String(official).trim().toLowerCase() ===
+            "leave without pay";
 
     }
 
@@ -99,285 +294,229 @@ frappe.pages["employee_attendance"].on_page_load = function (wrapper) {
     // =========================================================
 
     page.main.html(`
+        <main class="attendance-container">
 
-<main class="attendance-container">
+            <!-- ================= Header ================= -->
+            <header class="attendance-header">
 
-    <!-- ================= Header ================= -->
-
-    <header class="attendance-header">
-
-        <div class="header-left">
-
-            <div class="header-title-block">
-
-                <h2>Employee Attendance</h2>
-
-                <p class="header-subtitle">
-                    Track your attendance and working hours
-                </p>
-
-            </div>
-
-            <!-- kept for JS compatibility; hidden by CSS -->
-            <span id="status"></span>
-
-        </div>
-
-        <time class="header-right">
-
-            <strong id="current-date-main"></strong>
-
-            <small id="current-date-sub"></small>
-
-        </time>
-
-    </header>
-
-
-    <!-- ================= Leave balance ================= -->
-
-    <h3 class="section-title">Leave Balance</h3>
-
-    <section class="leave-balance-section"></section>
-
-
-    <!-- ================= Dashboard ================= -->
-
-    <section class="attendance-main-grid">
-
-        <!-- ---------- Left column ---------- -->
-
-        <section class="attendance-left">
-
-            <!-- Profile / timer -->
-
-            <article class="card attendance-card">
-
-                <div class="profile-row">
-
-                    <div class="avatar avatar-large" id="avatar_initial">A</div>
-
-                    <div class="profile-info">
-
-                        <h3 id="Employee_name" class="profile-name">Loading...</h3>
-
-                        <p id="Employee_role" class="profile-role">Loading...</p>
-
-                        <span id="status_text" class="status-text">--</span>
-
+                <div class="header-left">
+                    <div class="header-title-block">
+                        <h2>Employee Attendance</h2>
+                        <p class="header-subtitle">
+                            Track your attendance and working hours
+                        </p>
                     </div>
 
+                    <!-- kept for JS compatibility; hidden by CSS -->
+                    <span id="status"></span>
                 </div>
 
+                <time class="header-right">
+                    <strong id="current-date-main"></strong>
+                    <small id="current-date-sub"></small>
+                </time>
 
-                <div class="digit-timer" aria-label="Working hours">
-
-                    <span class="digit-box" id="timer_hh">00</span>
-
-                    <span class="digit-colon">:</span>
-
-                    <span class="digit-box" id="timer_mm">00</span>
-
-                    <span class="digit-colon">:</span>
-
-                    <span class="digit-box" id="timer_ss">00</span>
-
-                </div>
-
-                <div class="timer-caption">Working Hours</div>
+            </header>
 
 
-                <!-- Backward compatibility -->
+            <!-- ================= Leave balance ================= -->
+            <h3 class="section-title">Leave Balance</h3>
 
-                <span id="live-timer" hidden>00:00:00</span>
-
-                <span id="working_hours" hidden>00:00:00</span>
-
-
-                <div class="button-area">
-
-                    <button
-                        type="button"
-                        id="attendance_btn"
-                        class="attendance-button">
-
-                        Loading...
-
-                    </button>
-
-                </div>
+            <section class="leave-balance-section"></section>
 
 
-                <dl class="checkinout-grid">
+            <!-- ================= Dashboard ================= -->
+            <section class="attendance-main-grid">
 
-                    <div class="checkinout-box">
+                <!-- ---------- Left column ---------- -->
+                <section class="attendance-left">
 
-                        <div class="cio-text">
+                    <!-- Profile / timer -->
+                    <article class="card attendance-card">
 
-                            <dt>Check In</dt>
+                        <div class="profile-row">
+                            <div class="avatar avatar-large" id="avatar_initial">A</div>
 
-                            <dd id="checkin_time">--</dd>
+                            <div class="profile-info">
+                                <h3 id="Employee_name" class="profile-name">Loading...</h3>
+                                <p id="Employee_role" class="profile-role">Loading...</p>
+                                <span id="status_text" class="status-text">--</span>
+                            </div>
+                        </div>
+
+                        <div class="digit-timer" aria-label="Working hours">
+                            <span class="digit-box" id="timer_hh">00</span>
+                            <span class="digit-colon">:</span>
+                            <span class="digit-box" id="timer_mm">00</span>
+                            <span class="digit-colon">:</span>
+                            <span class="digit-box" id="timer_ss">00</span>
+                        </div>
+
+                        <div class="timer-caption">Working Hours</div>
+
+                        <!-- Backward compatibility -->
+                        <span id="live-timer" hidden>00:00:00</span>
+                        <span id="working_hours" hidden>00:00:00</span>
+
+                        <div class="button-area">
+                            <button
+                                type="button"
+                                id="attendance_btn"
+                                class="attendance-button">
+                                Loading...
+                            </button>
+                        </div>
+
+                        <dl class="checkinout-grid">
+
+                            <div class="checkinout-box">
+                                <div class="cio-text">
+                                    <dt>Check In</dt>
+                                    <dd id="checkin_time">--</dd>
+                                </div>
+                            </div>
+
+                            <div class="checkinout-box">
+                                <div class="cio-text">
+                                    <dt>Check Out</dt>
+                                    <dd id="checkout_time">--</dd>
+                                </div>
+                            </div>
+
+                        </dl>
+
+                    </article>
+
+
+                    <!-- Reporting manager -->
+                    <article class="card manager-card">
+
+                        <h4 class="card-label">Reporting Manager</h4>
+
+                        <div class="manager-row" id="manager_row">
+                            <div class="avatar avatar-small avatar-tint-0" id="manager_avatar">--</div>
+
+                            <div class="manager-info">
+                                <strong id="manager_name">Loading...</strong>
+                                <span id="manager_code" class="manager-code"></span>
+                                <span id="manager_status" class="member-status">--</span>
+                            </div>
+
+                            <i class="fa fa-angle-right manager-chevron"></i>
+                        </div>
+
+                    </article>
+
+
+                    <!-- Associate members -->
+                    <article class="card members-card">
+
+                        <header class="members-card-header">
+                            <h4 class="card-label">Associate Members</h4>
+                            <a href="#" id="view_all_members" class="view-all-link">View All</a>
+                        </header>
+
+                        <div id="associate_members_list" class="members-list">
+                            <div class="members-empty">Loading...</div>
+                        </div>
+
+                    </article>
+
+
+                    <!-- Attendance policies -->
+                    <article class="card attendance-policy-section">
+
+                        <h4 class="card-label">Policies</h4>
+
+                        <div
+                            id="attendance_policy_list"
+                            class="attendance-policy-list">
+
+                            <div class="members-empty">
+                                Loading policies...
+                            </div>
 
                         </div>
 
-                    </div>
+                        <div
+                            id="policy_toggle_row"
+                            class="policy-toggle-row"
+                            hidden>
 
-
-                    <div class="checkinout-box">
-
-                        <div class="cio-text">
-
-                            <dt>Check Out</dt>
-
-                            <dd id="checkout_time">--</dd>
+                            <a
+                                href="#"
+                                id="toggle_policies"
+                                class="view-all-link">View All Policies</a>
 
                         </div>
 
-                    </div>
+                    </article>
 
-                </dl>
-
-            </article>
+                </section>
 
 
-            <!-- Reporting manager -->
+                <!-- ---------- Right column ---------- -->
+                <section class="attendance-right">
 
-            <article class="card manager-card">
+                    <article class="card attendance-calendar-card">
 
-                <h4 class="card-label">Reporting Manager</h4>
+                        <header class="attendance-calendar-header">
+                            <h3>Attendance Calendar</h3>
+                        </header>
 
-                <div class="manager-row" id="manager_row">
+                        <div
+                            id="attendance-calendar"
+                            class="attendance-calendar-container">
+                        </div>
 
-                    <div class="avatar avatar-small avatar-tint-0" id="manager_avatar">--</div>
+                        <footer class="calendar-legend">
+                            <span><i class="legend-dot legend-present"></i>Present</span>
+                            <span><i class="legend-dot legend-absent"></i>Absent</span>
+                            <span><i class="legend-dot legend-leave"></i>Leave</span>
+                            <span><i class="legend-dot legend-holiday"></i>Holiday</span>
+                            <span><i class="legend-dot legend-halfday"></i>Half Day</span>
+                        </footer>
 
-                    <div class="manager-info">
+                    </article>
 
-                        <strong id="manager_name">Loading...</strong>
+                </section>
 
-                        <span id="manager_code" class="manager-code"></span>
-
-                        <span id="manager_status" class="member-status">--</span>
-
-                    </div>
-
-                    <i class="fa fa-angle-right manager-chevron"></i>
-
-                </div>
-
-            </article>
+            </section>
 
 
-            <!-- Associate members -->
+            <!-- ================= Recent attendance ================= -->
+            <section class="card history-card">
 
-            <article class="card members-card">
-
-                <header class="members-card-header">
-
-                    <h4 class="card-label">Associate Members</h4>
-
-                    <a href="#" id="view_all_members" class="view-all-link">View All</a>
-
+                <header class="history-header">
+                    <h3>Recent Attendance</h3>
+                    <a href="#" id="view_all_attendance" class="view-all-link">View All</a>
                 </header>
 
-                <div id="associate_members_list" class="members-list">
+                <div class="attendance-table-wrapper">
 
-                    <div class="members-empty">Loading...</div>
+                    <table class="attendance-table">
+
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Check In</th>
+                                <th>Check Out</th>
+                            </tr>
+                        </thead>
+
+                        <tbody id="attendance_history">
+                            <tr>
+                                <td colspan="3">Loading...</td>
+                            </tr>
+                        </tbody>
+
+                    </table>
 
                 </div>
 
-            </article>
+            </section>
 
-        </section>
-
-
-        <!-- ---------- Right column ---------- -->
-
-        <section class="attendance-right">
-
-            <article class="card attendance-calendar-card">
-
-                <header class="attendance-calendar-header">
-
-                    <h3>Attendance Calendar</h3>
-
-                </header>
-
-                <div
-                    id="attendance-calendar"
-                    class="attendance-calendar-container">
-                </div>
-
-                <footer class="calendar-legend">
-
-                    <span><i class="legend-dot legend-present"></i>Present</span>
-
-                    <span><i class="legend-dot legend-absent"></i>Absent</span>
-
-                    <span><i class="legend-dot legend-leave"></i>Leave</span>
-
-                    <span><i class="legend-dot legend-holiday"></i>Holiday</span>
-
-                    <span><i class="legend-dot legend-halfday"></i>Half Day</span>
-
-                </footer>
-
-            </article>
-
-        </section>
-
-    </section>
-
-
-    <!-- ================= Recent attendance ================= -->
-
-    <section class="card history-card">
-
-        <header class="history-header">
-
-            <h3>Recent Attendance</h3>
-
-            <a href="#" id="view_all_attendance" class="view-all-link">View All</a>
-
-        </header>
-
-        <div class="attendance-table-wrapper">
-
-            <table class="attendance-table">
-
-                <thead>
-
-                    <tr>
-
-                        <th>Date</th>
-
-                        <th>Check In</th>
-
-                        <th>Check Out</th>
-
-                        <th>Hours</th>
-
-                    </tr>
-
-                </thead>
-
-                <tbody id="attendance_history">
-
-                    <tr>
-
-                        <td colspan="4">Loading...</td>
-
-                    </tr>
-
-                </tbody>
-
-            </table>
-
-        </div>
-
-    </section>
-
-</main>
-
+        </main>
     `);
 
 
@@ -403,6 +542,230 @@ frappe.pages["employee_attendance"].on_page_load = function (wrapper) {
 
 
     // =========================================================
+    // ATTENDANCE POLICIES (URLs from Teceze Settings)
+    //
+    // The API returns URLs only, so the display names live here.
+    // Order matters: the first DEFAULT_POLICY_COUNT entries are the
+    // ones shown before "View All" is clicked.
+    // =========================================================
+
+    const POLICY_DEFINITIONS = [
+        {
+            label: "Probation Policy",
+            key: "probation_policy_url"
+        },
+        {
+            label: "Resignation Policy",
+            key: "resignation_policy_url"
+        },
+        {
+            label: "Performance Improvement Policy",
+            key: "performance_improvement_plan_url"
+        },
+        {
+            label: "Internship Policy",
+            key: "internship_policy_url"
+        },
+        {
+            label: "India Leave Policy",
+            key: "india_leave_policy_url"
+        },
+        {
+            label: "Dress Code Policy",
+            key: "dress_code_policy_url"
+        },
+        {
+            label: "Whistleblower Policy",
+            key: "whistleblower_policy_url"
+        }
+    ];
+
+    const DEFAULT_POLICY_COUNT = 2;
+
+    // only policies with a valid https URL, in display order
+    let attendance_policies = [];
+    let policies_expanded = false;
+
+
+    function load_attendance_policy_urls() {
+
+        frappe.call({
+
+            method:
+                "teceze.api.employee_attendance.get_attendance_policy_urls",
+
+            callback: function (r) {
+
+                const data = r.message || {};
+
+                attendance_policies = [];
+
+                POLICY_DEFINITIONS.forEach(function (def, index) {
+
+                    const url = String(data[def.key] || "").trim();
+
+                    // missing / empty / non-HTTPS -> not rendered
+                    if (!/^https:\/\//i.test(url)) {
+                        return;
+                    }
+
+                    attendance_policies.push({
+                        label: def.label,
+                        url: url,
+                        is_default: index < DEFAULT_POLICY_COUNT
+                    });
+
+                });
+
+                policies_expanded = false;
+
+                render_attendance_policies();
+
+            },
+
+            error: function (error) {
+
+                console.error(
+                    "Unable to load attendance policy URLs:",
+                    error
+                );
+
+                attendance_policies = [];
+
+                const container = document.getElementById(
+                    "attendance_policy_list"
+                );
+
+                const toggle_row =
+                    document.getElementById("policy_toggle_row");
+
+                if (toggle_row) {
+                    toggle_row.hidden = true;
+                }
+
+                if (container) {
+
+                    container.innerHTML = "";
+
+                    const msg = document.createElement("div");
+                    msg.className = "members-empty";
+                    msg.textContent = "Unable to load policies.";
+
+                    container.appendChild(msg);
+
+                }
+
+            }
+
+        });
+
+    }
+
+
+    // Rebuilds the list from scratch every time, so repeated
+    // View All / Show Less clicks can never duplicate cards.
+
+    function render_attendance_policies() {
+
+        const container = document.getElementById(
+            "attendance_policy_list"
+        );
+
+        const toggle = document.getElementById("toggle_policies");
+
+        const toggle_row = document.getElementById("policy_toggle_row");
+
+        if (!container) {
+            return;
+        }
+
+        const extra_count = attendance_policies.filter(function (p) {
+            return !p.is_default;
+        }).length;
+
+        // no extra policies configured -> no useless toggle
+
+        if (toggle_row) {
+            toggle_row.hidden = extra_count === 0;
+        }
+
+        if (toggle) {
+
+            toggle.textContent = policies_expanded
+                ? "Show Less"
+                : "View All Policies";
+
+        }
+
+        const visible = attendance_policies.filter(function (p) {
+            return policies_expanded || p.is_default;
+        });
+
+        container.innerHTML = "";
+
+        if (!visible.length) {
+
+            const empty = document.createElement("div");
+
+            empty.className = "members-empty";
+            empty.textContent = "No policies configured.";
+
+            container.appendChild(empty);
+
+            return;
+
+        }
+
+        visible.forEach(function (policy) {
+
+            const item = document.createElement("div");
+            item.className = "attendance-policy-item";
+
+            const icon = document.createElement("i");
+            icon.className = "fa fa-file-pdf-o";
+
+            const link = document.createElement("a");
+            link.href = policy.url;
+            link.target = "_blank";
+            link.rel = "noopener noreferrer";
+            link.textContent = policy.label;
+
+            item.appendChild(icon);
+            item.appendChild(link);
+
+            container.appendChild(item);
+
+        });
+
+    }
+
+
+    // =========================================================
+    // POLICIES: VIEW ALL / SHOW LESS
+    //
+    // Delegated + namespaced (same pattern as #view_all_members),
+    // so it is removed on page-unload by
+    // $(document).off(".employeeAttendance").
+    // =========================================================
+
+    $(document).off("click.employeeAttendance", "#toggle_policies");
+
+    $(document).on(
+        "click.employeeAttendance",
+        "#toggle_policies",
+        function (e) {
+
+            e.preventDefault();
+
+            policies_expanded = !policies_expanded;
+
+            render_attendance_policies();
+
+        }
+    );
+
+
+    // =========================================================
     // LOAD LOGGED EMPLOYEE
     // =========================================================
 
@@ -423,6 +786,7 @@ frappe.pages["employee_attendance"].on_page_load = function (wrapper) {
                 }
 
                 employee = r.message.name;
+                load_attendance_policy_urls();
 
                 $("#Employee_name").text(r.message.employee_name);
 
@@ -556,12 +920,14 @@ frappe.pages["employee_attendance"].on_page_load = function (wrapper) {
 
         const status = String(m.status || "").trim().toUpperCase();
         const label = String(m.status_label || "").trim().toLowerCase();
+
         if (
-            status === "IN"||
+            status === "IN" ||
             status === "CHECKED_IN"
         ) {
             return "in";
         }
+
         if (
             status === "ON_LEAVE" ||
             status === "LEAVE"
@@ -569,25 +935,24 @@ frappe.pages["employee_attendance"].on_page_load = function (wrapper) {
             return "leave";
         }
 
-        if (
-            status === "HALF_DAY"
-        ) {
+        if (status === "HALF_DAY") {
             return "half-day";
         }
+
         if (
             status === "WORK_FROM_HOME" ||
             status === "WFH"
         ) {
             return "wfh";
         }
-        if (
-            status === "NOT_CHECKED_IN"
-        ) {
+
+        if (status === "NOT_CHECKED_IN") {
             return "out";
         }
 
         if (
-            status === "out" ||status === "NOT_CHECKED_IN" 
+            status === "OUT" ||
+            status === "NOT_CHECKED_IN"
         ) {
             return "out";
         }
@@ -622,7 +987,7 @@ frappe.pages["employee_attendance"].on_page_load = function (wrapper) {
 
                 const list = $("#associate_members_list");
 
-               // console.log("Associate members:", r.message);
+                // console.log("Associate members:", r.message);
 
                 list.empty();
 
@@ -737,17 +1102,25 @@ frappe.pages["employee_attendance"].on_page_load = function (wrapper) {
 
     // =========================================================
     // LOAD CALENDAR DATA
+    //
+    // The Leave Type list is loaded first (once, cached) so it is
+    // ready before Attendance rows are processed. It never fails
+    // the chain: on error the stored leave types are used as saved.
     // =========================================================
 
     function load_calendar_data(callback) {
 
-        load_calendar_working_hours(function () {
+        load_leave_types().then(function () {
 
-            load_employee_holiday_details(function () {
+            load_calendar_working_hours(function () {
 
-                if (callback) {
-                    callback();
-                }
+                load_employee_holiday_details(function () {
+
+                    if (callback) {
+                        callback();
+                    }
+
+                });
 
             });
 
@@ -772,6 +1145,8 @@ frappe.pages["employee_attendance"].on_page_load = function (wrapper) {
     //
     // Working hours = highest value among the records.
     // Leave type    = unique leave types joined with ", ".
+    //                 (rec.leave_type is already the official
+    //                 Leave Type name - see load_calendar_working_hours)
     // =========================================================
 
     function group_attendance_records(date, date_records) {
@@ -994,7 +1369,10 @@ frappe.pages["employee_attendance"].on_page_load = function (wrapper) {
 
                         working_hours: Number(row.working_hours || 0),
 
-                        leave_type: String(row.leave_type || "").trim(),
+                        // official Leave Type name; a historical value
+                        // that is not in the list is kept as saved
+
+                        leave_type: resolve_leave_type(row.leave_type),
 
                         half_day_status:
                             String(row.half_day_status || "").trim()
@@ -1022,15 +1400,15 @@ frappe.pages["employee_attendance"].on_page_load = function (wrapper) {
                     }
                 );
 
-               // console.log(
+                // console.log(
                 //     "Grouped Attendance records:",
                 //     attendance_working_hours
                 // );
 
-            //    // console.log(
-            //         "All Attendance records by date:",
-            //         attendance_records_by_date
-            //     );
+                // console.log(
+                //     "All Attendance records by date:",
+                //     attendance_records_by_date
+                // );
 
                 if (callback) {
                     callback();
@@ -1115,9 +1493,9 @@ frappe.pages["employee_attendance"].on_page_load = function (wrapper) {
 
                 });
 
-               // console.log("Employee default shift:", employee_default_shift);
-               // console.log("Employee holiday list:", employee_holiday_list);
-               // console.log("Employee holiday details:", holiday_calendar_data);
+                // console.log("Employee default shift:", employee_default_shift);
+                // console.log("Employee holiday list:", employee_holiday_list);
+                // console.log("Employee holiday details:", holiday_calendar_data);
 
                 if (callback) {
                     callback();
@@ -1403,6 +1781,9 @@ frappe.pages["employee_attendance"].on_page_load = function (wrapper) {
 
     // =========================================================
     // ADD HOLIDAY DETAILS TO CALENDAR DAY
+    //
+    // (original version - Weekly Off styling is applied
+    //  separately by mark_weekly_off_days() below)
     // =========================================================
 
     function add_holiday_to_calendar_day(date) {
@@ -1503,6 +1884,70 @@ frappe.pages["employee_attendance"].on_page_load = function (wrapper) {
 
 
     // =========================================================
+    // MARK WEEKLY OFF (WO) DAYS
+    //
+    // Runs AFTER the holiday chips are drawn. Wrapped in
+    // try/catch so it can never stop the holidays from showing.
+    //
+    // A day is "weekly off" only when EVERY holiday entry on it
+    // has the description "WO". Those days lose the orange tint
+    // (CSS: .has-weekly-off / .is-weekly-off). Real holidays keep
+    // the orange look.
+    // =========================================================
+
+    function mark_weekly_off_days() {
+
+        try {
+
+            Object.keys(holiday_calendar_data).forEach(function (date) {
+
+                const holidays = holiday_calendar_data[date] || [];
+
+                if (!holidays.length) {
+                    return;
+                }
+
+                const dayCell =
+                    document.querySelector(
+                        `.fc-daygrid-day[data-date="${date}"]`
+                    );
+
+                if (!dayCell) {
+                    return;
+                }
+
+                const is_weekly_off = holidays.every(function (holiday) {
+
+                    return clean_holiday_description(holiday.description)
+                        .toUpperCase() === "WO";
+
+                });
+
+                dayCell.classList.toggle("has-weekly-off", is_weekly_off);
+
+                if (is_weekly_off) {
+                    dayCell.classList.remove("has-holiday");
+                }
+
+                const chip = dayCell.querySelector(".calendar-holiday");
+
+                if (chip) {
+                    chip.classList.toggle("is-weekly-off", is_weekly_off);
+                }
+
+            });
+
+        }
+        catch (error) {
+
+            console.warn("Could not mark weekly off days:", error);
+
+        }
+
+    }
+
+
+    // =========================================================
     // ADD HOLIDAYS TO ALL VISIBLE CALENDAR DAYS
     // =========================================================
 
@@ -1527,6 +1972,9 @@ frappe.pages["employee_attendance"].on_page_load = function (wrapper) {
                 add_holiday_to_calendar_day(date);
 
             });
+
+        // WO days: remove the orange look (safe - never throws)
+        mark_weekly_off_days();
 
     }
 
@@ -1657,13 +2105,13 @@ frappe.pages["employee_attendance"].on_page_load = function (wrapper) {
             ["Attendance", "docstatus", "=", 1]
         ];
 
-       // console.log("Attendance calendar filters:", attendance_calendar_filters);
+        // console.log("Attendance calendar filters:", attendance_calendar_filters);
 
         container.innerHTML = "";
 
         frappe.require("calendar.bundle.js", function () {
 
-           // console.log("calendar.bundle.js loaded.");
+            // console.log("calendar.bundle.js loaded.");
 
             load_attendance_calendar_config();
 
@@ -1704,7 +2152,7 @@ frappe.pages["employee_attendance"].on_page_load = function (wrapper) {
 
                 }
 
-               // console.log(
+                // console.log(
                 //     "Employee Attendance Calendar configuration:",
                 //     calendar_doc
                 // );
@@ -1717,7 +2165,7 @@ frappe.pages["employee_attendance"].on_page_load = function (wrapper) {
                     allDay: calendar_doc.all_day ? 1 : 0
                 };
 
-               // console.log("Calendar field map:", field_map);
+                // console.log("Calendar field map:", field_map);
 
                 if (!field_map.start) {
 
@@ -1748,7 +2196,7 @@ frappe.pages["employee_attendance"].on_page_load = function (wrapper) {
                     get_events_method: "frappe.desk.calendar.get_events"
                 };
 
-               // console.log("Initializing Frappe Calendar...");
+                // console.log("Initializing Frappe Calendar...");
 
                 try {
 
@@ -1763,7 +2211,7 @@ frappe.pages["employee_attendance"].on_page_load = function (wrapper) {
 
                     enable_single_event_per_date(attendance_calendar);
 
-                   // console.log(
+                    // console.log(
                     //     "Frappe Attendance Calendar initialized successfully.",
                     //     attendance_calendar
                     // );
@@ -1842,154 +2290,165 @@ frappe.pages["employee_attendance"].on_page_load = function (wrapper) {
 
     // =========================================================
     // LOAD LEAVE BALANCE
+    //
+    // The Leave Type list is loaded first (once, cached). Each
+    // leave type returned by the leave balance API is resolved to
+    // its official Leave Type name; a value that is not in the
+    // list is shown exactly as the API returned it.
     // =========================================================
 
     function load_leave_balance() {
 
-        frappe.call({
+        load_leave_types().then(function () {
 
-            method: "teceze.api.mobile_app.crud.leave_balance",
+            frappe.call({
 
-            callback: function (r) {
+                method: "teceze.api.mobile_app.crud.leave_balance",
 
-                if (!r.message || !r.message.success) {
+                callback: function (r) {
 
-                    console.error("Failed to load leave balance:", r.message);
+                    if (!r.message || !r.message.success) {
 
-                    return;
+                        console.error("Failed to load leave balance:", r.message);
 
-                }
+                        return;
 
-                const leave_balances = r.message.data || [];
+                    }
 
-               // console.log("Leave balances loaded:", leave_balances);
+                    const leave_balances = r.message.data || [];
 
-                const parent =
-                    document.querySelector(".leave-balance-section");
+                    // console.log("Leave balances loaded:", leave_balances);
 
-                if (!parent) {
+                    const parent =
+                        document.querySelector(".leave-balance-section");
 
-                    console.error("Leave balance section not found");
+                    if (!parent) {
 
-                    return;
+                        console.error("Leave balance section not found");
 
-                }
+                        return;
 
-                parent.innerHTML = "";
+                    }
 
-                // icon + color per leave type
-                // progress bar = days USED
-                // negative balance is shown in red
+                    parent.innerHTML = "";
 
-                leave_balances.forEach(function (item) {
+                    // icon + color per leave type
+                    // progress bar = days USED
+                    // negative balance is shown in red
 
-                    const leave_type = item.leave_type || "Leave";
+                    leave_balances.forEach(function (item) {
 
-                    const balance = Number(item.balance || 0);
+                        const leave_type =
+                            resolve_leave_type(item.leave_type) || "Leave";
 
-                    const total = Number(item.total || 0);
+                        const balance = Number(item.balance || 0);
 
-                    const style = get_leave_style(leave_type);
+                        const total = Number(item.total || 0);
 
-                    // Used = Total - Balance
+                        const style = get_leave_style(leave_type);
 
-                    const used = Number((total - balance).toFixed(2));
+                        // Used = Total - Balance
 
-                    const is_lwp =
-                        String(leave_type).trim().toLowerCase() ===
-                        "leave without pay";
+                        const used = Number((total - balance).toFixed(2));
 
-                    // used more than allocated (e.g. LWP: total 0, used 2)
+                        // from the Leave Type "is_lwp" flag
+                        // (name check only if the list is unavailable)
 
-                    const is_negative = used > total;
+                        const is_lwp = is_leave_without_pay(leave_type);
 
-                    const pct =
-                        total > 0
-                            ? Math.min((used / total) * 100, 100)
-                            : (used > 0 ? 100 : 0);
+                        // used more than allocated (e.g. LWP: total 0, used 2)
 
-                    const card = document.createElement("div");
+                        const is_negative = used > total;
 
-                    card.className =
-                        "card leave-balance-card " +
-                        style.cls +
-                        (is_negative ? " is-negative" : "");
+                        const pct =
+                            total > 0
+                                ? Math.min((used / total) * 100, 100)
+                                : (used > 0 ? 100 : 0);
 
-                    // total shown only for normal leave types
+                        const card = document.createElement("div");
 
-                    const total_display =
-                        is_lwp
-                            ? ""
-                            : `
-                                <span class="leave-card-total">
+                        card.className =
+                            "card leave-balance-card " +
+                            style.cls +
+                            (is_negative ? " is-negative" : "");
 
-                                    / ${frappe.utils.escape_html(String(total))}
+                        // total shown only for normal leave types
 
-                                </span>
-                            `;
+                        const total_display =
+                            is_lwp
+                                ? ""
+                                : `
+                                    <span class="leave-card-total">
 
-                    card.innerHTML = `
-
-                        <div class="leave-card-top">
-
-                            <div class="leave-card-icon">
-
-                                <i class="fa ${style.icon}"></i>
-
-                            </div>
-
-                            <div class="leave-card-info">
-
-                                <h4 class="leave-card-title">
-
-                                    ${frappe.utils.escape_html(String(leave_type))}
-
-                                </h4>
-
-                                <div class="leave-card-balance">
-
-                                    <strong>
-
-                                        ${frappe.utils.escape_html(String(used))}
-
-                                    </strong>
-
-                                    ${total_display}
-
-                                    <span class="leave-card-days">
-
-                                        days used
+                                        / ${frappe.utils.escape_html(String(total))}
 
                                     </span>
+                                `;
+
+                        card.innerHTML = `
+
+                            <div class="leave-card-top">
+
+                                <div class="leave-card-icon">
+
+                                    <i class="fa ${style.icon}"></i>
+
+                                </div>
+
+                                <div class="leave-card-info">
+
+                                    <h4 class="leave-card-title">
+
+                                        ${frappe.utils.escape_html(String(leave_type))}
+
+                                    </h4>
+
+                                    <div class="leave-card-balance">
+
+                                        <strong>
+
+                                            ${frappe.utils.escape_html(String(used))}
+
+                                        </strong>
+
+                                        ${total_display}
+
+                                        <span class="leave-card-days">
+
+                                            days used
+
+                                        </span>
+
+                                    </div>
 
                                 </div>
 
                             </div>
 
-                        </div>
+                            <div class="leave-card-progress">
 
-                        <div class="leave-card-progress">
+                                <div
+                                    class="leave-card-progress-bar"
+                                    style="width: ${pct}%;">
+                                </div>
 
-                            <div
-                                class="leave-card-progress-bar"
-                                style="width: ${pct}%;">
                             </div>
 
-                        </div>
+                        `;
 
-                    `;
+                        parent.appendChild(card);
 
-                    parent.appendChild(card);
+                    });
 
-                });
+                },
 
-            },
+                error: function (err) {
 
-            error: function (err) {
+                    console.error("Error loading leave balance:", err);
 
-                console.error("Error loading leave balance:", err);
+                }
 
-            }
+            });
 
         });
 
@@ -2451,7 +2910,7 @@ frappe.pages["employee_attendance"].on_page_load = function (wrapper) {
 
                     }, 500);
 
-                   // console.log("Attendance calendar refreshed.");
+                    // console.log("Attendance calendar refreshed.");
 
                     return;
 
@@ -2468,7 +2927,7 @@ frappe.pages["employee_attendance"].on_page_load = function (wrapper) {
 
                     }, 500);
 
-                   // console.log("Attendance calendar events refreshed.");
+                    // console.log("Attendance calendar events refreshed.");
 
                 }
 
@@ -2899,7 +3358,7 @@ frappe.pages["employee_attendance"].on_page_load = function (wrapper) {
 
                     tbody.append(`
                         <tr>
-                            <td colspan="4">
+                            <td colspan="3">
                                 No attendance records found
                             </td>
                         </tr>
@@ -2920,8 +3379,6 @@ frappe.pages["employee_attendance"].on_page_load = function (wrapper) {
 
                             ${table_cell(row.check_out)}
 
-                            ${table_cell(hours_for_row(row))}
-
                         </tr>
 
                     `);
@@ -2934,7 +3391,7 @@ frappe.pages["employee_attendance"].on_page_load = function (wrapper) {
 
                 $("#attendance_history").html(`
                     <tr>
-                        <td colspan="4">
+                        <td colspan="3">
                             Unable to load attendance history
                         </td>
                     </tr>

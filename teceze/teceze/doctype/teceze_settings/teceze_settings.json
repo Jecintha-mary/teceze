@@ -13,6 +13,11 @@
   "birthday",
   "custom_session_expire_hours",
   "custom_session_reset_hours",
+  "custom_probation_policy_url",
+  "custom_resignation_policy_url",
+  "custom_internship_policy_url",
+  "custom_india_leave_policy_url",
+  "custom_whistleblower_policy_url",
   "column_break_qrqi",
   "process_auto_attendance_after",
   "max_monthly_regularization",
@@ -20,7 +25,9 @@
   "payslip",
   "max_regularization_working_hours",
   "regularization_full_day_hours",
-  "min_regularization_allowed_hours"
+  "min_regularization_allowed_hours",
+  "custom_performance_improvement_plan",
+  "custom_dress_code_policy_url"
  ],
  "fields": [
   {
@@ -108,13 +115,52 @@
    "fieldname": "min_regularization_allowed_hours",
    "fieldtype": "Float",
    "label": "Minimum Regularization Hours"
+  },
+  {
+   "fieldname": "custom_probation_policy_url",
+   "fieldtype": "Data",
+   "label": "Probation Policy URL",
+   "options": "URL"
+  },
+  {
+   "fieldname": "custom_resignation_policy_url",
+   "fieldtype": "Data",
+   "label": "Resignation Policy URL"
+  },
+  {
+   "fieldname": "custom_internship_policy_url",
+   "fieldtype": "Data",
+   "label": "Internship Policy URL"
+  },
+  {
+   "fieldname": "custom_india_leave_policy_url",
+   "fieldtype": "Data",
+   "label": "India Leave Policy URL",
+   "options": "URL"
+  },
+  {
+   "fieldname": "custom_whistleblower_policy_url",
+   "fieldtype": "Data",
+   "label": "Whistleblower Policy URL"
+  },
+  {
+   "fieldname": "custom_dress_code_policy_url",
+   "fieldtype": "Data",
+   "label": "Dress Code Policy URL",
+   "options": "URL"
+  },
+  {
+   "fieldname": "custom_performance_improvement_plan",
+   "fieldtype": "Data",
+   "label": "Performance Improvement Plan URL",
+   "options": "URL"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-10-05 12:06:36.054460",
+ "modified": "2026-10-15 15:45:56.608669",
  "modified_by": "Administrator",
  "module": "Teceze",
  "name": "Teceze Settings",

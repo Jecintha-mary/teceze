@@ -8,19 +8,18 @@ from datetime import timedelta
 from frappe import _
 current_db_name = frappe.conf.get("db_name")
 MAX_PERMISSION_MINUTES_PER_MONTH = 60
+from frappe.utils import getdate, today
 
 class EmployeePermissionRequest(Document):
     def on_submit(self):
             from hrms.hr.doctype.employee_checkin.employee_checkin import calculate_working_hours
-            
-            # if (frappe.session.user.lower() == self.leave_approver.lower() or frappe.session.user == 'Administrator' or [d for d in ['Leave Approver','System Manager'] if d in frappe.permissions.get_roles(frappe.session.user)]): 
-            #     pass
-            # else:
-            #     frappe.throw("You don't have permission to submit this document. Please contact your RM")
-
             if self.status in ["Open"]:
                     frappe.throw("Employee Permission Request with status 'Approved' and 'Rejected' can be submitted")
-            
+
+            if self.status == "Approved": 
+                if getdate(self.permission_on) < getdate(today()):       
+                        from teceze.teceze.overrides.permission import attendance_for_permission
+                        attendance_for_permission(self)
     def validate(self):
       
         if self.workflow_state == "Approved":
@@ -68,10 +67,6 @@ class EmployeePermissionRequest(Document):
 
 
 
-    def on_update(self):
-        if self.status == "Approved":
-            from teceze.teceze.overrides.permission import attendance_for_permission
-            attendance_for_permission(self)
             
         
 #Validate Permission limitation

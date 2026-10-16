@@ -14,7 +14,7 @@ frappe.query_reports["Employee Leave Balance Report"] = {
             get_query: function () {
                 return {
                     filters: {
-                        status: "Active",
+                        // status: "Active",
                         employment_type: ["!=", "Engineer"]
                     }
                 };

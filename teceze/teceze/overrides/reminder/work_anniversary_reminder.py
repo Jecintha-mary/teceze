@@ -7,10 +7,10 @@ import random
 import frappe
 from frappe.utils import get_url, getdate, today
 
-# Folder where your local anniversary email app module resides
 ASSET_ROOT = Path("/home/frappe/frappe-bench/apps/teceze/teceze/teceze/overrides/reminder/work_anniversary/assets")
     # __file__).resolve().parent / "work_anniversary" / "assets"
 LOGO_FILENAME = "teceze-logo.png"
+MEDAL_FILENAME = "medal1-removebg.png"
 
 def _data_uri(relative_path):
     path = ASSET_ROOT / relative_path
@@ -94,7 +94,7 @@ def _get_empoyee_image(employee):
                     },
                     "name",
                 )
-        print("file_name",file_id )
+        # print("file_name",file_id )
         if not file_id :
             frappe.logger("Anniversary_reminder").warning("No File record found for employee image: %s",
                 employee.image,
@@ -132,11 +132,17 @@ def _anniversary_html(employee, current_date, years_completed, employee_image_fi
     milestone = f"{years_completed} {year_label} WITH US"
     logo = _logo_html()
     logo_swirl_svg =_img("assets/card-logo-swirl.png","logo",width=50)
+    # medal_img = (
+    #     '<img src="https://erp.teceze.com/files/medal1-removebg.png" '
+    #     'alt="Work Anniversary Medal" width="160" '
+    #     'style="display:block;border:0;outline:none;text-decoration:none;'
+    #     'background-color:transparent !important;">'
+    # )
     medal_img = (
-        '<img src="https://erp.teceze.com/files/medal1-removebg.png" '
-        'alt="Work Anniversary Medal" width="160" '
-        'style="display:block;border:0;outline:none;text-decoration:none;'
-        'background-color:transparent !important;">'
+        f'<img embed="{MEDAL_FILENAME}" '
+        f'alt="Work Anniversary Medal" width="160" '
+        f'style="display:block;border:0;outline:none;text-decoration:none;'
+        f'background-color:transparent !important;width:160px;height:auto;">'
     )
     card_logo_swirl = _img("assets/card-logo-swirl.png", alt="Card Logo", width=90) or logo
     monogram_icon = _img("card-employee-icon.png", "", width=28, height=28)
@@ -148,8 +154,6 @@ def _anniversary_html(employee, current_date, years_completed, employee_image_fi
             style="display:block;width:114px;height:114px;border:0;border-radius:57px;object-fit:cover;">"""
     else:
         avatar_content = (
-            monogram_icon
-            +
             (
                 f'<div style="'
                 f'font-size:28px;'
@@ -160,18 +164,6 @@ def _anniversary_html(employee, current_date, years_completed, employee_image_fi
                 f'">'
                 f'{initials}'
                 f'</div>'
-            )
-            +
-            (
-                '<div style="'
-                'font-size:9px;'
-                'line-height:12px;'
-                'font-weight:600;'
-                'letter-spacing:1.4px;'
-                'color:#64748b;'
-                '">'
-                'DYNAMIC AVATAR'
-                '</div>'
             )
         )
 
@@ -430,19 +422,23 @@ def send_work_anniversary_wishes():
             AND MONTH(date_of_joining) = MONTH(CURDATE())
             AND DAY(date_of_joining) = DAY(CURDATE())
     """, as_dict=True)
-    print("employees",employees)
+    # print("employees",employees)
 
     if not ASSET_ROOT.is_dir():
         frappe.throw(
             f"Anniversary email folder not found: {ASSET_ROOT}"
         )
     logo_path = ASSET_ROOT / LOGO_FILENAME
+    medal_path = ASSET_ROOT / MEDAL_FILENAME
     if not logo_path.is_file():
             frappe.throw(
                 "Birthday email logo not found: "
                 f"{logo_path}"
             )
+    if not medal_path.is_file():
+        frappe.throw(f"Medal asset not found: {medal_path}")
     logo_content = logo_path.read_bytes()
+    medal_content = medal_path.read_bytes()
     queued = 0
     skipped = 0
     failed = 0
@@ -466,14 +462,14 @@ def send_work_anniversary_wishes():
                 continue
 
             try:
-                print(f"Sending email to recipient: {recipient}")
+                # print(f"Sending email to recipient: {recipient}")
                 image_filename, image_content,img_url= _get_empoyee_image(employee)
 
-                inline_images = [{"filename": LOGO_FILENAME, "filecontent": logo_content}]
+                inline_images = [{"filename": LOGO_FILENAME, "filecontent": logo_content},{"filename": MEDAL_FILENAME, "filecontent": medal_content}]
                 if image_filename and image_content:
                     inline_images.append({"filename":image_filename, "filecontent": image_content})
                 
-                print("image_filename",image_filename)
+                # print("image_filename",image_filename)
                 message = _anniversary_html(
                     employee,
                     today_date,

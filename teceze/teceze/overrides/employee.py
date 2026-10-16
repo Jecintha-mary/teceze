@@ -270,46 +270,34 @@ def create_leave_allocations(doc):
         ):
             continue
 
-        # ---------------------------------------
-        # Restricted Leave Logic
-        # ---------------------------------------
-        if leave_type == "Restricted Leave":
-
-            # January to June = 5 RL
-            # July to December = 3 RL
-            if joining_date.month <= 6:
-                allocated_leaves = 5
-            else:
-                allocated_leaves = 3
 
         # ---------------------------------------
-        # CL / SL Logic
+        # CL / SL / Restricted Leave Logic
         # ---------------------------------------
-        else:
 
-            # Get annual leave count from Leave Type
-            annual_leaves = frappe.db.get_value(
-                "Leave Type",
-                leave_type,
-                "max_leaves_allowed"
+        # Get annual leave count from Leave Type
+        annual_leaves = frappe.db.get_value(
+            "Leave Type",
+            leave_type,
+            "max_leaves_allowed"
+        )
+
+        if not annual_leaves:
+            frappe.log_error(
+                f"Max Leaves Allowed not set for {leave_type}",
+                "Leave Allocation Error"
             )
+            continue
 
-            if not annual_leaves:
-                frappe.log_error(
-                    f"Max Leaves Allowed not set for {leave_type}",
-                    "Leave Allocation Error"
-                )
-                continue
+        # Prorated leave calculation
+        calculated_leaves = (
+            annual_leaves * remaining_days
+        ) / total_days
 
-            # Prorated leave calculation
-            calculated_leaves = (
-                annual_leaves * remaining_days
-            ) / total_days
-
-            # Round to nearest 0.5
-            allocated_leaves = round(
-                calculated_leaves * 2
-            ) / 2
+        # Round to nearest 0.5
+        allocated_leaves = round(
+            calculated_leaves * 2
+        ) / 2
 
         # ---------------------------------------
         # Create Leave Allocation
@@ -383,7 +371,7 @@ def credit_privilege_leave():
         "Employee",
         filters={
             "status": "Active",
-            "employment_type": "Full Time",
+            "employment_type": "Full-Time",
             "custom_country": ["!=", "Sri Lanka"]
         },
         fields=[
@@ -712,10 +700,6 @@ def allocate_eligible_leaves():
             rule_data.name
         )
 
-        # -----------------------------------
-        # Calculate eligibility date
-        # -----------------------------------
-
         if rule.uom == "Year":
 
             joining_date = getdate(
@@ -752,10 +736,6 @@ def allocate_eligible_leaves():
 
             continue
 
-        # -----------------------------------
-        # Get eligible employees
-        # -----------------------------------
-
         employees = frappe.get_all(
             "Employee",
             filters={
@@ -769,9 +749,6 @@ def allocate_eligible_leaves():
             ],
         )
 
-        # -----------------------------------
-        # Leap year handling
-        # -----------------------------------
 
         if (
             current_date.month == 2

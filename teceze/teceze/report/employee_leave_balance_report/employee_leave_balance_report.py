@@ -86,7 +86,7 @@ def get_columns():
 def get_data(filters):
 
     conditions = [
-        "e.status = 'Active'",
+        # "e.status = 'Active'",
         "IFNULL(e.employment_type, '') != 'Engineer'",
         "la.docstatus = 1",
     ]

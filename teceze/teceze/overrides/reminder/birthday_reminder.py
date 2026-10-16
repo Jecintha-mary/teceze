@@ -199,7 +199,7 @@ def _get_empoyee_image(employee):
             },
             "file_name",
         )
-        print("file_name",file_name)
+        # print("file_name",file_name)
         if not file_name:
             frappe.logger("birthday_reminder").warning("No File record found for employee image: %s",
                 employee.image,
@@ -316,18 +316,6 @@ def _birthday_html(employee, current_date,employee_image_filename=None,employee_
                 f'">'
                 f'{initials}'
                 f'</div>'
-            )
-            +
-            (
-                '<div style="'
-                'font-size:9px;'
-                'line-height:12px;'
-                'font-weight:600;'
-                'letter-spacing:1.4px;'
-                'color:#64748b;'
-                '">'
-                'DYNAMIC AVATAR'
-                '</div>'
             )
         )
 
@@ -531,7 +519,7 @@ def send_birthday_wishes():
         ),
         as_dict=True,
     )
-    print("employees",employees)
+    # print("employees",employees)
     if not employees:
         frappe.logger(
             "birthday_reminder"
@@ -560,7 +548,7 @@ def send_birthday_wishes():
     recipient = all_recipient
  
     for employee in employees:
-        print(f"Sending email to recipient: {recipient}")
+        # print(f"Sending email to recipient: {recipient}")
         
         if not recipient:
             skipped += 1
@@ -580,8 +568,8 @@ def send_birthday_wishes():
             img_filename, img_content, img_url = _get_empoyee_image(employee)
             if img_filename and img_content:
                 inline_images.append({"filename": img_filename, "filecontent": img_content})
-            print("img_url",img_url)
-            print("imag_filename",img_filename)
+            # print("img_url",img_url)
+            # print("imag_filename",img_filename)
             message = _birthday_html(
                         employee,
                         today_date,

@@ -96,7 +96,6 @@ def attendance_for_permission(doc=None, method=None):
                 (end_date,),
                 as_dict=True
             )
-
         if not perm_data:
             return
 
@@ -195,19 +194,16 @@ def attendance_for_permission(doc=None, method=None):
                 checkins[0].from_time,
                 checkins[0].to_time
             )
-
             # -------------------------------------------------
             # Calculate Employee Check-in Working Hours
             # -------------------------------------------------
 
             in_time = valid_checkins[0].time
             out_time = valid_checkins[-1].time
-
             working_hrs = calculate_working_hrs(
                 str(in_time).split(" ")[1],
                 str(out_time).split(" ")[1]
             )
-
             if not in_time or not out_time:
                 continue
 
@@ -576,3 +572,21 @@ def calculate_working_hrs(
     delta = end_time - start_time
 
     return delta.total_seconds() / 3600
+
+
+def user_has_permission(doc, ptype, user=None, debug=False):
+    user = user or frappe.session.user
+
+    # Administrator always has access
+    if user == "Administrator":
+        return True
+
+    # Only System Manager can access User
+    if not any(role in frappe.get_roles(user) for role in ["System Manager", "HR Manager"]):
+        frappe.throw(
+            "You are not authorized to access the User page. "
+            "Please contact the System Manager.",
+            frappe.PermissionError
+        )
+
+    return True

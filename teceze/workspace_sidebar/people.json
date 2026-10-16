@@ -172,11 +172,11 @@
   {
    "child": 1,
    "collapsible": 1,
-   "icon": "clipboard-list",
+   "icon": "clipboard-pen-line",
    "indent": 0,
    "keep_closed": 0,
-   "label": "Salary Slip",
-   "link_to": "Salary Slip",
+   "label": "Salary Structure Assignment ",
+   "link_to": "Salary Structure Assignment",
    "link_type": "DocType",
    "show_arrow": 0,
    "type": "Link"
@@ -184,11 +184,11 @@
   {
    "child": 1,
    "collapsible": 1,
-   "icon": "clipboard-pen",
+   "icon": "clipboard-list",
    "indent": 0,
    "keep_closed": 0,
-   "label": "Salary Structure Assignment",
-   "link_to": "Salary Structure Assignment",
+   "label": "Salary Slip",
+   "link_to": "Salary Slip",
    "link_type": "DocType",
    "show_arrow": 0,
    "type": "Link"
@@ -245,7 +245,7 @@
    "icon": "timer-reset",
    "indent": 0,
    "keep_closed": 0,
-   "label": "Time Sheet",
+   "label": "TimeSheet",
    "link_to": "Timesheet",
    "link_type": "DocType",
    "show_arrow": 0,
@@ -264,7 +264,7 @@
    "type": "Link"
   }
  ],
- "modified": "2026-10-12 15:36:48.505196",
+ "modified": "2026-10-15 13:01:58.083039",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "People",

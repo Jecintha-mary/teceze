@@ -10,13 +10,6 @@ from datetime import datetime, timedelta
 from geopy.geocoders import Nominatim
 from timezonefinder import TimezoneFinder
 from zoneinfo import ZoneInfo
-from math import (
-    radians,
-    sin,
-    cos,
-    sqrt,
-    atan2
-)
 from frappe import _dict
 from hrms.hr.doctype.employee_checkin.employee_checkin import calculate_working_hours
 from hrms.hr.utils import get_distance_between_coordinates
@@ -54,37 +47,6 @@ def get_attendance_session_settings():
     }
 
 session_settings = get_attendance_session_settings()
-# ==========================================================
-# Distance Calculation
-# ==========================================================
-
-def calculate_distance(lat1, lon1, lat2, lon2):
-
-    R = 6371000
-
-    lat1 = radians(float(lat1))
-    lon1 = radians(float(lon1))
-    lat2 = radians(float(lat2))
-    lon2 = radians(float(lon2))
-
-    dlat = lat2 - lat1
-    dlon = lon2 - lon1
-
-    a = (
-        sin(dlat / 2) ** 2
-        + cos(lat1)
-        * cos(lat2)
-        * sin(dlon / 2) ** 2
-    )
-
-    c = 2 * atan2(
-        sqrt(a),
-        sqrt(1 - a)
-    )
-
-    return R * c
-
-
 # ==========================================================
 # Timezone Details
 # ==========================================================
@@ -204,8 +166,6 @@ def validate_employee_location(
         user_lat,
         user_lon
     )
-    frappe.log_error(distance)
-
     allowed_radius = float(
         location.custom_attendance_radius or 500
     )
@@ -2073,4 +2033,39 @@ def get_employee_holiday_details(employee=None):
         "default_shift": default_shift,
         "holiday_list": holiday_list,
         "holidays": holidays
+    }
+
+
+@frappe.whitelist()
+def get_attendance_policy_urls():
+    settings = frappe.get_single("Teceze Settings")
+
+    return {
+        "probation_policy_url": settings.get(
+            "custom_probation_policy_url"
+        ) or "",
+
+        "resignation_policy_url": settings.get(
+            "custom_resignation_policy_url"
+        ) or "",
+
+        "performance_improvement_plan_url": settings.get(
+            "custom_performance_improvement_plan"
+        ) or "",
+
+        "internship_policy_url": settings.get(
+            "custom_internship_policy_url"
+        ) or "",
+
+        "india_leave_policy_url": settings.get(
+            "custom_india_leave_policy_url"
+        ) or "",
+
+        "dress_code_policy_url": settings.get(
+            "custom_dress_code_policy_url"
+        ) or "",
+
+        "whistleblower_policy_url": settings.get(
+            "custom_whistleblower_policy_url"
+        ) or ""
     }

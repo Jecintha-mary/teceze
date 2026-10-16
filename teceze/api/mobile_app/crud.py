@@ -8,7 +8,7 @@ from frappe.utils import (
     date_diff
 )
 from frappe import _
-from teceze.api.employee_attendance import validate_employee_location
+from teceze.api.employee_attendance import (validate_employee_location,get_timezone_details,get_checkin_address,)
 from teceze.api.attendance_regularization import get_existing_checkins
 class CRUD:
 
@@ -1571,8 +1571,7 @@ class CRUD:
 
 
 from frappe.utils import add_days, getdate
-
-@frappe.whitelist(allow_guest=True)
+@frappe.whitelist(allow_guest=False)
 def employee_checkin():
     payload = CRUD.get_json_payload()
     data = payload.get("data", payload)
@@ -1580,31 +1579,86 @@ def employee_checkin():
     employee = data.get("employee")
     latitude = data.get("latitude")
     longitude = data.get("longitude")
+    log_type = data.get("log_type")
 
+    # Validate required fields
     if not employee:
         frappe.throw(_("Employee ID is required."))
 
     if latitude is None or longitude is None:
         frappe.throw(_("Latitude and Longitude are required."))
 
-    result = validate_employee_location(
+    if log_type not in ("IN", "OUT"):
+        frappe.throw(_("Log Type must be IN or OUT."))
+
+    # Ensure the logged-in user can check in only for their own employee
+    logged_in_employee = frappe.db.get_value(
+        "Employee",
+        {"user_id": frappe.session.user},
+        "name"
+    )
+
+    if not logged_in_employee:
+        frappe.throw(_("Employee not found for the logged-in user."))
+
+    if employee != logged_in_employee:
+        frappe.throw(
+            _("You are not allowed to check in for another employee."),
+            frappe.PermissionError
+        )
+
+    # Validate geolocation
+    location_result = validate_employee_location(
         employee,
         latitude,
         longitude
     )
 
-    if not result.get("success"):
+    if not location_result.get("success"):
         frappe.throw(
-            result.get(
+            location_result.get(
                 "message",
                 _("You are outside of the geolocation.")
             )
         )
-    
-    return CRUD.handle(
+
+    # Get timezone details
+    timezone_data = get_timezone_details(
+        latitude,
+        longitude
+    )
+
+    # Get address from GPS coordinates
+    checkin_address = get_checkin_address(
+        latitude,
+        longitude
+    )
+
+    # Add validated and calculated values to the request data
+    data["custom_distance"] = location_result.get("distance")
+    data["custom_checkin_address"] = checkin_address
+
+    data["custom_utc_time"] = timezone_data.get("utc_time")
+    data["custom_employee_timezone"] = timezone_data.get(
+        "employee_timezone"
+    )
+    data["custom_employee_local_time"] = timezone_data.get(
+        "employee_local_time"
+    )
+    data["custom_company_timezone"] = timezone_data.get(
+        "company_timezone"
+    )
+    data["custom_company_local_time"] = timezone_data.get(
+        "company_local_time"
+    )
+
+    # Create Employee Checkin using the existing CRUD implementation
+    return CRUD.create_document(
         doctype="Employee Checkin",
+        data=data,
         permission=True
     )
+
 
 
 @frappe.whitelist(allow_guest=True)
