@@ -1,0 +1,108 @@
+{
+ "actions": [],
+ "allow_bulk_edit": 1,
+ "allow_rename": 1,
+ "creation": "2026-10-10 12:26:36.145659",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "section_break_29co",
+  "quotation",
+  "opportunity",
+  "revision_no",
+  "change_reason",
+  "changed_by",
+  "changed_on",
+  "old_total",
+  "new_total",
+  "old_snapshot",
+  "new_snapshot"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_break_29co",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "quotation",
+   "fieldtype": "Link",
+   "label": "Quotation",
+   "options": "Quotation"
+  },
+  {
+   "fieldname": "opportunity",
+   "fieldtype": "Link",
+   "label": "Opportunity",
+   "options": "Opportunity"
+  },
+  {
+   "fieldname": "revision_no",
+   "fieldtype": "Data",
+   "label": "Revision No"
+  },
+  {
+   "fieldname": "change_reason",
+   "fieldtype": "Data",
+   "label": "Change Reason"
+  },
+  {
+   "fieldname": "changed_by",
+   "fieldtype": "Link",
+   "label": "Changed By",
+   "options": "User"
+  },
+  {
+   "fieldname": "changed_on",
+   "fieldtype": "Datetime",
+   "label": "Changed On"
+  },
+  {
+   "fieldname": "old_total",
+   "fieldtype": "Currency",
+   "label": "Old Total"
+  },
+  {
+   "fieldname": "new_total",
+   "fieldtype": "Currency",
+   "label": "New Total"
+  },
+  {
+   "fieldname": "old_snapshot",
+   "fieldtype": "Long Text",
+   "label": "Old Snapshot"
+  },
+  {
+   "fieldname": "new_snapshot",
+   "fieldtype": "Long Text",
+   "label": "New Snapshot"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-10-10 12:31:33.391367",
+ "modified_by": "Administrator",
+ "module": "Teceze",
+ "name": "Quotation Revision Log",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

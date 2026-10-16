@@ -11,7 +11,8 @@
   "item_name",
   "required_fields",
   "amended_from",
-  "abbrevation"
+  "abbrevation",
+  "department"
  ],
  "fields": [
   {
@@ -47,12 +48,18 @@
    "in_list_view": 1,
    "label": "Abbrevation",
    "reqd": 1
+  },
+  {
+   "fieldname": "department",
+   "fieldtype": "Link",
+   "label": "Department",
+   "options": "Department"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-10-07 16:36:50.492383",
+ "modified": "2026-10-16 17:47:01.912243",
  "modified_by": "Administrator",
  "module": "Teceze",
  "name": "Service Vertical",

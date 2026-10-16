@@ -107,11 +107,15 @@ doc_events = {
 	"Leave Application": {
         "validate": ["teceze.teceze.overrides.leave_application.validate"]
     },
-    "Shift Request": {
-    	"before_submit": "teceze.teceze.overrides.shift_request.before_submit",
-        "on_submit": "teceze.teceze.overrides.shift_request.on_submit",
-        "on_cancel": "teceze.teceze.overrides.shift_request.on_cancel",
-	},
+    # "Shift Request": {
+    # 	"before_submit": "teceze.teceze.overrides.shift_request.before_submit",
+    #     "on_submit": "teceze.teceze.overrides.shift_request.on_submit",
+    #     "validate": "teceze.teceze.overrides.shift_request.validate",
+    #     "on_cancel": "teceze.teceze.overrides.shift_request.on_cancel",
+	# },
+    "Opportunity": {
+        "validate": "teceze.api.clarification.validate_opportunity_clarifications",
+    },
 
 
 }
@@ -205,11 +209,15 @@ extend_doctype_class = {
 # 	"Event": "frappe.desk.doctype.event.event.get_permission_query_conditions",
 # }
 #
+
+permission_query_conditions = {
+    "Opportunity": "teceze.teceze.overrides.sales_permissions.opportunity_query_conditions"
+}
 # has_permission = {
 # 	"Event": "frappe.desk.doctype.event.event.has_permission",
 # }
 has_permission = {
-    "User": "teceze.teceze.overrides.permissions.user_has_permission"
+    "User": "teceze.teceze.overrides.permission.user_has_permission"
 }
 # Document Events
 # ---------------
@@ -369,25 +377,25 @@ fixtures = [
 	# "doctype": "Notification",
 	# "filters": [{"is_standard":0}]
 	# },
-	# {
-	# "doctype": "Dashboard",
-	# "filters": [{"is_standard":0}]
-	# },
-	# {
-	# "doctype": "Dashboard Chart",
-	# "filters": [{"is_standard":0}]
-	# },
+	{
+	"doctype": "Dashboard",
+	"filters": [{"is_standard":0}]
+	},
+	{
+	"doctype": "Dashboard Chart",
+	"filters": [{"is_standard":0}]
+	},
    	"Custom Field",
    	"Property Setter",
-	# "Workflow",
-   	# "Workflow Action Master",
-   	# "Workflow State",
+	"Workflow",
+   	"Workflow Action Master",
+   	"Workflow State",
    	# "Role",
-   	"Workspace",
-	# "Print Format",
+   	# "Workspace",
+	"Print Format",
    	"Custom DocPerm",
    	"Report",
-	# "Number Card",
+	"Number Card",
 	# "Web Form",
     # "Web Page",
 	"Desktop Icon",

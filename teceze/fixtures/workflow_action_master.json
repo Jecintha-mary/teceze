@@ -2,13 +2,6 @@
  {
   "docstatus": 0,
   "doctype": "Workflow Action Master",
-  "modified": "2026-06-10 15:03:44.701465",
-  "name": "Review",
-  "workflow_action_name": "Review"
- },
- {
-  "docstatus": 0,
-  "doctype": "Workflow Action Master",
   "modified": "2026-09-15 11:45:41.108631",
   "name": "Revoke",
   "workflow_action_name": "Revoke"
@@ -16,9 +9,79 @@
  {
   "docstatus": 0,
   "doctype": "Workflow Action Master",
-  "modified": "2026-06-11 13:31:29.383315",
-  "name": "Submit",
-  "workflow_action_name": "Submit"
+  "modified": "2026-10-01 00:22:15.881274",
+  "name": "Rejected",
+  "workflow_action_name": "Rejected"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow Action Master",
+  "modified": "2026-10-12 17:06:57.097211",
+  "name": "Create Sales Order",
+  "workflow_action_name": "Create Sales Order"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow Action Master",
+  "modified": "2026-10-01 10:59:00.799523",
+  "name": "Read",
+  "workflow_action_name": "Read"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow Action Master",
+  "modified": "2026-10-01 11:22:08.612458",
+  "name": "Pending Approve",
+  "workflow_action_name": "Pending Approve"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow Action Master",
+  "modified": "2026-10-08 23:37:14.520682",
+  "name": "Submit Quotation",
+  "workflow_action_name": "Submit Quotation"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow Action Master",
+  "modified": "2026-10-10 16:09:16.314939",
+  "name": "Revision",
+  "workflow_action_name": "Revision"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow Action Master",
+  "modified": "2026-06-10 15:03:44.701465",
+  "name": "Review",
+  "workflow_action_name": "Review"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow Action Master",
+  "modified": "2026-10-01 00:23:51.466483",
+  "name": "Issue",
+  "workflow_action_name": "Issue"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow Action Master",
+  "modified": "2026-10-08 23:37:14.500743",
+  "name": "Request Clarification",
+  "workflow_action_name": "Request Clarification"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow Action Master",
+  "modified": "2026-10-09 23:54:32.520013",
+  "name": "Sent To Sales",
+  "workflow_action_name": "Sent To Sales"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow Action Master",
+  "modified": "2026-10-09 00:12:42.278198",
+  "name": "Negotiation",
+  "workflow_action_name": "Negotiation"
  },
  {
   "docstatus": 0,
@@ -30,9 +93,16 @@
  {
   "docstatus": 0,
   "doctype": "Workflow Action Master",
-  "modified": "2026-06-10 15:03:44.699021",
-  "name": "Approve",
-  "workflow_action_name": "Approve"
+  "modified": "2026-10-08 23:37:14.511790",
+  "name": "Mark Not Feasible",
+  "workflow_action_name": "Mark Not Feasible"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow Action Master",
+  "modified": "2026-10-08 23:37:14.516436",
+  "name": "Prepare Quotation",
+  "workflow_action_name": "Prepare Quotation"
  },
  {
   "docstatus": 0,
@@ -40,5 +110,61 @@
   "modified": "2026-09-02 12:01:37.119444",
   "name": "Cancel",
   "workflow_action_name": "Cancel"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow Action Master",
+  "modified": "2026-10-08 23:37:14.507601",
+  "name": "Respond",
+  "workflow_action_name": "Respond"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow Action Master",
+  "modified": "2026-10-08 23:37:14.529553",
+  "name": "Won",
+  "workflow_action_name": "Won"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow Action Master",
+  "modified": "2026-10-08 23:37:14.534118",
+  "name": "Lost",
+  "workflow_action_name": "Lost"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow Action Master",
+  "modified": "2026-10-08 23:37:14.525083",
+  "name": "Wait for Purchase Order",
+  "workflow_action_name": "Wait for Purchase Order"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow Action Master",
+  "modified": "2026-10-10 15:34:21.424693",
+  "name": "Sent Revision Request",
+  "workflow_action_name": "Sent Revision Request"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow Action Master",
+  "modified": "2026-06-10 15:03:44.699021",
+  "name": "Approve",
+  "workflow_action_name": "Approve"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow Action Master",
+  "modified": "2026-09-30 18:20:50.735137",
+  "name": "Save",
+  "workflow_action_name": "Save"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow Action Master",
+  "modified": "2026-06-11 13:31:29.383315",
+  "name": "Submit",
+  "workflow_action_name": "Submit"
  }
 ]

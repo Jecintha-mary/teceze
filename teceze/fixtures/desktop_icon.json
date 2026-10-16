@@ -1682,5 +1682,27 @@
   "roles": [],
   "sidebar": null,
   "standard": 0
+ },
+ {
+  "app": null,
+  "bg_color": "gray",
+  "docstatus": 0,
+  "doctype": "Desktop Icon",
+  "hidden": 0,
+  "icon": null,
+  "icon_image": "/files/crm-gear-icon.svg",
+  "icon_type": "Link",
+  "label": "CRM Desk",
+  "link": null,
+  "link_to": null,
+  "link_type": "Workspace Sidebar",
+  "logo_url": null,
+  "modified": "2026-10-15 15:55:30.357746",
+  "name": "CRM Desk",
+  "parent_icon": null,
+  "restrict_removal": 0,
+  "roles": [],
+  "sidebar": null,
+  "standard": 0
  }
 ]

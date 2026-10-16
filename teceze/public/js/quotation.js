@@ -1,1694 +1,357 @@
-(function () {
+/* =========================================================================
+   QUOTATION SCRIPT
 
- 
+   Depends on /assets/teceze/js/oppurtunity.js (shared helpers: window.teceze)
+
+   Sections
+     1. Config
+     2. Loading the shared script
+     3. Supplier grid        -> which columns show, dropdown options, order
+     4. Supplier <-> Item    -> matching rows and syncing the chosen supplier
+     5. Form events          -> Quotation, Quotation Item, Quotation Supplier
+   ========================================================================= */
+
+(function () {
+    "use strict";
+
+    /* =====================================================================
+       1. CONFIG
+       ===================================================================== */
+
+    const SHARED_SCRIPT = "/assets/teceze/js/oppurtunity.js";
     const SUPPLIER_DOCTYPE = "Quotation Supplier";
     const SUPPLIER_TABLE_DEFAULT = "custom_supplier_item";
 
-
     // Quotation Item field -> Quotation Supplier field
-    const QUOTATION_ITEM_TO_SUPPLIER = {
-
+    const ITEM_TO_SUPPLIER = {
         custom_items: "items",
-
         custom_descriptions: "descriptions",
-
         qty: "qty",
-
         rate: "rate",
-
         custom_budget_value: "budget_value",
-
         hours: "hours",
-
         scope: "scope",
-
-        resource: "resource"
-
+        resource: "resource",
     };
 
+    // Supplier fields wiped when the Service Vertical changes (if no longer shown)
+    const CLEARABLE = [...Object.values(ITEM_TO_SUPPLIER), "amount"];
 
-    function qs_table(frm) {
+    // [supplier field, quotation item field] copied when a supplier is selected (qty is handled separately)
+    const SYNCED = [
+        ["rate", "rate"],
+        ["budget_value", "custom_budget_value"],
+    ];
 
-        const field = Object.values(
-            frm.fields_dict || {}
-        ).find(
-            df =>
-                df.df.fieldtype === "Table" &&
-                df.df.options === SUPPLIER_DOCTYPE
+    // Quotation Item fields that change the supplier "items" dropdown
+    const WATCHED_ITEM_FIELDS = [
+        "custom_items", "custom_descriptions", "description",
+        "scope", "resource", "item_code", "item_name",
+    ];
+
+    const trim = v => String(v ?? "").trim();
+
+    // Name of the Quotation Supplier child table on this form
+    function supplier_table(frm) {
+        const field = Object.values(frm.fields_dict || {}).find(
+            f => f.df.fieldtype === "Table" && f.df.options === SUPPLIER_DOCTYPE
         );
-
-        return field
-            ? field.df.fieldname
-            : SUPPLIER_TABLE_DEFAULT;
+        return field ? field.df.fieldname : SUPPLIER_TABLE_DEFAULT;
     }
 
-    const clean = value =>
-        String(value ?? "")
-            .toLowerCase()
-            .replace(/[^a-z0-9]/g, "");
+    const supplier_rows = frm => frm.doc[supplier_table(frm)] || [];
 
+    /* =====================================================================
+       2. LOADING THE SHARED SCRIPT
+       ===================================================================== */
 
-    const refresh_options =
-        frappe.utils.debounce(
-            frm => qs_apply(frm),
-            300
-        );
+    let shared_ready = null;
 
-
-
-    const refresh_all =
-        frappe.utils.debounce(
-            (frm, clear_hidden = false) => {
-
-                frappe.require(
-                    "/assets/teceze/js/oppurtunity.js",
-                    function () {
-
-                        console.log(
-                            "oppurtunity.js loaded"
-                        );
-
-
-                        // Existing Opportunity Item logic
-                        if (
-                            typeof load_service_vertical_items ===
-                            "function"
-                        ) {
-
-                            load_service_vertical_items(
-                                frm
-                            );
-
-                        }
-
-
-                        // Supplier grid
-                        qs_apply(
-                            frm,
-                            !!clear_hidden,
-                            true
-                        );
-
-                    }
-                );
-
-            },
-            200
-        );
-
-    frappe.ui.form.on("Quotation", {
-
-        refresh(frm) {
-
-            refresh_all(frm);
-
-            load_quotation_service_vertical_items(
-                frm
-            );
-            
-
-        },
-
- validate(frm) {
-        (frm.doc.items || []).forEach(item => {
-            if (flt(item.qty) <= 0) {
-                item.qty = 1;
-            }
-        });
-    },
-        onload_post_render(frm) {
-
-            refresh_all(frm);
-
-            load_quotation_service_vertical_items(
-                frm
-            );
-
-        },
-
-
-        after_save(frm) {
-
-            refresh_all(frm);
-
-            load_quotation_service_vertical_items(
-                frm
-            );
-
-        },
-
-
-        custom_service_vertical(frm) {
-
-            refresh_all(
-                frm,
-                true
-            );
-
-            load_quotation_service_vertical_items(
-                frm
-            );
-
-        },
-
-before_workflow_action(frm) {
-    if (frm.selected_workflow_action !== "Sent Quotation To Sales") {
-        return;
+    // Resolves once window.teceze helpers exist (loads the file only once)
+    function load_shared() {
+        if (window.teceze?.apply_service_vertical) return Promise.resolve();
+        if (!shared_ready) shared_ready = new Promise(resolve => frappe.require(SHARED_SCRIPT, resolve));
+        return shared_ready;
     }
 
-    if (!frm.doc.opportunity) {
-        frappe.throw(__("Opportunity is not linked to this Quotation."));
-    }
-
-    return frappe.call({
-        method: "frappe.client.set_value",
-        args: {
-            doctype: "Opportunity",
-            name: frm.doc.opportunity,
-            fieldname: {
-                workflow_state: "Quotation Submitted",
-                status: "Quotation",
-                custom_quotation_number: frm.doc.name
-            }
-        }
-    }).then(r => {
-        if (!r.message || r.exc) {
-            frappe.throw(
-                __("Failed to update the linked Opportunity. Workflow transition cancelled.")
-            );
-        }
-
-        frappe.show_alert({
-            message: __("Opportunity updated successfully."),
-            indicator: "green"
-        });
-    }).catch(error => {
-        frappe.validated = false;
-        frappe.throw(
-            __("Could not update the Opportunity. The Quotation workflow transition was not completed.")
-        );
-    });
-},
-        items_add(frm) {
-
-            refresh_options(frm);
-
-            load_quotation_service_vertical_items(
-                frm
-            );
-
-        },
-
-
-        items_remove(frm) {
-
-            refresh_options(frm);
-
-        }
-
-    });
-
-
-
-    frappe.ui.form.on(
-        "Quotation Item",
-        {
-
-            custom_items(frm) {
-
-                refresh_options(frm);
-
-            },
-
-
-            custom_descriptions(frm) {
-
-                refresh_options(frm);
-
-            },
-
-
-            description(frm) {
-
-                refresh_options(frm);
-
-            },
-
-
-            scope(frm) {
-
-                refresh_options(frm);
-
-            },
-
-
-            resource(frm) {
-
-                refresh_options(frm);
-
-            },
-
-
-            item_code(frm) {
-
-                refresh_options(frm);
-
-            },
-
-
-            item_name(frm) {
-
-                refresh_options(frm);
-
-            }
-
-        }
-    );
-
-
-
-    const sv_cache = {};
-
-
-    async function qs_get_vertical(name) {
-
-        if (!sv_cache[name]) {
-
-            sv_cache[name] =
-                await frappe.db.get_doc(
-                    "Service Vertical",
-                    name
-                );
-
-        }
-
-        return sv_cache[name];
-    }
-
-
-    async function qs_visible_fields(frm) {
-
-        const visible = [
-            "supplier"
-        ];
-
-
-        // No Service Vertical
-        if (!frm.doc.custom_service_vertical) {
-
-            visible.push(
-                "is_selected"
-            );
-
-            return visible;
-        }
-
-
-        const service =
-            await qs_get_vertical(
-                frm.doc.custom_service_vertical
-            );
-
-
-        const quotation_item_fields =
-            frappe.get_meta(
-                "Quotation Item"
-            ).fields;
-
-
-        // -----------------------------------------------------
-        // Read Service Vertical required fields
-        // -----------------------------------------------------
-
-        (service.required_fields || [])
-            .forEach(row => {
-
-                const raw =
-                    row.field ||
-                    row.label;
-
-
-                if (!raw) {
-                    return;
-                }
-
-
-                const key =
-                    clean(raw);
-
-
-                // Find field in Quotation Item
-                const quotation_item_field =
-                    quotation_item_fields.find(
-                        df =>
-                            clean(
-                                df.fieldname
-                            ) === key ||
-
-                            clean(
-                                df.label
-                            ) === key
-                    );
-
-
-                if (!quotation_item_field) {
-
-                    console.warn(
-                        "Service Vertical field not found in Quotation Item:",
-                        raw
-                    );
-
-                    return;
-                }
-
-
-                // Map Quotation Item field
-                // to Supplier field
-                const supplier_field =
-                    QUOTATION_ITEM_TO_SUPPLIER[
-                        quotation_item_field.fieldname
-                    ];
-
-
-                if (!supplier_field) {
-
-                    console.warn(
-                        "No Supplier mapping for Quotation Item field:",
-                        quotation_item_field.fieldname
-                    );
-
-                    return;
-                }
-
-
-                if (
-                    !visible.includes(
-                        supplier_field
-                    )
-                ) {
-
-                    visible.push(
-                        supplier_field
-                    );
-
-                }
-
+    /* =====================================================================
+       3. SUPPLIER GRID
+       ===================================================================== */
+
+    // Supplier columns to show: supplier, fields from Service Vertical, is_selected
+    async function visible_fields(frm) {
+        const visible = ["supplier"];
+
+        if (frm.doc.custom_service_vertical) {
+            const service = await teceze.get_cached_doc("Service Vertical", frm.doc.custom_service_vertical);
+            const item_fields = frappe.get_meta("Quotation Item").fields;
+
+            (service.required_fields || []).forEach(row => {
+                const df = teceze.match_field(item_fields, row.field || row.label);
+                const target = df && ITEM_TO_SUPPLIER[df.fieldname];
+                if (target && !visible.includes(target)) visible.push(target);
             });
+        }
 
-
-        // -----------------------------------------------------
-        // is_selected ALWAYS LAST
-        // -----------------------------------------------------
-
-        visible.push(
-            "is_selected"
-        );
-
-
-        console.log(
-            "Quotation Supplier visible fields:",
-            visible
-        );
-
-
+        visible.push("is_selected"); // always last
         return visible;
     }
 
-
-    function qs_get_item_rows(frm) {
-
-        return frm.doc.items || [];
-
+    // Unique, non-empty "custom_items" values -> dropdown options for supplier "items"
+    function item_values(frm) {
+        return [...new Set((frm.doc.items || []).map(row => trim(row.custom_items)).filter(Boolean))];
     }
 
-
-
-    function qs_get_item_values(frm) {
-
-        const rows =
-            qs_get_item_rows(frm);
-
-
-        return [
-            ...new Set(
-
-                rows
-                    .map(
-                        row =>
-                            row.custom_items
-                    )
-                    .filter(Boolean)
-                    .map(
-                        value =>
-                            String(value).trim()
-                    )
-                    .filter(Boolean)
-
-            )
-        ];
-
-    }
-
-
-    function qs_find_quotation_item(
-        frm,
-        supplier_row
-    ) {
-
-        if (
-            !supplier_row ||
-            !supplier_row.items
-        ) {
-
-            return null;
-
-        }
-
-
-        return (
-            frm.doc.items || []
-        ).find(
-            item =>
-                String(
-                    item.custom_items || ""
-                ).trim() ===
-                String(
-                    supplier_row.items || ""
-                ).trim()
-        ) || null;
-
-    }
-
-
-
-    async function qs_apply(
-        frm,
-        clear_hidden = false,
-        force = false
-    ) {
-
-        const table =
-            qs_table(frm);
-
-
-        const grid =
-            frm.fields_dict[
-                table
-            ]?.grid;
-
-
-        if (!grid) {
-            return;
-        }
-
-
-        // -----------------------------------------------------
-        // GET VISIBLE FIELDS
-        // -----------------------------------------------------
-
-        const visible =
-            await qs_visible_fields(
-                frm
-            );
-
-
-        frm.__qs_visible =
-            visible;
-
-
-        // -----------------------------------------------------
-        // SUPPLIER META
-        // -----------------------------------------------------
-
-        const fields =
-            frappe
-                .get_meta(
-                    SUPPLIER_DOCTYPE
-                )
-                .fields
-                .filter(
-                    df =>
-                        !frappe.model
-                            .no_value_type
-                            .includes(
-                                df.fieldtype
-                            )
-                );
-
-
-        // -----------------------------------------------------
-        // ITEMS = DROPDOWN
-        // -----------------------------------------------------
-
-        grid.update_docfield_property(
-            "items",
-            "fieldtype",
-            "Select"
-        );
-
-
-        // -----------------------------------------------------
-        // DESCRIPTIONS = NORMAL DATA
-        // -----------------------------------------------------
-
-        grid.update_docfield_property(
-            "descriptions",
-            "fieldtype",
-            "Data"
-        );
-
-
-        // -----------------------------------------------------
-        // ITEM DROPDOWN OPTIONS
-        // -----------------------------------------------------
-
-        const item_values =
-            qs_get_item_values(
-                frm
-            );
-
-
-        console.log(
-            "Quotation Item custom_items:",
-            item_values
-        );
-
-
-        grid.update_docfield_property(
-            "items",
-            "options",
-            "\n" +
-            item_values.join("\n")
-        );
-
-
-        // -----------------------------------------------------
-        // GRID ORDER
-        //
-        // Supplier
-        // Dynamic fields
-        // is_selected
-        // -----------------------------------------------------
-
-        const order = [
-
-            "supplier",
-
-            ...visible.filter(
-                field =>
-                    ![
-                        "supplier",
-                        "is_selected"
-                    ].includes(field)
-            ),
-
-            "is_selected"
-
-        ];
-
-
-        const valid_order =
-            order.filter(
-                field =>
-                    fields.some(
-                        df =>
-                            df.fieldname === field
-                    )
-            );
-
-
-        console.log(
-            "Quotation Supplier Grid Order:",
-            valid_order
-        );
-
-
-        // -----------------------------------------------------
-        // COLUMN WIDTH
-        // -----------------------------------------------------
-
-        const columns =
-            Math.max(
-                1,
-                Math.floor(
-                    12 /
-                    Math.max(
-                        valid_order.length,
-                        1
-                    )
-                )
-            );
-
-        // -----------------------------------------------------
-        // SHOW / HIDE FIELDS
-        // -----------------------------------------------------
-
-        fields.forEach(df => {
-
-            const show =
-                valid_order.includes(
-                    df.fieldname
-                );
-
-
-            grid.update_docfield_property(
-                df.fieldname,
-                "hidden",
-                show ? 0 : 1
-            );
-
-
-            grid.update_docfield_property(
-                df.fieldname,
-                "in_list_view",
-                show ? 1 : 0
-            );
-
-
-            if (show) {
-
-                grid.update_docfield_property(
-                    df.fieldname,
-                    "columns",
-                    columns
-                );
-
-            }
-
-        });
-
-
-        // -----------------------------------------------------
-        // AMOUNT READ ONLY
-        // -----------------------------------------------------
-
-        if (
-            frappe.meta.has_field(
-                SUPPLIER_DOCTYPE,
-                "amount"
-            )
-        ) {
-
-            grid.update_docfield_property(
-                "amount",
-                "read_only",
-                1
-            );
-
-        }
-
-
-        // -----------------------------------------------------
-        // CLEAR FIELDS WHEN SERVICE VERTICAL CHANGES
-        // -----------------------------------------------------
-
-        if (clear_hidden) {
-
-            (
-                frm.doc[table] || []
-            ).forEach(row => {
-
-                [
-                    "items",
-                    "descriptions",
-                    "rate",
-                    "qty",
-                    "hours",
-                    "scope",
-                    "resource",
-                    "budget_value",
-                    "amount"
-                ].forEach(
-                    fieldname => {
-
-                        if (
-                            !valid_order.includes(
-                                fieldname
-                            )
-                        ) {
-
-                            if (
-                                Object.prototype
-                                    .hasOwnProperty
-                                    .call(
-                                        row,
-                                        fieldname
-                                    )
-                            ) {
-
-                                row[fieldname] =
-                                    null;
-
-                            }
-
-                        }
-
-                    }
-                );
-
-
-                row.item_row_reference =
-                    "";
-
+    function clear_hidden_values(frm, table, shown) {
+        (frm.doc[table] || []).forEach(row => {
+            CLEARABLE.forEach(field => {
+                if (!shown.includes(field) && field in row) row[field] = null;
             });
-
-        }
-
-
-        // -----------------------------------------------------
-        // SAVE GRID ORDER
-        // -----------------------------------------------------
-
-        const current =
-            frappe.get_user_settings(
-                frm.doctype,
-                "GridView"
-            ) || {};
-
-
-        const old =
-            current[
-                SUPPLIER_DOCTYPE
-            ] || [];
-
-
-        const old_order =
-            old.map(
-                x =>
-                    x.fieldname
-            );
-
-
-        if (
-            old_order.join(",") !==
-            valid_order.join(",")
-        ) {
-
-            const settings = {
-
-                ...current,
-
-                [SUPPLIER_DOCTYPE]:
-                    valid_order.map(
-                        fieldname => ({
-                            fieldname,
-                            columns
-                        })
-                    )
-
-            };
-
-
-            try {
-
-                const result =
-                    await frappe.model
-                        .user_settings
-                        .save(
-                            frm.doctype,
-                            "GridView",
-                            settings
-                        );
-
-
-                frappe.model
-                    .user_settings[
-                        frm.doctype
-                    ] =
-                    result.message ||
-                    result;
-
-            }
-            catch (error) {
-
-                console.warn(
-                    "Could not save grid settings:",
-                    error
-                );
-
-            }
-
-        }
-
-
-        // -----------------------------------------------------
-        // REBUILD GRID
-        // -----------------------------------------------------
-
-        grid.visible_columns =
-            undefined;
-
-
-        grid.user_defined_columns =
-            [];
-
-
-        if (
-            typeof grid.reset_grid ===
-            "function"
-        ) {
-
-            grid.reset_grid();
-
-        }
-        else {
-
-            grid.refresh();
-
-        }
-
-
-        frm.__qs_signature =
-            valid_order.join(",");
-
+            row.item_row_reference = "";
+        });
     }
 
-
-    frappe.ui.form.on(
-        SUPPLIER_DOCTYPE,
-        {
-
-
-            items(frm, cdt, cdn) {
-
-                const row =
-                    locals[cdt][cdn];
-
-
-                const item =
-                    qs_find_quotation_item(
-                        frm,
-                        row
-                    );
-
-
-                // No matching item
-                if (!item) {
-
-                    frappe.model.set_value(
-                        cdt,
-                        cdn,
-                        "item_row_reference",
-                        ""
-                    );
-
-
-                    frappe.model.set_value(
-                        cdt,
-                        cdn,
-                        "descriptions",
-                        ""
-                    );
-
-
-                    return;
-                }
-
-
-
-                frappe.model.set_value(
-                    cdt,
-                    cdn,
-                    "item_row_reference",
-                    item.name
-                );
-
-
-                // -------------------------------------------------
-                // AUTO FILL DESCRIPTION
-                //
-                // Quotation Item:
-                // custom_descriptions
-                //
-                // Supplier:
-                // descriptions
-                // -------------------------------------------------
-
-                frappe.model.set_value(
-                    cdt,
-                    cdn,
-                    "descriptions",
-                    item.custom_descriptions || ""
-                );
-
-
-                // -------------------------------------------------
-                // IF ALREADY SELECTED
-                // SYNC QTY / RATE
-                // -------------------------------------------------
-
-                if (row.is_selected) {
-
-                    qs_sync_to_quotation(
-                        frm,
-                        cdt,
-                        cdn
-                    );
-
-                }
-
-            },
-
-
-            qty(frm, cdt, cdn) {
-
-                qs_sync_to_quotation(
-                    frm,
-                    cdt,
-                    cdn
-                );
-
-            },
-
-
-            // -------------------------------------------------
-            // RATE
-            // -------------------------------------------------
-
-            rate(frm, cdt, cdn) {
-
-                qs_sync_to_quotation(
-                    frm,
-                    cdt,
-                    cdn
-                );
-
-            },
-
-
-            // -------------------------------------------------
-            // DESCRIPTION
-            //
-            // Normal Data field.
-            // User can manually edit it.
-            // -------------------------------------------------
-
-            descriptions(frm, cdt, cdn) {
-
-                const row =
-                    locals[cdt][cdn];
-
-
-                console.log(
-                    "Supplier Description changed:",
-                    row.descriptions
-                );
-
-            },
-
-
-            // -------------------------------------------------
-            // IS SELECTED
-            // -------------------------------------------------
-
-            is_selected(frm, cdt, cdn) {
-
-                const row =
-                    locals[cdt][cdn];
-
-
-                // Unselected
-                if (!row.is_selected) {
-                    return;
-                }
-
-
-                // No item selected
-                if (!row.items) {
-
-                    frappe.msgprint(
-                        __(
-                            "Select the item first."
-                        )
-                    );
-
-
-                    frappe.model.set_value(
-                        cdt,
-                        cdn,
-                        "is_selected",
-                        0
-                    );
-
-
-                    return;
-                }
-
-
-                // Find matching Quotation Item
-                const item =
-                    qs_find_quotation_item(
-                        frm,
-                        row
-                    );
-
-
-                if (!item) {
-
-                    frappe.msgprint(
-                        __(
-                            "Selected item was not found in Quotation Items."
-                        )
-                    );
-
-
-                    frappe.model.set_value(
-                        cdt,
-                        cdn,
-                        "is_selected",
-                        0
-                    );
-
-
-                    return;
-                }
-
-
-                // -------------------------------------------------
-                // SAVE REFERENCE
-                // -------------------------------------------------
-
-                frappe.model.set_value(
-                    cdt,
-                    cdn,
-                    "item_row_reference",
-                    item.name
-                );
-
-
-                // -------------------------------------------------
-                // AUTO FILL DESCRIPTION
-                // -------------------------------------------------
-
-                frappe.model.set_value(
-                    cdt,
-                    cdn,
-                    "descriptions",
-                    item.custom_descriptions || ""
-                );
-
-
-                // -------------------------------------------------
-                // ONLY ONE SUPPLIER
-                // FOR SAME ITEM
-                // -------------------------------------------------
-
-                (
-                    frm.doc[
-                        qs_table(frm)
-                    ] || []
-                ).forEach(
-                    supplier_row => {
-
-                        if (
-                            supplier_row.name !==
-                                row.name &&
-
-                            supplier_row.is_selected &&
-
-                            supplier_row.item_row_reference ===
-                                item.name
-                        ) {
-
-                            frappe.model.set_value(
-                                supplier_row.doctype,
-                                supplier_row.name,
-                                "is_selected",
-                                0
-                            );
-
-                        }
-
-                    }
-                );
-
-
-                // -------------------------------------------------
-                // SYNC TO QUOTATION ITEM
-                // -------------------------------------------------
-
-                qs_sync_to_quotation(
-                    frm,
-                    cdt,
-                    cdn
-                );
-
-            }
-
-        }
-    );
-
-
-   function qs_sync_to_quotation(
-    frm,
-    cdt,
-    cdn
-) {
-
-    const row = locals[cdt][cdn];
-
-    // Only selected supplier
-    if (!row.is_selected) {
-        return;
-    }
-
-    // No item selected
-    if (!row.items) {
-        return;
-    }
-
-    // Find matching Quotation Item
-    const item =
-        qs_find_quotation_item(
-            frm,
-            row
-        );
-
-    if (!item) {
-        return;
-    }
-
-
-    // -----------------------------------------------------
-    // SAVE ITEM REFERENCE
-    // -----------------------------------------------------
-
-    if (
-        row.item_row_reference !==
-        item.name
-    ) {
-
-        frappe.model.set_value(
-            cdt,
-            cdn,
-            "item_row_reference",
-            item.name
-        );
-
-    }
-
-
-
- // -----------------------------------------------------
-// QTY → QUOTATION ITEM QTY
-// Default to 1 when quantity is empty or zero
-// -----------------------------------------------------
-
-const supplierQty = flt(row.qty);
-
-const finalQty = supplierQty > 0 ? supplierQty : 1;
-
-// Update supplier row
-row.qty = finalQty;
-
-// Update corresponding Quotation Item
-item.qty = finalQty;
-
-frappe.model.set_value(
-    item.doctype,
-    item.name,
-    "qty",
-    finalQty
-);
-
-
-    // -----------------------------------------------------
-    // RATE → QUOTATION ITEM RATE
-    // -----------------------------------------------------
-
-    if (
-        row.rate !== undefined &&
-        row.rate !== null
-    ) {
-
-        frappe.model.set_value(
-            item.doctype,
-            item.name,
-            "rate",
-            flt(row.rate)
-        );
-
-    }
-
-
-
-    if (
-        row.budget_value !== undefined &&
-        row.budget_value !== null
-    ) {
-
-        frappe.model.set_value(
-            item.doctype,
-            item.name,
-            "custom_budget_value",
-            flt(row.budget_value)
-        );
-
-    }
-
-
-    frm.refresh_field(
-        "items"
-    );
-
-}
-
-
-async function load_quotation_service_vertical_items(
-        frm
-    ) {
-
-        const grid =
-            frm.fields_dict.items?.grid;
-
-
-        if (!grid) {
-            return;
-        }
-
-
-        if (
-            !frm.doc.custom_service_vertical
-        ) {
-
-            return;
-        }
-
+    // Persist the column order so the grid keeps it
+    async function save_grid_order(frm, order, columns) {
+        const current = frappe.get_user_settings(frm.doctype, "GridView") || {};
+        const old_order = (current[SUPPLIER_DOCTYPE] || []).map(x => x.fieldname);
+        if (old_order.join(",") === order.join(",")) return;
+
+        const settings = {
+            ...current,
+            [SUPPLIER_DOCTYPE]: order.map(fieldname => ({ fieldname, columns })),
+        };
 
         try {
-
-            const service =
-                await frappe.db.get_doc(
-                    "Service Vertical",
-                    frm.doc.custom_service_vertical
-                );
-
-
-            const config =
-                service.required_fields || [];
-
-
-            console.log(
-                service.name,
-                "required_fields:",
-                config
-            );
-
-            if (service.item_name) {
-
-                let item =
-                    await frappe.db.get_value(
-                        "Item",
-                        service.item_name,
-                        [
-                            "name",
-                            "item_code",
-                            "item_name",
-                            "stock_uom"
-                        ]
-                    );
-
-
-                if (
-                    !item.message?.name
-                ) {
-
-                    item =
-                        await frappe.db.insert({
-
-                            doctype: "Item",
-
-                            item_code:
-                                service.item_name,
-
-                            item_name:
-                                service.item_name,
-
-                            item_group:
-                                "All Item Groups",
-
-                            stock_uom:
-                                "Nos",
-
-                            is_stock_item: 0,
-
-                            is_sales_item: 1,
-
-                            is_purchase_item: 0,
-                            
-
-                        });
-
-                }
-                else {
-
-                    item =
-                        item.message;
-
-                }
-
-
-                // -------------------------------------------------
-                // APPLY ITEM TO QUOTATION ITEMS
-                // -------------------------------------------------
-
-                (
-                    frm.doc.items || []
-                ).forEach(row => {
-
-                    row.item_code =
-                        item.item_code ||
-                        service.item_name;
-
-
-                    row.item_name =
-                        item.item_name ||
-                        service.item_name;
-
-
-                    if (
-                        item.stock_uom
-                    ) {
-
-                        row.uom =
-                            item.stock_uom;
-
-                    }
-
-                });
-
-
-                frm.refresh_field(
-                    "items"
-                );
-
-            }
-
-
-            // -------------------------------------------------
-            // QUOTATION ITEM META
-            // -------------------------------------------------
-
-            const fields =
-                frappe
-                    .get_meta(
-                        "Quotation Item"
-                    )
-                    .fields
-                    .filter(
-                        df =>
-                            !frappe.model
-                                .no_value_type
-                                .includes(
-                                    df.fieldtype
-                                )
-                    );
-
-
-            const chosen = {};
-
-
-            // -------------------------------------------------
-            // FIND CONFIGURED FIELDS
-            // -------------------------------------------------
-
-            config.forEach(row => {
-
-                const value =
-                    row.field;
-
-
-                if (!value) {
-                    return;
-                }
-
-
-                const normalized =
-                    String(value)
-                        .trim()
-                        .toLowerCase()
-                        .replace(
-                            /[\s_-]+/g,
-                            ""
-                        );
-
-
-                const df =
-                    fields.find(
-                        field => {
-
-                            const fieldname =
-                                String(
-                                    field.fieldname
-                                )
-                                    .trim()
-                                    .toLowerCase()
-                                    .replace(
-                                        /[\s_-]+/g,
-                                        ""
-                                    );
-
-
-                            const label =
-                                String(
-                                    field.label || ""
-                                )
-                                    .trim()
-                                    .toLowerCase()
-                                    .replace(
-                                        /[\s_-]+/g,
-                                        ""
-                                    );
-
-
-                            return (
-                                fieldname ===
-                                    normalized ||
-
-                                label ===
-                                    normalized
-                            );
-
-                        }
-                    );
-
-
-                if (df) {
-
-                    chosen[
-                        df.fieldname
-                    ] = row;
-
-                }
-
-            });
-
-
-            console.log(
-                "Quotation Item - Visible Fields:",
-                Object.keys(chosen)
-            );
-
-
-            console.log(
-                "Service Vertical Config Fields:",
-                config
-                    .map(
-                        row =>
-                            row.field
-                    )
-                    .filter(Boolean)
-            );
-
-
-            // -------------------------------------------------
-            // APPLY VISIBILITY
-            // -------------------------------------------------
-
-            fields.forEach(df => {
-
-                const cfg =
-                    chosen[
-                        df.fieldname
-                    ];
-
-
-                const show =
-                    !!cfg;
-
-
-                grid.update_docfield_property(
-                    df.fieldname,
-                    "hidden",
-                    show ? 0 : 1
-                );
-
-
-                grid.update_docfield_property(
-                    df.fieldname,
-                    "in_list_view",
-                    show ? 1 : 0
-                );
-
-
-                if (cfg) {
-
-                    grid.update_docfield_property(
-                        df.fieldname,
-                        "reqd",
-                        cfg.mandatory
-                            ? 1
-                            : 0
-                    );
-
-                }
-
-            });
-
-
-            // -------------------------------------------------
-            // REBUILD QUOTATION ITEM GRID
-            // -------------------------------------------------
-
-            grid.visible_columns =
-                undefined;
-
-
-            if (
-                typeof grid.reset_grid ===
-                "function"
-            ) {
-
-                grid.reset_grid();
-
-            }
-            else {
-
-                grid.refresh();
-
-            }
-
+            const result = await frappe.model.user_settings.save(frm.doctype, "GridView", settings);
+            frappe.model.user_settings[frm.doctype] = result.message || result;
+        } catch (error) {
+            console.warn("Could not save grid settings:", error);
         }
-        catch (error) {
-
-            console.error(
-                "Quotation Service Vertical Item Error:",
-                error
-            );
-
-        }
-
     }
 
+    async function apply_supplier_grid(frm, clear_hidden = false) {
+        const table = supplier_table(frm);
+        const grid = frm.fields_dict[table]?.grid;
+        if (!grid) return;
+
+        // Newer call wins if two run at once
+        const run = (frm.__qs_run = (frm.__qs_run || 0) + 1);
+
+        const fields = teceze.value_fields(SUPPLIER_DOCTYPE);
+        const visible = await visible_fields(frm);
+        if (run !== frm.__qs_run) return;
+
+        const order = visible.filter(name => fields.some(df => df.fieldname === name));
+        const columns = Math.max(1, Math.floor(12 / order.length));
+        const set = (field, prop, value) => grid.update_docfield_property(field, prop, value);
+
+        // "items" is a dropdown of Quotation Item values, "descriptions" is plain text
+        set("items", "fieldtype", "Select");
+        set("items", "options", "\n" + item_values(frm).join("\n"));
+        set("descriptions", "fieldtype", "Data");
+
+        // Show / hide columns
+        fields.forEach(df => {
+            const show = order.includes(df.fieldname);
+            set(df.fieldname, "hidden", show ? 0 : 1);
+            set(df.fieldname, "in_list_view", show ? 1 : 0);
+            if (show) set(df.fieldname, "columns", columns);
+        });
+
+        if (frappe.meta.has_field(SUPPLIER_DOCTYPE, "amount")) set("amount", "read_only", 1);
+
+        if (clear_hidden) clear_hidden_values(frm, table, order);
+
+        await save_grid_order(frm, order, columns);
+        if (run !== frm.__qs_run) return;
+
+        grid.visible_columns = undefined;
+        grid.user_defined_columns = [];
+        grid.reset_grid ? grid.reset_grid() : grid.refresh();
+    }
+
+    /* =====================================================================
+       4. SUPPLIER <-> QUOTATION ITEM
+       ===================================================================== */
+
+    // Quotation Item whose "custom_items" matches the supplier row's "items"
+    function find_item(frm, supplier_row) {
+        const key = trim(supplier_row?.items);
+        if (!key) return null;
+        return (frm.doc.items || []).find(item => trim(item.custom_items) === key) || null;
+    }
+
+    // Link a supplier row to its item and copy the description (clears both if no match)
+    function link_to_item(cdt, cdn, item) {
+        frappe.model.set_value(cdt, cdn, "item_row_reference", item ? item.name : "");
+        frappe.model.set_value(cdt, cdn, "descriptions", item ? item.custom_descriptions || "" : "");
+    }
+
+    // Copy qty / rate / budget of the SELECTED supplier onto the Quotation Item
+    function sync_to_quotation(frm, cdt, cdn) {
+        const row = locals[cdt][cdn];
+        if (!row.is_selected || !row.items) return;
+
+        const item = find_item(frm, row);
+        if (!item) return;
+
+        const set_item = (field, value) => frappe.model.set_value(item.doctype, item.name, field, value);
+
+        if (row.item_row_reference !== item.name) {
+            frappe.model.set_value(cdt, cdn, "item_row_reference", item.name);
+        }
+
+        // Quantity defaults to 1 when empty or zero
+        const qty = flt(row.qty) > 0 ? flt(row.qty) : 1;
+        row.qty = qty;
+        set_item("qty", qty);
+
+        SYNCED.forEach(([supplier_field, item_field]) => {
+            const value = row[supplier_field];
+            if (value !== undefined && value !== null) set_item(item_field, flt(value));
+        });
+
+        frm.refresh_field("items");
+        frm.refresh_field(supplier_table(frm));
+    }
+
+    // Undo a selection and tell the user why
+    function reject_selection(cdt, cdn, message) {
+        frappe.msgprint(__(message));
+        frappe.model.set_value(cdt, cdn, "is_selected", 0);
+    }
+
+    /* =====================================================================
+       5. FORM EVENTS
+       ===================================================================== */
+
+    // Full refresh: Quotation Item columns + Item on rows + supplier grid
+    const run_full_refresh = frappe.utils.debounce(async frm => {
+        // Read the flag NOW: several events can fire within the debounce window,
+        // and only the last call's arguments survive (a "clear" request must not be lost)
+        const clear_hidden = !!frm.__qs_clear_hidden;
+        frm.__qs_clear_hidden = false;
+
+        try {
+            await load_shared();
+            await teceze.apply_service_vertical(frm);
+            await apply_supplier_grid(frm, clear_hidden);
+        } catch (error) {
+            console.error("Quotation refresh failed:", error);
+        }
+    }, 200);
+
+    function refresh_all(frm, clear_hidden = false) {
+        if (clear_hidden) frm.__qs_clear_hidden = true;
+        run_full_refresh(frm);
+    }
+
+    // Light refresh: only the supplier grid (used while typing in item fields)
+    const run_supplier_refresh = frappe.utils.debounce(async frm => {
+        try {
+            await load_shared();
+            await apply_supplier_grid(frm);
+        } catch (error) {
+            console.error("Supplier grid refresh failed:", error);
+        }
+    }, 300);
+
+    // NOTE: Frappe calls handlers as (frm, cdt, cdn). Always wrap them like
+    // `frm => refresh_all(frm)` so cdt is never mistaken for an extra argument.
+    frappe.ui.form.on("Quotation", {
+        refresh: frm => refresh_all(frm),
+        onload_post_render: frm => refresh_all(frm),
+        after_save: frm => refresh_all(frm),
+        items_remove: frm => run_supplier_refresh(frm),
+
+        // New row -> give it the Item straight away, then refresh the grids
+        items_add(frm, cdt, cdn) {
+            window.teceze?.fill_row?.(frm, locals[cdt][cdn]);
+            refresh_all(frm);
+        },
+
+        custom_service_vertical(frm) {
+            frm.sv_item = null;
+            refresh_all(frm, true);
+        },
+
+        // Set the Item and a default qty BEFORE the server checks the rows
+        async validate(frm) {
+            await load_shared();
+
+            (frm.doc.items || []).forEach(item => {
+                if (flt(item.qty) <= 0) item.qty = 1;
+            });
+
+            await teceze.validate_items(frm, true);
+        },
+
+        // "Sent To Sales" -> move the linked Opportunity to "Quotation Submitted" first
+        async before_workflow_action(frm) {
+            if (frm.selected_workflow_action !== "Sent To Sales") return;
+
+            await load_shared();
+
+            if (!frm.doc.opportunity) {
+                frappe.throw(__("Opportunity is not linked to this Quotation."));
+            }
+
+            try {
+                const r = await teceze.set_values("Opportunity", frm.doc.opportunity, {
+                    workflow_state: "Quotation Submitted",
+                    status: "Quotation",
+                    custom_quotation_number: frm.doc.name,
+                });
+                if (!r.message) throw new Error("No response");
+
+                frappe.show_alert({ message: __("Opportunity updated successfully."), indicator: "green" });
+            } catch (error) {
+                console.error(error);
+                frappe.throw(
+                    __("Could not update the Opportunity. The Quotation workflow transition was not completed.")
+                );
+            }
+        },
+    });
+
+    frappe.ui.form.on(
+        "Quotation Item",
+        Object.fromEntries(WATCHED_ITEM_FIELDS.map(field => [field, frm => run_supplier_refresh(frm)]))
+    );
+
+    frappe.ui.form.on(SUPPLIER_DOCTYPE, {
+        items(frm, cdt, cdn) {
+            const row = locals[cdt][cdn];
+            const item = find_item(frm, row);
+
+            link_to_item(cdt, cdn, item);
+            if (item && row.is_selected) sync_to_quotation(frm, cdt, cdn);
+        },
+
+        qty: sync_to_quotation,
+        rate: sync_to_quotation,
+        budget_value: sync_to_quotation,
+
+        is_selected(frm, cdt, cdn) {
+            const row = locals[cdt][cdn];
+            if (!row.is_selected) return;
+
+            if (!row.items) return reject_selection(cdt, cdn, "Select the item first.");
+
+            const item = find_item(frm, row);
+            if (!item) return reject_selection(cdt, cdn, "Selected item was not found in Quotation Items.");
+
+            link_to_item(cdt, cdn, item);
+
+            // Only one selected supplier per item
+            supplier_rows(frm).forEach(other => {
+                if (other.name !== row.name && other.is_selected && other.item_row_reference === item.name) {
+                    frappe.model.set_value(other.doctype, other.name, "is_selected", 0);
+                }
+            });
+
+            sync_to_quotation(frm, cdt, cdn);
+        },
+    });
 })();
-
-
-
-
-
-
-
-
-
-// frappe.ui.form.on("Supplier Item", {
-//     custom_quantity: function(frm, cdt, cdn) {
-//         calculate_amount(cdt, cdn);
-//         set_quotation_supplier_items(frm,cdt, cdn);
-//     },
-
-//     custom_price: function(frm, cdt, cdn) {
-//         calculate_amount(cdt, cdn);
-//         set_quotation_supplier_items(frm,cdt, cdn);
-//     },
-
-//     custom_is_selected: function(frm, cdt, cdn) {
-//         set_quotation_supplier_items(frm,cdt, cdn);
-
-//         let row = locals[cdt][cdn];
-
-//         if (!row.custom_is_selected) return;
-
-//         // Uncheck other suppliers for the same item
-//         frm.doc.custom_supplier.forEach(function(d) {
-//             if (
-//                 d.name !== row.name &&
-//                 d.custom_item === row.custom_item &&
-//                 d.custom_is_selected
-//             ) {
-//                 frappe.model.set_value(
-//                     d.doctype,
-//                     d.name,
-//                     "custom_is_selected",
-//                     0
-//                 );
-//             }
-//         });
-//     }
-// });
-
-// function calculate_amount(cdt, cdn) {
-//     let row = locals[cdt][cdn];
-
-//     row.custom_amount = (flt(row.custom_quantity) || 0) * (flt(row.custom_price) || 0);
-
-//     refresh_field("custom_supplier");
-// }
-
-// function set_quotation_supplier_items(frm,cdt,cdn){
-//     let row = locals[cdt][cdn];
-
-//     if (!row.custom_is_selected) return;
-
-//     let item = frm.doc.items.find(d => d.item_code === row.custom_item);
-
-//     if (item) {
-
-//         frappe.model.set_value(item.doctype, item.name, "qty", row.custom_quantity);
-//         frappe.model.set_value(item.doctype, item.name, "rate", row.custom_price);
-//         frappe.model.set_value(item.doctype, item.name, "amount", row.custom_amount);
-
-//         set_uom(row.custom_item, item.doctype, item.name);
-
-//     } else {
-
-//         let empty_row = frm.doc.items.find(d => !d.item_code);
-
-//         if (empty_row) {
-
-//             frappe.model.set_value(empty_row.doctype, empty_row.name, "item_code", row.custom_item);
-//             frappe.model.set_value(empty_row.doctype, empty_row.name, "qty", row.custom_quantity);
-//             frappe.model.set_value(empty_row.doctype, empty_row.name, "rate", row.custom_price);
-//             frappe.model.set_value(empty_row.doctype, empty_row.name, "amount", row.custom_amount);
-
-//             set_uom(row.custom_item, empty_row.doctype, empty_row.name);
-
-//         } else {
-
-//             let new_row = frm.add_child("items");
-
-//             frappe.model.set_value(new_row.doctype, new_row.name, "item_code", row.custom_item);
-//             frappe.model.set_value(new_row.doctype, new_row.name, "qty", row.custom_quantity);
-//             frappe.model.set_value(new_row.doctype, new_row.name, "rate", row.custom_price);
-//             frappe.model.set_value(new_row.doctype, new_row.name, "amount", row.custom_amount);
-
-//             set_uom(row.custom_item, new_row.doctype, new_row.name);
-//         }
-//     }
-
-//     frm.refresh_field("items");
-
-// }
-
-// function set_uom(item_code, doctype, docname) {
-//     frappe.db.get_value("Item", item_code, "stock_uom")
-//         .then(r => {
-//             if (r.message) {
-//                 frappe.model.set_value(
-//                     doctype,
-//                     docname,
-//                     "uom",
-//                     r.message.stock_uom
-//                 );
-//             }
-//         });
-// }
