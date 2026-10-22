@@ -33,6 +33,7 @@ frappe.ui.form.on("Attendance Request", {
 
 	},
  	after_save(frm) {
+		console.log("method saved")
         // Reset for future saves
         frm._create_confirmed = false;
     },
@@ -41,7 +42,7 @@ frappe.ui.form.on("Attendance Request", {
 		frm.trigger("show_attendance_warnings");
 		frm.trigger("set_request_type_options");
 		frm.trigger("toggle_regularization_fields");
-
+		
 		if (frm.doc.reason === "Regularization" && frm.doc.from_date) {    
 			frm.set_value("half_day_date", frm.doc.from_date);
 			frm.set_value("to_date", frm.doc.from_date);
