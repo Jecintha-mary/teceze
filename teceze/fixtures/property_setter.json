@@ -1,6 +1,38 @@
 [
  {
   "default_value": null,
+  "doc_type": "Opportunity",
+  "docstatus": 0,
+  "doctype": "Property Setter",
+  "doctype_or_field": "DocField",
+  "field_name": "naming_series",
+  "is_system_generated": 1,
+  "modified": "2026-10-22 15:24:08.611279",
+  "module": null,
+  "name": "Opportunity-naming_series-options",
+  "property": "options",
+  "property_type": "Text",
+  "row_name": null,
+  "value": "CRM-CWS-.YYYY.-\nCRM-CSS-.YYYY.-\nCRM-CIS-.YYYY.-\nCRM-FES-.YYYY.-\nCRM-GPS-.YYYY.-\nCRM-SWD-.YYYY.-"
+ },
+ {
+  "default_value": null,
+  "doc_type": "Employee",
+  "docstatus": 0,
+  "doctype": "Property Setter",
+  "doctype_or_field": "DocField",
+  "field_name": "naming_series",
+  "is_system_generated": 1,
+  "modified": "2026-10-22 15:24:10.169696",
+  "module": null,
+  "name": "Employee-naming_series-options",
+  "property": "options",
+  "property_type": "Text",
+  "row_name": null,
+  "value": "HR-EMP-"
+ },
+ {
+  "default_value": null,
   "doc_type": "Employee Checkin",
   "docstatus": 0,
   "doctype": "Property Setter",
