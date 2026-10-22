@@ -117,10 +117,10 @@
   "javascript": null,
   "json": null,
   "letter_head": null,
-  "modified": "2017-04-04 10:00:10.253224",
+  "modified": "2026-10-20 22:21:06.725332",
   "module": "CRM",
   "name": "Prospects Engaged But Not Converted",
-  "prepared_report": 0,
+  "prepared_report": 1,
   "query": null,
   "ref_doctype": "Lead",
   "reference_report": null,
@@ -8328,68 +8328,17 @@
   "javascript": null,
   "json": null,
   "letter_head": null,
-  "modified": "2026-09-28 11:46:02.432481",
+  "modified": "2026-08-13 12:59:44.465310",
   "module": "Teceze",
-  "name": "Employee Attendance Tracker",
+  "name": "Employee Leave Balance Report",
   "prepared_report": 0,
   "query": null,
-  "ref_doctype": "Employee",
+  "ref_doctype": "Leave Allocation",
   "reference_report": null,
-  "report_name": "Employee Attendance Tracker",
+  "report_name": "Employee Leave Balance Report",
   "report_script": null,
   "report_type": "Script Report",
   "roles": [
-   {
-    "role": "HR Manager"
-   }
-  ],
-  "timeout": 0
- },
- {
-  "add_total_row": 0,
-  "add_translate_data": 0,
-  "columns": [],
-  "disable_prepared_report_automation": 0,
-  "disabled": 0,
-  "docstatus": 0,
-  "doctype": "Report",
-  "filters": [],
-  "is_standard": "No",
-  "javascript": null,
-  "json": null,
-  "letter_head": "Teceze Letter Pad",
-  "modified": "2026-10-12 14:24:35.239307",
-  "module": "Teceze",
-  "name": "jamal test",
-  "prepared_report": 0,
-  "query": null,
-  "ref_doctype": "Attendance",
-  "reference_report": null,
-  "report_name": "jamal test",
-  "report_script": null,
-  "report_type": "Script Report",
-  "roles": [
-   {
-    "role": "Employee Self Service"
-   },
-   {
-    "role": "Employee Self Service"
-   },
-   {
-    "role": "System Manager"
-   },
-   {
-    "role": "HR User"
-   },
-   {
-    "role": "HR Manager"
-   },
-   {
-    "role": "System Manager"
-   },
-   {
-    "role": "HR User"
-   },
    {
     "role": "HR Manager"
    },
@@ -8484,22 +8433,22 @@
   "javascript": null,
   "json": null,
   "letter_head": null,
-  "modified": "2026-08-13 12:59:44.465310",
+  "modified": "2026-10-22 14:59:05.116090",
   "module": "Teceze",
-  "name": "Employee Leave Balance Report",
+  "name": "Payroll Register",
   "prepared_report": 0,
   "query": null,
-  "ref_doctype": "Leave Allocation",
+  "ref_doctype": "Salary Slip",
   "reference_report": null,
-  "report_name": "Employee Leave Balance Report",
+  "report_name": "Payroll Register",
   "report_script": null,
   "report_type": "Script Report",
   "roles": [
    {
-    "role": "HR Manager"
+    "role": "System Manager"
    },
    {
-    "role": "Employee"
+    "role": "HR Manager"
    }
   ],
   "timeout": 0
@@ -8517,19 +8466,55 @@
   "javascript": null,
   "json": null,
   "letter_head": null,
-  "modified": "2026-09-24 15:49:49.050151",
+  "modified": "2026-09-28 11:46:02.432481",
   "module": "Teceze",
-  "name": "Employee Attendance Overveiw",
+  "name": "Employee Attendance Tracker",
   "prepared_report": 0,
   "query": null,
   "ref_doctype": "Employee",
   "reference_report": null,
-  "report_name": "Employee Attendance Overveiw",
+  "report_name": "Employee Attendance Tracker",
   "report_script": null,
   "report_type": "Script Report",
   "roles": [
    {
     "role": "HR Manager"
+   }
+  ],
+  "timeout": 0
+ },
+ {
+  "add_total_row": 0,
+  "add_translate_data": 0,
+  "columns": [],
+  "disable_prepared_report_automation": 0,
+  "disabled": 0,
+  "docstatus": 0,
+  "doctype": "Report",
+  "filters": [],
+  "is_standard": "Yes",
+  "javascript": null,
+  "json": null,
+  "letter_head": null,
+  "modified": "2026-08-26 12:32:43.360736",
+  "module": "Teceze",
+  "name": "Holiday Details",
+  "prepared_report": 0,
+  "query": null,
+  "ref_doctype": "Holiday List",
+  "reference_report": null,
+  "report_name": "Holiday Details",
+  "report_script": null,
+  "report_type": "Script Report",
+  "roles": [
+   {
+    "role": "HR Manager"
+   },
+   {
+    "role": "HR User"
+   },
+   {
+    "role": "Employee"
    }
   ],
   "timeout": 0
@@ -8589,20 +8574,17 @@
   "javascript": null,
   "json": null,
   "letter_head": null,
-  "modified": "2026-08-13 14:20:29.046778",
+  "modified": "2026-09-24 15:49:49.050151",
   "module": "Teceze",
-  "name": "Monthly Attendance Report",
+  "name": "Employee Attendance Overveiw",
   "prepared_report": 0,
   "query": null,
-  "ref_doctype": "Attendance",
+  "ref_doctype": "Employee",
   "reference_report": null,
-  "report_name": "Monthly Attendance Report",
+  "report_name": "Employee Attendance Overveiw",
   "report_script": null,
   "report_type": "Script Report",
   "roles": [
-   {
-    "role": "Employee"
-   },
    {
     "role": "HR Manager"
    }
@@ -8622,25 +8604,22 @@
   "javascript": null,
   "json": null,
   "letter_head": null,
-  "modified": "2026-08-26 12:32:43.360736",
+  "modified": "2026-08-13 14:20:29.046778",
   "module": "Teceze",
-  "name": "Holiday Details",
+  "name": "Monthly Attendance Report",
   "prepared_report": 0,
   "query": null,
-  "ref_doctype": "Holiday List",
+  "ref_doctype": "Attendance",
   "reference_report": null,
-  "report_name": "Holiday Details",
+  "report_name": "Monthly Attendance Report",
   "report_script": null,
   "report_type": "Script Report",
   "roles": [
    {
-    "role": "HR Manager"
-   },
-   {
-    "role": "HR User"
-   },
-   {
     "role": "Employee"
+   },
+   {
+    "role": "HR Manager"
    }
   ],
   "timeout": 0

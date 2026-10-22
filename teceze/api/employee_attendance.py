@@ -4,8 +4,10 @@ from frappe.utils import (
     now_datetime,
     get_datetime,
     time_diff_in_seconds,
-    add_to_date
+    add_to_date,getdate, today, get_first_day, get_last_day,add_days,
 )
+from erpnext.setup.doctype.employee.employee import (
+    get_holiday_list_for_employee,)
 from datetime import datetime, timedelta
 from geopy.geocoders import Nominatim
 from timezonefinder import TimezoneFinder
@@ -1953,15 +1955,24 @@ def get_associate_members(employee=None):
 # ==========================================================
 
 @frappe.whitelist()
-def get_employee_holiday_details(employee=None):
+def get_employee_holiday_details(employee=None, month=None):
 
     if not employee:
-        frappe.throw(
-            _("Employee is required.")
-        )
+        frappe.throw(_("Employee is required."))
+
+    if not frappe.db.exists("Employee", employee):
+        frappe.throw(_("Invalid employee."))
 
     # ------------------------------------------------------
-    # Employee -> Default Shift
+    # Selected Month
+    # ------------------------------------------------------
+
+    selected_date = getdate(month or today())
+    month_start = get_first_day(selected_date)
+    month_end = get_last_day(selected_date)
+
+    # ------------------------------------------------------
+    # Employee Default Shift
     # ------------------------------------------------------
 
     default_shift = frappe.db.get_value(
@@ -1970,70 +1981,178 @@ def get_employee_holiday_details(employee=None):
         "default_shift"
     )
 
-    if not default_shift:
-        return {
-            "default_shift": None,
-            "holiday_list": None,
-            "holidays": []
-        }
-
     # ------------------------------------------------------
-    # Default Shift -> Shift Type -> Holiday List
+    # Fetch Shift Assignments overlapping the month
     # ------------------------------------------------------
 
-    holiday_list = frappe.db.get_value(
-        "Shift Type",
-        default_shift,
-        "holiday_list"
-    )
-
-    if not holiday_list:
-        return {
-            "default_shift": default_shift,
-            "holiday_list": None,
-            "holidays": []
-        }
-
-    # ------------------------------------------------------
-    # Holiday List -> Holiday
-    #
-    # Include both public holidays and weekly offs.
-    #
-    # If weekly_off = 1:
-    #     description = 'WO'
-    #
-    # Otherwise:
-    #     description = original holiday description
-    # ------------------------------------------------------
-
-    holidays = frappe.db.sql(
-        """
-        SELECT
-            parent AS holiday_list,
-            holiday_date,
-            CASE
-                WHEN weekly_off = 1 THEN 'WO'
-                ELSE description
-            END AS description,
-            custom_status,
-            weekly_off
-        FROM `tabHoliday`
-        WHERE parent = %s
-        ORDER BY holiday_date ASC
-        """,
-        (holiday_list,),
-        as_dict=True
+    assignments = frappe.get_all(
+        "Shift Assignment",
+        filters={
+            "employee": employee,
+            "docstatus": 1,
+            "start_date": ["<=", month_end],
+        },
+        fields=[
+            "name",
+            "shift_type",
+            "start_date",
+            "end_date",
+            "status",
+        ],
+        order_by="start_date asc, creation asc"
     )
 
     # ------------------------------------------------------
-    # Return Holiday Details
+    # Cache Holiday Lists by Shift Type
+    # ------------------------------------------------------
+
+    shift_holiday_lists = {}
+
+    def get_shift_holiday_list(shift_type):
+        if not shift_type:
+            return None
+
+        if shift_type not in shift_holiday_lists:
+            shift_holiday_lists[shift_type] = frappe.db.get_value(
+                "Shift Type",
+                shift_type,
+                "holiday_list"
+            )
+
+        return shift_holiday_lists[shift_type]
+
+    # ------------------------------------------------------
+    # Build Holiday List applicable to each date
+    # ------------------------------------------------------
+
+    holiday_list_by_date = {}
+    current_date = month_start
+
+    while current_date <= month_end:
+
+        active_assignment = None
+
+        for assignment in assignments:
+
+            assignment_start = getdate(
+                assignment.start_date
+            )
+
+            assignment_end = (
+                getdate(assignment.end_date)
+                if assignment.end_date
+                else None
+            )
+
+            if (
+                assignment_start <= current_date
+                and (
+                    not assignment_end
+                    or current_date <= assignment_end
+                )
+            ):
+                # Latest start date wins if assignments overlap.
+                if (
+                    active_assignment is None
+                    or assignment_start >= getdate(
+                        active_assignment.start_date
+                    )
+                ):
+                    active_assignment = assignment
+
+        # Assignment Shift Type takes priority.
+        # Default Shift is used when no assignment covers the day.
+        shift_type = (
+            active_assignment.shift_type
+            if active_assignment
+            else default_shift
+        )
+
+        holiday_list = get_shift_holiday_list(shift_type)
+
+        # Fall back to Employee's applicable Holiday List if needed.
+        if not holiday_list:
+            holiday_list = get_holiday_list_for_employee(
+                employee,
+                as_on=current_date
+            )
+
+        holiday_list_by_date[current_date] = holiday_list
+
+        current_date = add_days(current_date, 1)
+
+    # ------------------------------------------------------
+    # Fetch Holiday records for all relevant Holiday Lists
+    # ------------------------------------------------------
+
+    holiday_lists = list({
+        holiday_list
+        for holiday_list in holiday_list_by_date.values()
+        if holiday_list
+    })
+
+    holidays_by_date = {}
+
+    if holiday_lists:
+
+        holiday_rows = frappe.get_all(
+            "Holiday",
+            filters={
+                "parent": ["in", holiday_lists],
+                "holiday_date": [
+                    "between",
+                    [month_start, month_end]
+                ],
+            },
+            fields=[
+                "parent",
+                "holiday_date",
+                "description",
+                "weekly_off",
+                "custom_status",
+            ],
+            order_by="holiday_date asc"
+        )
+
+        for holiday in holiday_rows:
+
+            holiday_date = getdate(holiday.holiday_date)
+
+            # Only use the Holiday List applicable to this date.
+            if holiday.parent != holiday_list_by_date.get(
+                holiday_date
+            ):
+                continue
+
+            weekly_off = holiday.weekly_off
+            custom_status = holiday.custom_status
+            description = holiday.description
+
+            if weekly_off and not custom_status:
+                description = "WO"
+
+            holidays_by_date[holiday_date] = {
+                "holiday_date": str(holiday_date),
+                "description": description or "",
+                "custom_status": custom_status or "",
+                "weekly_off": weekly_off,
+            }
+
+    # ------------------------------------------------------
+    # Return data in chronological order
     # ------------------------------------------------------
 
     return {
         "default_shift": default_shift,
-        "holiday_list": holiday_list,
-        "holidays": holidays
+        "holiday_list": None,
+        "holidays": [
+            holidays_by_date[holiday_date]
+            for holiday_date in sorted(holidays_by_date)
+        ],
     }
+
+
+
 
 
 @frappe.whitelist()

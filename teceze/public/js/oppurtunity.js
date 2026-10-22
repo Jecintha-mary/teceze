@@ -570,6 +570,28 @@ window.teceze = window.teceze || {};
             };
             frm.email_field = "contact_email";
         },
+        toggle_not_feasible_button: function (frm) {
+            frm.remove_custom_button(__("Lost"));
+
+            const status = (frm.doc.status || "").trim().toLowerCase();
+
+            const show_custom =
+                status === "closed" || status === "not feasible";
+
+            if (!frm.is_new() && show_custom) {
+                frm.add_custom_button(__("Lost"), function () {
+                    frm.set_df_property("status", "hidden", 0);
+
+                    // Change Status field to Closed
+                    frm.set_value("status", "Closed").then(function () {
+
+                        frm.save();
+
+                    });
+                });
+            }
+        },
+        
 
         refresh(frm) {
             frm.remove_custom_button(__("Fetch Latest Exchange Rate"));
@@ -583,6 +605,65 @@ window.teceze = window.teceze || {};
             render_pipeline(frm);
             ns.apply_service_vertical(frm);
             render_quotation_items(frm);
+
+            frm.trigger("toggle_not_feasible_button");
+            if (!frm.is_dirty()) {
+                frm._orig_closing = frm.doc.expected_closing;
+            }
+            const closing = frm.fields_dict.expected_closing;
+            if (closing && closing.$input) {
+                const lock_past = () => {
+                    const dp = closing.datepicker;
+                    if (!dp || dp._past_locked) return;   
+                    const today = new Date();
+                    today.setHours(0, 0, 0, 0);
+                    dp.update({
+                        minDate: today,
+                        onRenderCell: (date, cellType) =>
+                            cellType === "day" && date < today ? { disabled: true } : {},
+                    });
+                    dp._past_locked = true;
+                };
+                lock_past();
+                setTimeout(lock_past, 500);
+                closing.$input.off("focus.mindate").on("focus.mindate", lock_past);
+            }
+
+            const $prob = frm.fields_dict.probability && frm.fields_dict.probability.$input;
+            if ($prob) {
+                $prob.off("input.probcheck").on("input.probcheck", function () {
+                    let val = $(this).val().replace(/[^0-9]/g, "");
+
+                    if (val.length > 3) {
+                        val = val.slice(0, 3);
+                    }
+                    if (parseInt(val, 10) > 100) {
+                        val = val.slice(0, -1);
+                    }
+                    $(this).val(val);
+                });
+            }
+            const $amt = frm.fields_dict.opportunity_amount && frm.fields_dict.opportunity_amount.$input;
+            if ($amt) {
+                $amt.off("input.amtcheck").on("input.amtcheck", function () {
+                    let val = $(this).val().replace(/[^0-9.]/g, ""); // digits and dot only
+
+                    // allow only one decimal point
+                    const parts = val.split(".");
+                    if (parts.length > 2) {
+                        val = parts[0] + "." + parts.slice(1).join("");
+                    }
+
+                    // allow only 2 digits after the decimal point
+                    if (val.includes(".")) {
+                        const [whole, decimals] = val.split(".");
+                        val = whole + "." + decimals.slice(0, 2);
+                    }
+
+                    $(this).val(val);
+                });
+            }
+
              // Clarification UI
     render_clarification_center(frm);
         },
@@ -607,9 +688,28 @@ window.teceze = window.teceze || {};
         opportunity_amount: frm => calculate_base_amount(frm),
         custom_exchange_rates: frm => calculate_base_amount(frm),
         custom_quotation_number: frm => render_quotation_items(frm),
+        
+        // probability: function (frm) {
+        //     if (frm.doc.probability > 100 || frm.doc.probability < 0) {
+        //         frappe.throw(__("Probability (%) must be between 0 and 100"));
+        //     }
+        // },
 
-        custom_client_country(frm) {
+        async custom_client_country(frm) {
             frm.set_value("custom_bill_country", frm.doc.custom_client_country);
+
+            if (!frm.doc.custom_client_country) return;
+
+            const { message } = await frappe.db.get_value(
+                "Country",
+                frm.doc.custom_client_country,
+                "custom_currency"
+            );
+
+            const currency = message && message.custom_currency;
+            if (currency) {
+                await frm.set_value("currency", currency);
+            }
         },
 
         custom_service_vertical(frm) {
@@ -622,6 +722,22 @@ window.teceze = window.teceze || {};
             });
 
             ns.apply_service_vertical(frm);
+            if (!frm.doc.custom_service_vertical) {
+                return;
+            }
+            var fieldname = "abbrevation"
+            frappe.db.get_value(
+                "Service Vertical",
+                frm.doc.custom_service_vertical,
+                fieldname,  
+                function (r) {
+                    var code = r && r[fieldname];               
+                    var series = "CRM-" + String(code).toUpperCase() + "-.YYYY.-";
+                    frm.set_df_property("naming_series", "options", series);
+                    frm.set_value("naming_series", series);
+                    frm.refresh_field("naming_series");
+                }
+            );
         },
 
         async party_name(frm) {

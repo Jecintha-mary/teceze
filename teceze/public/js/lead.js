@@ -65,6 +65,20 @@ frappe.ui.form.on("Lead", {
 
         render_lead_activity_report(frm);
 
+    },
+    country(frm) {
+        if (!frm.doc.country) return;
+
+        frappe.db.get_value("Country", frm.doc.country,"custom_phone_code").then((r) => {
+            let code = r.message && r.message.custom_phone_code;
+            if (!code) return;
+
+            code = String(code).trim();
+            if (!code.startsWith("+")) code = "+" + code;
+
+            const number = (frm.doc.mobile_no || "").replace(/^\+\d+\s*/, "");
+            frm.set_value("mobile_no", code + " " + number);
+        });
     }
 
 });

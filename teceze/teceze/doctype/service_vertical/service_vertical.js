@@ -13,7 +13,7 @@ frappe.ui.form.on("Service Vertical Configuration", {
         );
         if (!table_df) return;
 
-        frappe.model.with_doctype("Opportunity Item", () => {
+        frappe.model.with_doctype("Quotation Item", () => {
             const skip = [
                 "Section Break", "Column Break", "Tab Break",
                 "HTML", "Button", "Image", "Fold", "Heading"
@@ -21,7 +21,7 @@ frappe.ui.form.on("Service Vertical Configuration", {
 
             const options = [""]
                 .concat(
-                    frappe.get_meta("Opportunity Item").fields
+                    frappe.get_meta("Quotation Item").fields
                         .filter(df => !skip.includes(df.fieldtype))
                         .map(df => df.fieldname)
                 )

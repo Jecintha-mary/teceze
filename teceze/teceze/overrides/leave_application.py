@@ -194,8 +194,10 @@ def validate_probation_leave(doc):
                 for leave_type in other_types
             ):
                 frappe.throw(
-                    f"You cannot take both Sick Leave and Casual Leave "
-                    f"in {getdate(month + '-01').strftime('%B %Y')}."
+                    f"As a probation employee, you can take only one day of "
+                    f"either Sick Leave or Casual Leave per month. "
+                    f"You cannot apply for both types of leave in the same month "
+                    f"({getdate(month + '-01').strftime('%B %Y')})."
                 )
 
             if (

@@ -67,6 +67,9 @@ def validate_opportunity_clarifications(doc, method=None):
     #Dharshini/Jeci
     # if doc.workflow_state == "Presales Assessment":
     #     send_email_for_manager(doc)
+    if doc.is_new():
+        doc.opportunity_owner = frappe.session.user
+
 
     """Prevent direct child-table modifications through ordinary Opportunity saves."""
     if doc.flags.get("clarification_api_update"):

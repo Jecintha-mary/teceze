@@ -1437,43 +1437,45 @@ frappe.pages["employee_attendance"].on_page_load = function (wrapper) {
     }
 
 
+
     // =========================================================
     // LOAD EMPLOYEE HOLIDAY DETAILS
     // =========================================================
 
-    function load_employee_holiday_details(callback) {
+    function load_employee_holiday_details(month, callback) {
+
+        if (typeof month === "function") {
+            callback = month;
+            month = null;
+        }
 
         holiday_calendar_data = {};
         employee_holiday_list = null;
         employee_default_shift = null;
 
         if (!employee) {
-
             if (callback) {
                 callback();
             }
-
             return;
         }
 
         frappe.call({
-
             method:
                 "teceze.api.employee_attendance.get_employee_holiday_details",
 
-            args: { employee: employee },
+            args: {
+                employee: employee,
+                month: month || null
+            },
 
             callback: function (r) {
-
                 const data = r.message || {};
 
                 employee_default_shift = data.default_shift || null;
                 employee_holiday_list = data.holiday_list || null;
 
-                const holidays = data.holidays || [];
-
-                holidays.forEach(function (holiday) {
-
+                (data.holidays || []).forEach(function (holiday) {
                     if (!holiday.holiday_date) {
                         return;
                     }
@@ -1488,41 +1490,83 @@ frappe.pages["employee_attendance"].on_page_load = function (wrapper) {
                         holiday_list: holiday.holiday_list,
                         holiday_date: holiday.holiday_date,
                         description: holiday.description,
-                        custom_status: holiday.custom_status
+                        custom_status: holiday.custom_status,
+                        weekly_off: holiday.weekly_off
                     });
-
                 });
 
-                // console.log("Employee default shift:", employee_default_shift);
-                // console.log("Employee holiday list:", employee_holiday_list);
-                // console.log("Employee holiday details:", holiday_calendar_data);
-
                 if (callback) {
                     callback();
                 }
-
             },
 
-            error: function (error) {
-
-                console.error(
-                    "Unable to load employee holiday details:",
-                    error
-                );
-
+            error: function () {
                 holiday_calendar_data = {};
-                employee_holiday_list = null;
-                employee_default_shift = null;
 
                 if (callback) {
                     callback();
                 }
-
             }
+        });
+    }
 
+    // =========================================================
+    // RELOAD HOLIDAYS FOR THE VISIBLE CALENDAR MONTH
+    // =========================================================
+
+    let holiday_month_loading = null;
+
+    function reload_holidays_for_visible_month() {
+
+        const container = document.getElementById("attendance-calendar");
+
+        if (!container || !employee) {
+            return;
+        }
+
+        const dayCells = container.querySelectorAll(
+            ".fc-daygrid-day[data-date]"
+        );
+
+        if (!dayCells.length) {
+            return;
+        }
+
+        // Use a date from the currently visible month.
+        // Prefer a cell that is not an adjacent-month date.
+        let visibleDate = null;
+
+        dayCells.forEach(function (cell) {
+            if (
+                !visibleDate &&
+                !cell.classList.contains("fc-day-other")
+            ) {
+                visibleDate = cell.getAttribute("data-date");
+            }
         });
 
+        if (!visibleDate) {
+            visibleDate = dayCells[0].getAttribute("data-date");
+        }
+
+        if (!visibleDate) {
+            return;
+        }
+
+        const month = visibleDate.slice(0, 7);
+
+        if (holiday_month_loading === month) {
+            return;
+        }
+
+        holiday_month_loading = month;
+
+        load_employee_holiday_details(month + "-01", function () {
+            holiday_month_loading = null;
+            add_holidays_to_calendar();
+        });
     }
+
 
 
     // =========================================================
@@ -2205,6 +2249,33 @@ frappe.pages["employee_attendance"].on_page_load = function (wrapper) {
 
                     window.employee_attendance_calendar =
                         attendance_calendar;
+
+                    // Reload holiday details when the visible month changes.
+                    const calendarContainer =
+                        document.getElementById("attendance-calendar");
+
+                    if (calendarContainer) {
+
+                        calendarContainer.addEventListener(
+                            "click",
+                            function (event) {
+
+                                const button = event.target.closest(
+                                    ".fc-prev-button, " +
+                                    ".fc-next-button, " +
+                                    ".fc-today-button"
+                                );
+
+                                if (!button) {
+                                    return;
+                                }
+
+                                setTimeout(function () {
+                                    reload_holidays_for_visible_month();
+                                }, 300);
+                            }
+                        );
+                    }
 
                     // ONE event per date: patch before the first
                     // events response is processed

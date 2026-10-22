@@ -44,13 +44,6 @@
  {
   "docstatus": 0,
   "doctype": "Workflow Action Master",
-  "modified": "2026-10-10 16:09:16.314939",
-  "name": "Revision",
-  "workflow_action_name": "Revision"
- },
- {
-  "docstatus": 0,
-  "doctype": "Workflow Action Master",
   "modified": "2026-06-10 15:03:44.701465",
   "name": "Review",
   "workflow_action_name": "Review"
@@ -61,6 +54,13 @@
   "modified": "2026-10-01 00:23:51.466483",
   "name": "Issue",
   "workflow_action_name": "Issue"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow Action Master",
+  "modified": "2026-10-10 16:09:16.314939",
+  "name": "Revision",
+  "workflow_action_name": "Revision"
  },
  {
   "docstatus": 0,
@@ -86,13 +86,6 @@
  {
   "docstatus": 0,
   "doctype": "Workflow Action Master",
-  "modified": "2026-06-10 15:03:44.700673",
-  "name": "Reject",
-  "workflow_action_name": "Reject"
- },
- {
-  "docstatus": 0,
-  "doctype": "Workflow Action Master",
   "modified": "2026-10-08 23:37:14.511790",
   "name": "Mark Not Feasible",
   "workflow_action_name": "Mark Not Feasible"
@@ -107,9 +100,9 @@
  {
   "docstatus": 0,
   "doctype": "Workflow Action Master",
-  "modified": "2026-09-02 12:01:37.119444",
-  "name": "Cancel",
-  "workflow_action_name": "Cancel"
+  "modified": "2026-06-10 15:03:44.700673",
+  "name": "Reject",
+  "workflow_action_name": "Reject"
  },
  {
   "docstatus": 0,
@@ -145,6 +138,13 @@
   "modified": "2026-10-10 15:34:21.424693",
   "name": "Sent Revision Request",
   "workflow_action_name": "Sent Revision Request"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow Action Master",
+  "modified": "2026-09-02 12:01:37.119444",
+  "name": "Cancel",
+  "workflow_action_name": "Cancel"
  },
  {
   "docstatus": 0,

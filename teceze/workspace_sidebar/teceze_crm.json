@@ -1,6 +1,6 @@
 {
  "app": "teceze",
- "creation": "2026-08-13 17:01:28.060164",
+ "creation": "2026-09-17 15:59:38.397825",
  "docstatus": 0,
  "doctype": "Workspace Sidebar",
  "idx": 0,
@@ -475,6 +475,7 @@
   {
    "child": 0,
    "collapsible": 1,
+   "icon": "list",
    "indent": 0,
    "keep_closed": 0,
    "label": "Teceze CRM",
@@ -482,9 +483,21 @@
    "link_type": "Workspace",
    "show_arrow": 0,
    "type": "Link"
+  },
+  {
+   "child": 0,
+   "collapsible": 1,
+   "icon": "list",
+   "indent": 0,
+   "keep_closed": 0,
+   "label": "Testing",
+   "link_to": "crm-dashboards",
+   "link_type": "Page",
+   "show_arrow": 0,
+   "type": "Link"
   }
  ],
- "modified": "2026-08-19 15:22:06.370712",
+ "modified": "2026-10-18 14:51:48.148398",
  "modified_by": "Administrator",
  "module": "Teceze",
  "name": "Teceze CRM",

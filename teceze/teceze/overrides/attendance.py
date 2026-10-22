@@ -6,7 +6,7 @@ from frappe.utils import getdate, add_days, today
 def mark_absent_for_rh():
 
     # Previous date
-    attendance_date = getdate(add_days(today(), -1))
+    attendance_date = getdate(add_days(today(), -2))
     # attendance_date = frappe.utils.getdate("2026-09-14")
     # Active employees, excluding Engineer
     employees = frappe.get_all(

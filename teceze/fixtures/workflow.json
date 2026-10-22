@@ -1021,7 +1021,7 @@
   "document_type": "Quotation",
   "enable_action_confirmation": 1,
   "is_active": 1,
-  "modified": "2026-10-13 19:36:21.867053",
+  "modified": "2026-10-21 16:38:48.695633",
   "name": "Quotation",
   "override_status": 0,
   "send_email_alert": 0,
@@ -1165,6 +1165,20 @@
     "update_field": null,
     "update_value": null,
     "workflow_builder_id": null
+   },
+   {
+    "allow_edit": "Presales Manager",
+    "avoid_status_override": 0,
+    "doc_status": "0",
+    "evaluate_as_expression": 0,
+    "is_optional_state": 0,
+    "message": null,
+    "next_action_email_template": null,
+    "send_email": 1,
+    "state": "Pending Approval",
+    "update_field": null,
+    "update_value": null,
+    "workflow_builder_id": null
    }
   ],
   "transitions": [
@@ -1278,7 +1292,7 @@
   "document_type": "Shift Request",
   "enable_action_confirmation": 1,
   "is_active": 1,
-  "modified": "2026-10-12 17:33:57.789606",
+  "modified": "2026-10-22 11:33:20.551372",
   "name": "Shift Request",
   "override_status": 0,
   "send_email_alert": 0,
@@ -1385,7 +1399,7 @@
   "document_type": "Opportunity",
   "enable_action_confirmation": 1,
   "is_active": 1,
-  "modified": "2026-10-16 19:05:54.730675",
+  "modified": "2026-10-21 16:37:01.133569",
   "name": "Opportunity Workflow Test",
   "override_status": 0,
   "send_email_alert": 0,
@@ -1680,6 +1694,20 @@
     "next_action_email_template": null,
     "send_email": 1,
     "state": "Quotation Submitted",
+    "update_field": null,
+    "update_value": null,
+    "workflow_builder_id": null
+   },
+   {
+    "allow_edit": "Presales Manager",
+    "avoid_status_override": 0,
+    "doc_status": "0",
+    "evaluate_as_expression": 0,
+    "is_optional_state": 0,
+    "message": null,
+    "next_action_email_template": null,
+    "send_email": 1,
+    "state": "Pending Approval",
     "update_field": null,
     "update_value": null,
     "workflow_builder_id": null

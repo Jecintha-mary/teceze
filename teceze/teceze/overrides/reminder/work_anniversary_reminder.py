@@ -397,11 +397,12 @@ def get_all_employees():
 
 def send_work_anniversary_wishes():  
     if not frappe.db.get_single_value("Teceze Settings", "work_anniversary"):
+        frappe.log_error("Work anniversary disabled in Teceze Settings", "Work anniversary skipped")
         frappe.logger("work_anniversary").info(
             "Work anniversary reminders are disabled in Teceze Settings. Skipping."
         )
         return "Work anniversary reminders disabled in Teceze Setting."
-    # today_date = getdate(today())
+    # today_date = getdate("2026-10-21")
     today_date = getdate(today())
     
 
@@ -419,9 +420,10 @@ def send_work_anniversary_wishes():
         WHERE status = 'Active' 
             AND (employment_type IS NULL OR employment_type != 'Engineer') 
             AND date_of_joining IS NOT NULL
-            AND MONTH(date_of_joining) = MONTH(CURDATE())
-            AND DAY(date_of_joining) = DAY(CURDATE())
-    """, as_dict=True)
+            AND MONTH(date_of_joining) = %s
+            AND DAY(date_of_joining) = %s
+    """,(today_date.month, today_date.day),
+    as_dict=True)
     # print("employees",employees)
 
     if not ASSET_ROOT.is_dir():
@@ -443,7 +445,7 @@ def send_work_anniversary_wishes():
     skipped = 0
     failed = 0
     all_recipient=get_all_employees()
-    # target_email = ["jecintha.mary@teceze.com"]
+    # all_recipient = ["jecintha.mary@teceze.com"]
     target_email =all_recipient
     for employee in employees:
         recipient = target_email

@@ -355,3 +355,98 @@
         },
     });
 })();
+
+
+function calculate_quotation_item_totals(frm, cdt, cdn) {
+    const row = locals[cdt][cdn];
+
+    const qty = Math.max(0, flt(row.qty));
+    const budget = flt(row.custom_budget_value);
+    const margin_percent = flt(row.custom_margin_percent);
+    const tax_percent = flt(row.custom_tax_percentage);
+
+    // 1. Subtotal = Quantity × Budget per unit
+    const subtotal = qty * budget;
+
+    // 2. Margin amount (zero if no margin)
+    const margin_amount = subtotal * margin_percent / 100;
+
+    // 3. Total before tax
+    const total_before_tax = subtotal + margin_amount;
+
+    // 4. Tax amount (zero if no tax)
+    const tax_amount = total_before_tax * tax_percent / 100;
+
+    // 5. Final amount
+    const final_amount = total_before_tax + tax_amount;
+
+    // Update custom calculated fields
+    frappe.model.set_value(
+        cdt, cdn, "custom_subtotal",
+        flt(subtotal, 2)
+    );
+
+    frappe.model.set_value(
+        cdt, cdn, "custom_margin_amount",
+        flt(margin_amount, 2)
+    );
+
+    frappe.model.set_value(
+        cdt, cdn, "custom_total_before_tax",
+        flt(total_before_tax, 2)
+    );
+
+    // Using your existing field to store the tax amount
+    frappe.model.set_value(
+        cdt, cdn, "custom_taxable_value",
+        flt(tax_amount, 2)
+    );
+
+    // ERPNext calculates amount as qty × rate.
+    // Set the effective selling rate to include margin and tax.
+    const effective_rate = qty > 0 ? final_amount / qty : 0;
+
+    frappe.model.set_value(
+        cdt, cdn, "rate",
+        flt(effective_rate, 2)
+    );
+
+    // Refresh the parent form
+    frm.refresh_field("items");
+}
+
+frappe.ui.form.on("Quotation Item", {
+    qty(frm, cdt, cdn) {
+        calculate_quotation_item_totals(frm, cdt, cdn);
+    },
+
+    custom_budget_value(frm, cdt, cdn) {
+        calculate_quotation_item_totals(frm, cdt, cdn);
+    },
+
+    custom_margin_percent(frm, cdt, cdn) {
+        calculate_quotation_item_totals(frm, cdt, cdn);
+    },
+
+    custom_tax_percentage(frm, cdt, cdn) {
+        calculate_quotation_item_totals(frm, cdt, cdn);
+    }
+});
+
+frappe.ui.form.on("Quotation", {
+    validate(frm) {
+        (frm.doc.items || []).forEach(row => {
+            calculate_quotation_item_totals(
+                frm, row.doctype, row.name
+            );
+        });
+    },
+    refresh(frm) {
+        // Ensure totals are calculated on refresh
+        (frm.doc.items || []).forEach(row => {
+            calculate_quotation_item_totals(
+                frm, row.doctype, row.name
+            );
+        });
+    }
+});

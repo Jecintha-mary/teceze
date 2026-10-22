@@ -10,7 +10,8 @@
   "field",
   "maping__column",
   "is_item",
-  "mandatory"
+  "mandatory",
+  "is_printable"
  ],
  "fields": [
   {
@@ -41,13 +42,19 @@
    "fieldname": "mandatory",
    "fieldtype": "Check",
    "label": "Mandatory"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_printable",
+   "fieldtype": "Check",
+   "label": "Is Not Printable"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-10-06 11:49:05.164525",
+ "modified": "2026-10-21 17:28:41.226229",
  "modified_by": "Administrator",
  "module": "Teceze",
  "name": "Service Vertical Configuration",
