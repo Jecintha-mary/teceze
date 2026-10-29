@@ -1,4 +1,5 @@
 import frappe
+import requests
 from frappe import _
 from frappe.utils import getdate, nowdate, add_days, flt
 
@@ -14,12 +15,12 @@ OPPORTUNITY_FIELDS = [
     "name", "creation", "transaction_date", "expected_closing", "workflow_state",
     "status", "opportunity_owner", "custom_lead_owner", "custom_presales_owner",
     "custom_service_vertical", "opportunity_amount", "currency", "customer_name",
-    "party_name", "probability", "custom_quotation_number",
+    "party_name", "probability", "custom_quotation_number", "billing_address_name",
 ]
 QUOTATION_FIELDS = [
     "name", "creation", "transaction_date", "valid_till", "workflow_state",
     "status", "currency", "grand_total", "opportunity", "custom_service_vertical",
-    "custom_opportunity_owner", "party_name", "customer_name", "docstatus",
+    "custom_opportunity_owner", "party_name", "customer_name", "docstatus", "billing_address_name",
 ]
 
 
@@ -132,12 +133,100 @@ def _get_lead_activities(lead_names, is_executive):
     return frappe.get_list("Lead Activity", filters=filters, fields=fields, limit_page_length=10000)
 
 
+
+def _frankfurter_rate(source_currency, target_currency):
+    """Return (rate, rate_date) from Frankfurter v2, cached for one hour."""
+    source = (source_currency or "").upper().strip()
+    target = (target_currency or "USD").upper().strip()
+    if not source or not target:
+        return None, None
+    if source == target:
+        return 1.0, None
+
+    cache_key = f"crm_dashboard_fx:{source}:{target}"
+    cache = frappe.cache()
+    cached = cache.get_value(cache_key)
+    if cached:
+        try:
+            return float(cached["rate"]), cached.get("date")
+        except (KeyError, TypeError, ValueError):
+            pass
+
+    # Frankfurter is preferred, but it does not cover every currency used by
+    # customers (notably some Asian/Middle Eastern currencies). Fall back to
+    # the open.er-api daily rates and calculate a cross rate when needed.
+    try:
+        response = requests.get(
+            f"https://api.frankfurter.dev/v2/rate/{source}/{target}", timeout=5,
+        )
+        response.raise_for_status()
+        payload = response.json()
+        rate = flt(payload.get("rate"))
+        if rate > 0:
+            result = {"rate": rate, "date": payload.get("date"), "provider": "Frankfurter"}
+            cache.set_value(cache_key, result, expires_in_sec=3600)
+            return rate, result.get("date")
+    except Exception:
+        pass
+
+    try:
+        response = requests.get(f"https://open.er-api.com/v6/latest/{source}", timeout=6)
+        response.raise_for_status()
+        payload = response.json()
+        rates = payload.get("rates") or {}
+        rate = flt(rates.get(target))
+        if rate <= 0:
+            # Cross-rate through USD when source->target is not directly present.
+            source_to_usd = flt(rates.get("USD"))
+            if source_to_usd > 0:
+                usd_response = requests.get("https://open.er-api.com/v6/latest/USD", timeout=6)
+                usd_response.raise_for_status()
+                usd_rates = (usd_response.json() or {}).get("rates") or {}
+                usd_to_target = flt(usd_rates.get(target))
+                if usd_to_target > 0:
+                    rate = source_to_usd * usd_to_target
+        if rate <= 0:
+            return None, None
+        result = {"rate": rate, "date": payload.get("time_last_update_utc"), "provider": "ExchangeRate-API fallback"}
+        cache.set_value(cache_key, result, expires_in_sec=3600)
+        return rate, result.get("date")
+    except Exception:
+        frappe.log_error(title="CRM dashboard exchange-rate lookup failed", message=frappe.get_traceback())
+        return None, None
+
+
+def _date_key(value):
+    if not value:
+        return None
+    try:
+        return str(getdate(value))
+    except Exception:
+        return None
+
+
 def _safe_sum_by_currency(rows, amount_field, currency_field):
     totals = {}
     for row in rows:
         currency = row.get(currency_field) or "UNKNOWN"
         totals[currency] = flt(totals.get(currency, 0)) + flt(row.get(amount_field))
     return {currency: round(value, 2) for currency, value in totals.items()}
+
+
+def _billing_country(address_name=None, customer_name=None, is_executive=False):
+    """Resolve billing country from a transaction billing address, then customer primary address."""
+    address = address_name
+    if not address and customer_name:
+        try:
+            address = frappe.db.get_value("Customer", customer_name, "customer_primary_address")
+        except Exception:
+            address = None
+    if not address:
+        return "Unknown country"
+    try:
+        country = frappe.db.get_value("Address", address, "country")
+        return country or "Unknown country"
+    except Exception:
+        return "Unknown country"
 
 
 @frappe.whitelist()
@@ -161,17 +250,35 @@ def get_dashboard_data(from_date=None, to_date=None, reporting_currency="USD", r
         except Exception:
             rates = {}
     rates = rates if isinstance(rates, dict) else {}
+    reporting_currency = (reporting_currency or "USD").upper().strip()
+    fx_meta = {}
 
     def convert(amount, source_currency):
-        source_currency = source_currency or "UNKNOWN"
-        target = reporting_currency or "USD"
+        source_currency = (source_currency or "").upper().strip()
+        target = reporting_currency
+        if not source_currency:
+            return None, False
         if source_currency == target:
             return flt(amount), True
-        # Rate means: 1 unit of source currency = rate units of reporting currency.
-        rate = rates.get(f"{source_currency}_{target}")
-        if rate in (None, "") or flt(rate) <= 0:
+        # User-entered dashboard override takes precedence over Frankfurter.
+        manual_rate = rates.get(f"{source_currency}_{target}")
+        if manual_rate not in (None, "") and flt(manual_rate) > 0:
+            fx_meta[f"{source_currency}_{target}"] = {"rate": flt(manual_rate), "source": "Manual override", "date": None}
+            return flt(amount) * flt(manual_rate), True
+        rate, rate_date = _frankfurter_rate(source_currency, target)
+        if not rate:
             return None, False
-        return flt(amount) * flt(rate), True
+        fx_meta[f"{source_currency}_{target}"] = {"rate": rate, "source": "Frankfurter", "date": rate_date}
+        return flt(amount) * rate, True
+
+    lead_converted_total = 0
+    lead_conversion_complete = True
+    for lead in leads:
+        value, ok = convert(lead.get("custom_amount"), lead.get("custom_currency"))
+        if ok:
+            lead_converted_total += flt(value)
+        else:
+            lead_conversion_complete = False
 
     quote_converted_total = 0
     quote_conversion_complete = True
@@ -197,6 +304,19 @@ def get_dashboard_data(from_date=None, to_date=None, reporting_currency="USD", r
     open_opportunities = [o for o in opportunities if (o.get("status") or "").lower() not in {"won", "lost", "converted", "closed"}]
     won = [o for o in opportunities if (o.get("workflow_state") or o.get("status") or "").lower() == "won"]
     lost = [o for o in opportunities if (o.get("workflow_state") or o.get("status") or "").lower() == "lost"]
+    won_converted_total = 0
+    won_conversion_complete = True
+    for opportunity in won:
+        value, ok = convert(opportunity.get("opportunity_amount"), opportunity.get("currency"))
+        if ok:
+            won_converted_total += flt(value)
+        else:
+            won_conversion_complete = False
+    # Attach dashboard-only converted amounts to each opportunity record so all visible
+    # charts and registers can use one selected reporting currency.
+    for opportunity in opportunities:
+        converted_value, converted_ok = convert(opportunity.get("opportunity_amount"), opportunity.get("currency"))
+        opportunity["converted_opportunity_amount"] = round(flt(converted_value), 2) if converted_ok else None
     quoted_opportunity_names = {q.get("opportunity") for q in quotations if q.get("opportunity")}
     stage_counts = {}
     for o in opportunities:
@@ -204,16 +324,45 @@ def get_dashboard_data(from_date=None, to_date=None, reporting_currency="USD", r
         stage_counts[stage] = stage_counts.get(stage, 0) + 1
 
     verticals = {}
+    stage_summary = {}
+    country_summary = {}
+    quotation_by_opportunity = {}
+    for q in quotations:
+        if q.get("opportunity"):
+            quotation_by_opportunity.setdefault(q.get("opportunity"), q)
     for o in opportunities:
+        converted_value, converted_ok = convert(o.get("opportunity_amount"), o.get("currency"))
         vertical = o.get("custom_service_vertical") or "Unassigned"
-        entry = verticals.setdefault(vertical, {"opportunities": 0, "pipeline_value_by_currency": {}, "won": 0, "quoted_opportunities": 0})
+        entry = verticals.setdefault(vertical, {"opportunities": 0, "pipeline_value": 0.0, "value_complete": True, "won": 0, "quoted_opportunities": 0})
         entry["opportunities"] += 1
-        currency = o.get("currency") or "UNKNOWN"
-        entry["pipeline_value_by_currency"][currency] = entry["pipeline_value_by_currency"].get(currency, 0) + flt(o.get("opportunity_amount"))
+        if converted_ok:
+            entry["pipeline_value"] += flt(converted_value)
+        else:
+            entry["value_complete"] = False
+        stage = o.get("workflow_state") or o.get("status") or "Unspecified"
+        stage_entry = stage_summary.setdefault(stage, {"count": 0, "value": 0.0, "value_complete": True})
+        stage_entry["count"] += 1
+        if converted_ok:
+            stage_entry["value"] += flt(converted_value)
+        else:
+            stage_entry["value_complete"] = False
+        q = quotation_by_opportunity.get(o.get("name"), {})
+        country = _billing_country(q.get("billing_address_name"), o.get("customer_name") or o.get("party_name"), is_executive)
+        country_entry = country_summary.setdefault(country, {"count": 0, "value": 0.0, "value_complete": True})
+        country_entry["count"] += 1
+        if converted_ok:
+            country_entry["value"] += flt(converted_value)
+        else:
+            country_entry["value_complete"] = False
         if o in won:
             entry["won"] += 1
         if o.get("name") in quoted_opportunity_names:
             entry["quoted_opportunities"] += 1
+    for group in (verticals, stage_summary, country_summary):
+        for item in group.values():
+            item["value"] = round(item.get("value", item.get("pipeline_value", 0.0)), 2)
+            if "pipeline_value" in item:
+                item["pipeline_value"] = round(item["pipeline_value"], 2)
 
     today = getdate(nowdate())
     followups = []
@@ -234,22 +383,62 @@ def get_dashboard_data(from_date=None, to_date=None, reporting_currency="USD", r
             "owner": lead.get("lead_owner_name") or lead.get("lead_owner") or "",
         })
 
+    # Date-wise counts and converted monetary values. The FX rate is the latest
+    # available Frankfurter reference rate (or a dashboard manual override), not a
+    # historical transaction-date rate. Amounts are converted before aggregation.
+    daily = {}
+    def add_daily(rows, date_field, amount_field, currency_field, prefix):
+        for row in rows:
+            day = _date_key(row.get(date_field))
+            if not day:
+                continue
+            entry = daily.setdefault(day, {
+                "date": day, "lead_count": 0, "lead_amount": 0.0, "lead_amount_complete": True,
+                "opportunity_count": 0, "opportunity_amount": 0.0, "opportunity_amount_complete": True,
+                "quotation_count": 0, "quotation_amount": 0.0, "quotation_amount_complete": True,
+            })
+            entry[f"{prefix}_count"] += 1
+            converted, ok = convert(row.get(amount_field), row.get(currency_field))
+            if ok:
+                entry[f"{prefix}_amount"] += flt(converted)
+            else:
+                entry[f"{prefix}_amount_complete"] = False
+    add_daily(leads, "creation", "custom_amount", "custom_currency", "lead")
+    add_daily(opportunities, "transaction_date", "opportunity_amount", "currency", "opportunity")
+    add_daily(quotations, "transaction_date", "grand_total", "currency", "quotation")
+    daily_trend = []
+    for day in sorted(daily):
+        entry = daily[day]
+        for prefix in ("lead", "opportunity", "quotation"):
+            if entry[f"{prefix}_amount_complete"]:
+                entry[f"{prefix}_amount"] = round(entry[f"{prefix}_amount"], 2)
+            else:
+                entry[f"{prefix}_amount"] = None
+        daily_trend.append(entry)
+
     return {
         "period": {"from_date": str(start), "to_date": str(end)},
-        "reporting_currency": reporting_currency or "USD",
+        "reporting_currency": reporting_currency,
+        "daily_trend": daily_trend,
         "leads": {
             "count": len(leads),
             "status_counts": _count_by(leads, "status"),
             "amount_by_currency": _safe_sum_by_currency(leads, "custom_amount", "custom_currency"),
+            "converted_amount": round(lead_converted_total, 2) if lead_conversion_complete else None,
+            "conversion_complete": lead_conversion_complete,
             "records": leads[:100],
         },
         "opportunities": {
             "count": len(opportunities),
             "open_count": len(open_opportunities),
             "won_count": len(won),
+            "won_converted_total": round(won_converted_total, 2) if won_conversion_complete else None,
+            "won_conversion_complete": won_conversion_complete,
             "lost_count": len(lost),
             "win_rate": round((len(won) / (len(won) + len(lost)) * 100), 1) if won or lost else 0,
             "stage_counts": stage_counts,
+            "stage_summary": stage_summary,
+            "billing_country_summary": country_summary,
             "amount_by_currency": _safe_sum_by_currency(opportunities, "opportunity_amount", "currency"),
             "converted_amount": round(opp_converted_total, 2) if opp_conversion_complete else None,
             "conversion_complete": opp_conversion_complete,
@@ -268,8 +457,10 @@ def get_dashboard_data(from_date=None, to_date=None, reporting_currency="USD", r
         "meta": {
             "is_executive": is_executive,
             "rates_used": rates,
+            "fx_rates": fx_meta,
+            "fx_provider": "Frankfurter API v2 (latest available daily reference rates); manual dashboard overrides take precedence.",
             "employee_names": employee_names,
-            "note": "Dashboard-only conversion rates. Missing rates prevent a complete converted total."
+            "note": "Dashboard-only conversion rates. Missing rates prevent a complete converted total. Historical date trends use the latest available rate, not the rate on each transaction date."
         },
     }
 

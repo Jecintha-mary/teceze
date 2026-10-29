@@ -111,7 +111,7 @@ def get_employees(filters):
         conditions["employment_type"] = filters.get("employment_type")
     else:
         # Safely exclude 'Engineer' or 'engineer' using NOT LIKE
-        conditions["employment_type"] = ["not like", "%engineer%"]
+        conditions["employment_type"] = ["in", ["Full-Time"]]
 
     return frappe.get_all(
         "Employee",

@@ -18,20 +18,8 @@ frappe.ui.form.on("Shift Request", {
             };
         });
      },
-     validate(frm) {
-     const today = frappe.datetime.get_today();
-     if (frm.doc.from_date &&frm.doc.from_date < today) {
-           frappe.throw(__("From Date cannot be in the past. Please select today or a future date.")
-           );
-       }
-    },
      refresh (frm){
-        const from_date_field = frm.fields_dict.from_date;
-        if (from_date_field && from_date_field.datepicker) {
-            from_date_field.datepicker.update({
-              minDate: frappe.datetime.get_today()
-            });
-      }
+    
         //Hide Submit button for employees and HR
 		if(has_common(frappe.user_roles, ["System Manager","HR Manager"])){
 		}else{
@@ -45,7 +33,36 @@ frappe.ui.form.on("Shift Request", {
                 }
 		}
      },
-    
+     
+    validate(frm) {
+    const today = frappe.datetime.get_today();
 
+    // Validate From Date
+    if (frm.doc.from_date && frm.doc.from_date < today) {
+        frappe.throw(
+            __("From Date cannot be in the past. Please select today or a future date.")
+        );
+    }
 
+    // Confirm before creating a new Shift Request
+    if (frm.is_new() && !frm._create_confirmed) {
+        // Stop the current save
+        frappe.validated = false;
+
+        frappe.confirm(
+            __("Are you sure you want to create this Shift Request?"),
+
+            // Yes
+            () => {
+                frm._create_confirmed = true;
+                frm.save();
+            },
+
+            // No
+            () => {
+                frm._create_confirmed = false;
+            }
+        );
+    }
+},
 });

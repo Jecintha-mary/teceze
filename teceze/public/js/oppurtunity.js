@@ -592,7 +592,9 @@ window.teceze = window.teceze || {};
             }
         },
         
-
+custom_region(frm) {
+        frm.set_value("custom_client_country", "");
+    },
         refresh(frm) {
             frm.remove_custom_button(__("Fetch Latest Exchange Rate"));
 
@@ -666,6 +668,14 @@ window.teceze = window.teceze || {};
 
              // Clarification UI
     render_clarification_center(frm);
+     if (frm.is_new()) return;
+
+        if (!frm.fields_dict.custom_dashboards) {
+            // Add a dashboard using a custom HTML field.
+            return;
+        }
+
+        render_opportunity_dashboard(frm);
         },
 
         // Make sure every row has its Item before the server validates it
@@ -689,11 +699,12 @@ window.teceze = window.teceze || {};
         custom_exchange_rates: frm => calculate_base_amount(frm),
         custom_quotation_number: frm => render_quotation_items(frm),
         
-        // probability: function (frm) {
-        //     if (frm.doc.probability > 100 || frm.doc.probability < 0) {
-        //         frappe.throw(__("Probability (%) must be between 0 and 100"));
-        //     }
-        // },
+        custom_zip_code: function (frm) {
+            const val = String(frm.doc.custom_zip_code || "").replace(/[^0-9]/g, "").slice(0, 6);
+            if (val !== frm.doc.custom_zip_code) {
+                frm.set_value("custom_zip_code", val);
+            }
+        },
 
         async custom_client_country(frm) {
             frm.set_value("custom_bill_country", frm.doc.custom_client_country);
@@ -739,7 +750,6 @@ window.teceze = window.teceze || {};
                 }
             );
         },
-
         async party_name(frm) {
             let owner = "";
 
@@ -1219,5 +1229,4 @@ function render_clarification_center(frm) {
 
     
 })(window.teceze);
-
 

@@ -72,7 +72,7 @@ def api_response(status_code, success, message, data=None):
 # LOGIN API
 # =====================================================================
 
-@frappe.whitelist(allow_guest=True)
+@frappe.whitelist(allow_guest=False)
 def login():
 
     try:
@@ -208,7 +208,7 @@ def authenticate():
 # LOGOUT API
 # =====================================================================
 
-@frappe.whitelist(allow_guest=True)
+@frappe.whitelist(allow_guest=False)
 def logout():
 
     frappe.local.login_manager.logout()
@@ -223,7 +223,7 @@ def logout():
     })
 
 
-@frappe.whitelist(allow_guest=True)
+@frappe.whitelist(allow_guest=False)
 def logout_test():
 
     # user = authenticate()

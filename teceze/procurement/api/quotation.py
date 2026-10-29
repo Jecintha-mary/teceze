@@ -1,6 +1,6 @@
 import frappe
 
-@frappe.whitelist(allow_guest=True)
+@frappe.whitelist(allow_guest=False)
 def get_quotations():
     data = []
 
@@ -48,7 +48,7 @@ def get_quotations():
 
 
 
-@frappe.whitelist(allow_guest=True)
+@frappe.whitelist(allow_guest=False)
 def get_one_quotation(quotation_id):
     doc = frappe.get_doc("Quotation", quotation_id)
 

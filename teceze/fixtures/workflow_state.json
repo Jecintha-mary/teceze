@@ -83,15 +83,6 @@
  {
   "docstatus": 0,
   "doctype": "Workflow State",
-  "icon": "remove",
-  "modified": "2026-06-10 15:03:44.689733",
-  "name": "Rejected",
-  "style": "Danger",
-  "workflow_state_name": "Rejected"
- },
- {
-  "docstatus": 0,
-  "doctype": "Workflow State",
   "icon": "",
   "modified": "2026-09-02 12:01:57.977085",
   "name": "Cancelled",
@@ -106,15 +97,6 @@
   "name": "Revision",
   "style": "Primary",
   "workflow_state_name": "Revision"
- },
- {
-  "docstatus": 0,
-  "doctype": "Workflow State",
-  "icon": "",
-  "modified": "2026-10-15 17:26:48.758232",
-  "name": "Sent Quotation To Sales",
-  "style": "Info",
-  "workflow_state_name": "Sent Quotation To Sales"
  },
  {
   "docstatus": 0,
@@ -138,37 +120,10 @@
   "docstatus": 0,
   "doctype": "Workflow State",
   "icon": "",
-  "modified": "2026-10-12 12:26:39.781644",
-  "name": "Negotiation",
-  "style": "Danger",
-  "workflow_state_name": "Negotiation"
- },
- {
-  "docstatus": 0,
-  "doctype": "Workflow State",
-  "icon": "",
   "modified": "2026-10-05 17:29:01.546407",
   "name": "Quotation",
   "style": "Primary",
   "workflow_state_name": "Quotation"
- },
- {
-  "docstatus": 0,
-  "doctype": "Workflow State",
-  "icon": "",
-  "modified": "2026-10-05 17:28:51.346688",
-  "name": "Lost",
-  "style": "Danger",
-  "workflow_state_name": "Lost"
- },
- {
-  "docstatus": 0,
-  "doctype": "Workflow State",
-  "icon": "",
-  "modified": "2026-10-09 12:01:10.464108",
-  "name": "Preparing Quotation",
-  "style": "Info",
-  "workflow_state_name": "Preparing Quotation"
  },
  {
   "docstatus": 0,
@@ -201,19 +156,28 @@
   "docstatus": 0,
   "doctype": "Workflow State",
   "icon": "",
-  "modified": "2026-10-05 17:28:33.009513",
-  "name": "Clarification Needed",
-  "style": "Warning",
-  "workflow_state_name": "Clarification Needed"
+  "modified": "2026-10-05 17:28:44.162712",
+  "name": "Clarification",
+  "style": "Info",
+  "workflow_state_name": "Clarification"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "remove",
+  "modified": "2026-06-10 15:03:44.689733",
+  "name": "Rejected",
+  "style": "Danger",
+  "workflow_state_name": "Rejected"
  },
  {
   "docstatus": 0,
   "doctype": "Workflow State",
   "icon": "",
-  "modified": "2026-10-05 17:28:44.162712",
-  "name": "Clarification",
-  "style": "Info",
-  "workflow_state_name": "Clarification"
+  "modified": "2026-10-05 17:28:51.346688",
+  "name": "Lost",
+  "style": "Danger",
+  "workflow_state_name": "Lost"
  },
  {
   "docstatus": 0,
@@ -223,6 +187,42 @@
   "name": "Quotation Submitted",
   "style": "Primary",
   "workflow_state_name": "Quotation Submitted"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2026-10-15 17:26:48.758232",
+  "name": "Sent Quotation To Sales",
+  "style": "Info",
+  "workflow_state_name": "Sent Quotation To Sales"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2026-10-12 12:26:39.781644",
+  "name": "Negotiation",
+  "style": "Danger",
+  "workflow_state_name": "Negotiation"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2026-10-09 12:01:10.464108",
+  "name": "Preparing Quotation",
+  "style": "Info",
+  "workflow_state_name": "Preparing Quotation"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2026-10-05 17:28:33.009513",
+  "name": "Clarification Needed",
+  "style": "Warning",
+  "workflow_state_name": "Clarification Needed"
  },
  {
   "docstatus": 0,

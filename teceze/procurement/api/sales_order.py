@@ -1,6 +1,6 @@
 import frappe
 
-@frappe.whitelist(allow_guest=True)
+@frappe.whitelist(allow_guest=False)
 def get_sales_orders():
     try:
         data = []
@@ -106,7 +106,7 @@ def get_sales_orders():
 
 
 
-@frappe.whitelist(allow_guest=True)
+@frappe.whitelist(allow_guest=False)
 def get_one_sales_order(sales_order_id):
     so = frappe.get_doc("Sales Order", sales_order_id)
 
@@ -157,7 +157,7 @@ def get_one_sales_order(sales_order_id):
         "message": "Request processed successfully",
     }
 
-@frappe.whitelist(allow_guest=True)
+@frappe.whitelist(allow_guest=False)
 def get_recent_sales_orders():
     try:
         data = []

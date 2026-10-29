@@ -29,6 +29,8 @@ def autoname(doc, method):
 
     if doc.employment_type == "Engineer":
         prefix = (settings.engineer_prefix or "").upper()
+    if doc.employment_type == "Intern":
+        prefix = (settings.intern_prefix or "").upper()
 
     series = f"{prefix}-{country_code}-.{series}"
     doc.name = make_autoname(series)
@@ -58,6 +60,7 @@ def create_shift_and_holiday_assignment(doc):
     if not doc.default_shift:
         return
 
+
     start_date, end_date = get_current_year_dates()
     holiday_list = get_shift_holiday_list(doc.default_shift)
 
@@ -72,79 +75,19 @@ def create_shift_and_holiday_assignment(doc):
 
     shift_assignment.insert(ignore_permissions=True)
     shift_assignment.submit()
-
-    # Holiday List Assignment
-    holiday_assignment = frappe.get_doc({
-        "doctype": "Holiday List Assignment",
-        "assigned_to": doc.name,
-        "holiday_list": holiday_list,
-        "from_date": start_date,
-        "end_date": end_date
-    })
-
-    holiday_assignment.insert(ignore_permissions=True)
-    holiday_assignment.submit()
-def update_shift_and_holiday_assignment(doc):
-    if not doc.default_shift:
-        return
-
-    start_date, end_date = get_current_year_dates()
-    holiday_list = get_shift_holiday_list(doc.default_shift)
-
-    # Shift Assignment
-    shift_assignment_name = frappe.db.get_value(
-        "Shift Assignment",
-        {
-            "employee": doc.name,
-            "docstatus": 1
-        },
-        "name"
-    )
-
-    if shift_assignment_name:
-        frappe.db.set_value(
-            "Shift Assignment",
-            shift_assignment_name,
-            "shift_type",
-            doc.default_shift
-        )
-    else:
-        shift_assignment = frappe.get_doc({
-            "doctype": "Shift Assignment",
-            "employee": doc.name,
-            "shift_type": doc.default_shift,
-            "start_date": start_date,
-            "end_date": end_date
-        })
-        shift_assignment.insert(ignore_permissions=True)
-        shift_assignment.submit()
-
-    # Holiday List Assignment
-    holiday_assignment_name = frappe.db.get_value(
-        "Holiday List Assignment",
-        {
-            "assigned_to": doc.name,
-            "docstatus": 1
-        },
-        "name"
-    )
-
-    if holiday_assignment_name:
-        frappe.db.set_value(
-            "Holiday List Assignment",
-            holiday_assignment_name,
-            "holiday_list",
-            holiday_list
-        )
-    else:
+    if doc.employment_type not in {"Intern", "Engineer"}:
+        # Holiday List Assignment
         holiday_assignment = frappe.get_doc({
             "doctype": "Holiday List Assignment",
             "assigned_to": doc.name,
             "holiday_list": holiday_list,
-            "from_date": start_date
+            "from_date": start_date,
+            "end_date": end_date
         })
+
         holiday_assignment.insert(ignore_permissions=True)
         holiday_assignment.submit()
+
 def after_insert(doc, method):
     create_leave_allocations(doc)
     create_shift_and_holiday_assignment(doc)
@@ -152,10 +95,6 @@ def after_insert(doc, method):
 
 def on_update(doc, method):
 
-    # if doc.has_value_changed("default_shift"):
-    #     update_shift_and_holiday_assignment(doc)
-    if (not frappe.flags.get("shift_request_update") and doc.has_value_changed("default_shift")):
-        update_shift_and_holiday_assignment(doc)
 
     if not doc.resignation_letter_date:
         return
@@ -218,6 +157,8 @@ def date_calculation_for_employee(doc):
 
 
 def create_leave_allocations(doc):
+    if  doc.employment_type=="Intern":
+            return
     joining_date = getdate(doc.date_of_joining)
 
     # Find Leave Period
@@ -371,8 +312,8 @@ def credit_privilege_leave():
         "Employee",
         filters={
             "status": "Active",
-            "employment_type": "Full-Time",
-            "custom_country": ["!=", "Sri Lanka"]
+            "employment_type": ["in", ["Full-Time"]],
+            "custom_country": ["!=", "Sri Lanka"],
         },
         fields=[
             "name",
@@ -742,6 +683,7 @@ def allocate_eligible_leaves():
                 "custom_country": rule.country,
                 "status": "Active",
                 "date_of_joining": joining_date,
+                 "employment_type": ["in", ["Full-Time"]],
             },
             fields=[
                 "name",
@@ -770,6 +712,7 @@ def allocate_eligible_leaves():
                     "custom_country": rule.country,
                     "status": "Active",
                     "date_of_joining": leap_joining_date,
+                  "employment_type": ["in", ["Full-Time"]],
                 },
                 fields=[
                     "name",

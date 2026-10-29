@@ -1,6 +1,6 @@
 {
  "app": "teceze",
- "creation": "2026-09-17 15:59:38.747214",
+ "creation": "2026-10-22 15:27:32.471732",
  "docstatus": 0,
  "doctype": "Workspace Sidebar",
  "header_icon": "circle-user-round",
@@ -91,6 +91,18 @@
   {
    "child": 1,
    "collapsible": 1,
+   "icon": "calendar-days",
+   "indent": 0,
+   "keep_closed": 0,
+   "label": "Shift Request",
+   "link_to": "Shift Request",
+   "link_type": "DocType",
+   "show_arrow": 0,
+   "type": "Link"
+  },
+  {
+   "child": 1,
+   "collapsible": 1,
    "icon": "chart-bar-increasing",
    "indent": 0,
    "keep_closed": 0,
@@ -130,6 +142,18 @@
    "keep_closed": 0,
    "label": "Leave Application",
    "link_to": "Leave Application",
+   "link_type": "DocType",
+   "show_arrow": 0,
+   "type": "Link"
+  },
+  {
+   "child": 1,
+   "collapsible": 1,
+   "icon": "card",
+   "indent": 0,
+   "keep_closed": 0,
+   "label": "Leave Encashment",
+   "link_to": "Leave Encashment",
    "link_type": "DocType",
    "show_arrow": 0,
    "type": "Link"
@@ -264,7 +288,7 @@
    "type": "Link"
   }
  ],
- "modified": "2026-10-15 13:01:58.083039",
+ "modified": "2026-10-29 11:22:26.368848",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "People",

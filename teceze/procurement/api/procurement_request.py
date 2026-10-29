@@ -3,7 +3,7 @@ import frappe
 from teceze.procurement.api.auth import authenticate
 
 
-@frappe.whitelist(allow_guest=True,methods=["POST"])
+@frappe.whitelist(allow_guest=False,methods=["POST"])
 def create():
 
     try:
@@ -128,7 +128,7 @@ def create():
 import frappe
 
 
-@frappe.whitelist(allow_guest=True,methods=["GET"])
+@frappe.whitelist(allow_guest=False,methods=["GET"])
 def get_procurement_requests():
 
     try:
@@ -246,7 +246,7 @@ def get_procurement_requests():
 import frappe
 
 
-@frappe.whitelist(allow_guest=True,methods=["GET"])
+@frappe.whitelist(allow_guest=False,methods=["GET"])
 def get_procurement_requests_by_client(client_name):
 
     try:
@@ -372,7 +372,7 @@ def get_procurement_requests_by_client(client_name):
 
         return
 
-@frappe.whitelist(allow_guest=True,methods=["GET"])
+@frappe.whitelist(allow_guest=False,methods=["GET"])
 def get_procurement_request(pr_id):
 
     try:
@@ -491,7 +491,7 @@ def get_procurement_request(pr_id):
 import frappe
 
 
-@frappe.whitelist(allow_guest=True,methods=["GET"])
+@frappe.whitelist(allow_guest=False,methods=["GET"])
 def get_recent_procurement_requests():
 
     try:

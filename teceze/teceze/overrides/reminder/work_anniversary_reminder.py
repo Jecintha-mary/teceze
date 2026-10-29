@@ -388,7 +388,7 @@ def get_all_employees():
         "Employee",
         filters={
             "status": "Active",
-            "employment_type": ["!=", "Engineer"],
+            "employment_type": ["in", ["Full-Time"]],
             "company_email": ["!=", ""],
         },
         pluck="company_email"

@@ -33,7 +33,6 @@ frappe.ui.form.on("Attendance Request", {
 
 	},
  	after_save(frm) {
-		console.log("method saved")
         // Reset for future saves
         frm._create_confirmed = false;
     },

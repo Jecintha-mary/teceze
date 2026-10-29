@@ -1,7 +1,7 @@
 import frappe
 
 
-@frappe.whitelist(allow_guest=True,methods=["GET"])
+@frappe.whitelist(allow_guest=False,methods=["GET"])
 def get_orders():
     sales_orders = frappe.get_all(
         "Sales Order",
@@ -56,7 +56,7 @@ def get_orders():
     }
 
 
-@frappe.whitelist(allow_guest=True,methods=["GET"])
+@frappe.whitelist(allow_guest=False,methods=["GET"])
 def get_order(order_number):
     if not frappe.db.exists("Sales Order", order_number):
         return {
@@ -103,7 +103,7 @@ def get_order(order_number):
     }
 
 
-@frappe.whitelist(allow_guest=True,methods=["GET"])
+@frappe.whitelist(allow_guest=False,methods=["GET"])
 def get_order_tracking(order_number):
     if not frappe.db.exists("Sales Order", order_number):
         return {

@@ -3,7 +3,7 @@ from frappe import _
 from frappe.query_builder import DocType
 from frappe.query_builder.functions import Sum
 
-@frappe.whitelist(allow_guest=True)
+@frappe.whitelist(allow_guest=False)
 def get_dashboard_summary():
     total_purchase_requests = frappe.db.count("Procurement Request")
     open_quotations = frappe.db.count(
@@ -45,7 +45,7 @@ def get_dashboard_summary():
         "message": _("Request processed successfully"),
     }
 
-@frappe.whitelist(allow_guest=True)
+@frappe.whitelist(allow_guest=False)
 def pr_status_breakdown():
     rows = frappe.db.sql("""
         SELECT status, COUNT(*) AS count
@@ -77,7 +77,7 @@ def pr_status_breakdown():
     }
 
 
-@frappe.whitelist(allow_guest=True)
+@frappe.whitelist(allow_guest=False)
 def get_procurement_monthly_amounts():
     rows = frappe.db.sql("""
         SELECT

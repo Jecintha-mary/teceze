@@ -380,6 +380,11 @@ function calculate_quotation_item_totals(frm, cdt, cdn) {
     // 5. Final amount
     const final_amount = total_before_tax + tax_amount;
 
+    //6.update each amount each item after margin 
+    each_item=total_before_tax/qty;
+
+
+
     // Update custom calculated fields
     frappe.model.set_value(
         cdt, cdn, "custom_subtotal",
@@ -407,6 +412,10 @@ function calculate_quotation_item_totals(frm, cdt, cdn) {
     const effective_rate = qty > 0 ? final_amount / qty : 0;
 
     frappe.model.set_value(
+        cdt, cdn, "custom_per_unit_after_margin",
+        flt(each_item, 2)
+    );
+     frappe.model.set_value(
         cdt, cdn, "rate",
         flt(effective_rate, 2)
     );

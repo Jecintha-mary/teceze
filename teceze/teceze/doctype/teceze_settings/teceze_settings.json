@@ -9,6 +9,7 @@
   "employee_prefix",
   "employee_series",
   "engineer_prefix",
+  "intern_prefix",
   "work_anniversary",
   "birthday",
   "custom_session_expire_hours",
@@ -154,13 +155,18 @@
    "fieldtype": "Data",
    "label": "Performance Improvement Plan URL",
    "options": "URL"
+  },
+  {
+   "fieldname": "intern_prefix",
+   "fieldtype": "Data",
+   "label": "Intern Naming Prefix"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-10-15 15:45:56.608669",
+ "modified": "2026-10-28 15:25:24.366699",
  "modified_by": "Administrator",
  "module": "Teceze",
  "name": "Teceze Settings",

@@ -1,6 +1,6 @@
 
 import frappe
-@frappe.whitelist(allow_guest=True,methods=["GET"])
+@frappe.whitelist(allow_guest=False,methods=["GET"])
 def get_one_invoice(invoice_no):
     salesorder=frappe.db.get_value("Sales Invoice Item",
         {"parent": invoice_no},
@@ -27,7 +27,7 @@ def get_one_invoice(invoice_no):
 
     }
 
-@frappe.whitelist(allow_guest=True,methods=["GET"])
+@frappe.whitelist(allow_guest=False,methods=["GET"])
 def get_allinvoices():
 
     invoices = frappe.get_all(
@@ -70,7 +70,7 @@ def get_allinvoices():
         "statusCode": 200,
         "message": "Request processed successfully"
     }
-#@frappe.whitelist(allow_guest=True,methods=["GET"])
+#@frappe.whitelist(allow_guest=False,methods=["GET"])
 # def test(invoice_no):
 
 #     return frappe.get_all(
@@ -79,7 +79,7 @@ def get_allinvoices():
 #         fields=["parent", "sales_order", "item_code"]
 #     )
 
-@frappe.whitelist(allow_guest=True)
+@frappe.whitelist(allow_guest=False)
 def recent_invoices():
 
     invoices = frappe.get_all(
@@ -121,7 +121,7 @@ def recent_invoices():
 
 
 
-@frappe.whitelist(allow_guest=True)
+@frappe.whitelist(allow_guest=False)
 def get_recent_sales_invoices():
     invoices = frappe.get_all(
         "Sales Invoice",

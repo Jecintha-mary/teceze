@@ -203,5 +203,5 @@ span.sidebar-item-icon:hover svg,
 }
 
 a.promotional-banner.px-2 {
-    display: none;
+    display: none !important;
 }

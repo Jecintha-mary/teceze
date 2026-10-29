@@ -3,7 +3,7 @@ import frappe
 from teceze.procurement.api.auth import authenticate
 
 
-@frappe.whitelist(allow_guest=True,methods=["GET"])
+@frappe.whitelist(allow_guest=False,methods=["GET"])
 def get_items():
 
     try:
@@ -94,7 +94,7 @@ def get_items():
         }
 
 
-@frappe.whitelist(allow_guest=True,methods=["GET"])
+@frappe.whitelist(allow_guest=False,methods=["GET"])
 def get_item(item_code):
 
     try:

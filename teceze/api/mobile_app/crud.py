@@ -8,7 +8,7 @@ from frappe.utils import (
     date_diff
 )
 from frappe import _
-from teceze.api.employee_attendance import (validate_employee_location,get_timezone_details,get_checkin_address,)
+from teceze.api.employee_attendance import (employee_checkin as desktop_employee_checkin,)
 from teceze.api.attendance_regularization import get_existing_checkins
 class CRUD:
 
@@ -1571,8 +1571,10 @@ class CRUD:
 
 
 from frappe.utils import add_days, getdate
+
 @frappe.whitelist(allow_guest=False)
 def employee_checkin():
+
     payload = CRUD.get_json_payload()
     data = payload.get("data", payload)
 
@@ -1581,94 +1583,46 @@ def employee_checkin():
     longitude = data.get("longitude")
     log_type = data.get("log_type")
 
-    # Validate required fields
     if not employee:
         frappe.throw(_("Employee ID is required."))
 
     if latitude is None or longitude is None:
         frappe.throw(_("Latitude and Longitude are required."))
 
-    if log_type not in ("IN", "OUT"):
-        frappe.throw(_("Log Type must be IN or OUT."))
-
-    # Ensure the logged-in user can check in only for their own employee
     logged_in_employee = frappe.db.get_value(
         "Employee",
         {"user_id": frappe.session.user},
-        "name"
+        "name",
     )
 
     if not logged_in_employee:
-        frappe.throw(_("Employee not found for the logged-in user."))
+        frappe.throw(
+            _("Employee not found for the logged-in user.")
+        )
 
     if employee != logged_in_employee:
         frappe.throw(
             _("You are not allowed to check in for another employee."),
-            frappe.PermissionError
+            frappe.PermissionError,
         )
 
-    # Validate geolocation
-    location_result = validate_employee_location(
-        employee,
-        latitude,
-        longitude
-    )
-
-    if not location_result.get("success"):
-        frappe.throw(
-            location_result.get(
-                "message",
-                _("You are outside of the geolocation.")
-            )
-        )
-
-    # Get timezone details
-    timezone_data = get_timezone_details(
-        latitude,
-        longitude
-    )
-
-    # Get address from GPS coordinates
-    checkin_address = get_checkin_address(
-        latitude,
-        longitude
-    )
-
-    # Add validated and calculated values to the request data
-    data["custom_distance"] = location_result.get("distance")
-    data["custom_checkin_address"] = checkin_address
-
-    data["custom_utc_time"] = timezone_data.get("utc_time")
-    data["custom_employee_timezone"] = timezone_data.get(
-        "employee_timezone"
-    )
-    data["custom_employee_local_time"] = timezone_data.get(
-        "employee_local_time"
-    )
-    data["custom_company_timezone"] = timezone_data.get(
-        "company_timezone"
-    )
-    data["custom_company_local_time"] = timezone_data.get(
-        "company_local_time"
-    )
-
-    # Create Employee Checkin using the existing CRUD implementation
-    return CRUD.create_document(
-        doctype="Employee Checkin",
-        data=data,
-        permission=True
+    return desktop_employee_checkin(
+        employee=employee,
+        log_type=log_type,
+        latitude=latitude,
+        longitude=longitude,
     )
 
 
 
-@frappe.whitelist(allow_guest=True)
+@frappe.whitelist(allow_guest=False)
 def app_policy():
     return CRUD.handle(
         doctype="Terms and Conditions",
          permission=True
     )
 
-@frappe.whitelist(allow_guest=True)
+@frappe.whitelist(allow_guest=False)
 def attendance():
     return CRUD.handle(
         doctype="Attendance"
@@ -1690,9 +1644,27 @@ import frappe
 
 @frappe.whitelist()
 def timesheet():
+    method = frappe.request.method
+    
+    if method in ("PUT", "PATCH"):
+        name = frappe.form_dict.get("name")
+        action = frappe.form_dict.get("action")
 
+        if not name:
+            frappe.throw("Timesheet name is required")
+
+        if action == "Submit":
+            doc = frappe.get_doc("Timesheet", name)
+            doc.check_permission("submit")
+            doc.submit()
+
+            return {
+                "success": True,
+                "message": "Timesheet submitted successfully",
+                "data": doc.as_dict()
+            }
     response = CRUD.handle("Timesheet")
-
+    
     # Only modify normal list response
     if (
         isinstance(response, dict)
@@ -1727,7 +1699,6 @@ def timesheet():
                     record.get("name"),
                     []
                 )
-
     return response
 @frappe.whitelist(allow_guest=False)
 def employee():
@@ -3098,6 +3069,16 @@ def attendance_request():
                 doc.to_date = data.get("from_date") 
                 doc.half_day = 0 
                 doc.half_day_date = None
+
+            # On Duty -> attachment mandatory + valid file URL
+            attachment = data.get("custom_attachment")
+
+            if data.get("reason") == "On Duty":
+                if not attachment:
+                    frappe.throw("Attachment is mandatory for On Duty.")
+
+                if not frappe.db.exists("File", {"file_url": attachment}):
+                    frappe.throw("Invalid attachment. Please upload the file first.")
             
             # Always use logged-in employee
             doc.employee = get_logged_in_employee()
@@ -3249,3 +3230,88 @@ def attendance_request_cancellation(name, comment):
     "success": True,
     "message": "Cancellation request sent successfully"
 }
+@frappe.whitelist(allow_guest=False)
+def policy_details():
+    
+    
+    policy_fields = {
+        "probation_policy_url": "custom_probation_policy_url",
+        "resignation_policy_url": "custom_resignation_policy_url",
+        "performance_improvement_plan_url": "custom_performance_improvement_plan",
+        "internship_policy_url": "custom_internship_policy_url",
+        "india_leave_policy_url": "custom_india_leave_policy_url",
+        "dress_code_policy_url": "custom_dress_code_policy_url",
+        "whistleblower_policy_url": "custom_whistleblower_policy_url",
+    }
+    settings = frappe.get_single("Teceze Settings").as_dict()
+
+    data = {
+        key: (settings.get(fieldname) or "").strip()
+        for key, fieldname in policy_fields.items()
+    }
+    return {
+        "success": True,
+        "message": "Policy details fetched successfully",
+        "data": data,
+    }
+
+from frappe.utils import getdate, get_last_day
+
+@frappe.whitelist(allow_guest=False)
+def salary_slip():
+    CRUD.check_authentication()
+
+    # Payslip read-only: create / update / delete block
+    if frappe.request.method != "GET":
+        frappe.throw(_("Only GET is allowed"), frappe.PermissionError)
+
+    employee = get_logged_in_employee()
+
+    frappe.form_dict["employee"] = employee
+    frappe.has_permission(
+        "Salary Slip",
+        "read",
+        throw=True
+    )
+
+    return CRUD.handle("Salary Slip")
+
+@frappe.whitelist(allow_guest=False)
+def salary_slip_pdf(name=None):
+    CRUD.check_authentication()
+
+    employee = get_logged_in_employee()
+    if not employee:
+        frappe.throw(_("Employee record not found"), frappe.PermissionError)
+
+    filters = {"employee": employee, "docstatus": ["in", [0, 1]]}
+
+    if name:
+        filters["name"] = name
+    # elif start_date:
+    #     first_day = getdate(start_date).replace(day=1)
+    #     filters["start_date"] = ["between", [first_day, get_last_day(first_day)]]
+        
+    slips = frappe.get_list(
+        "Salary Slip",
+        filters=filters,
+        fields=["name"],
+        order_by="start_date desc",
+        page_length=1,
+    )
+    if not slips:
+        frappe.throw(_("Salary Slip not found"), frappe.DoesNotExistError)
+
+    slip_name = slips[0].name
+    frappe.has_permission("Salary Slip", "read", slip_name, throw=True)
+
+    pdf = frappe.get_print(
+        "Salary Slip",
+        slip_name,
+        print_format="Salary Slip",
+        as_pdf=True,
+    )
+
+    frappe.local.response.filename = f"{slip_name.replace('/', '-')}.pdf"
+    frappe.local.response.filecontent = pdf
+    frappe.local.response.type = "pdf"

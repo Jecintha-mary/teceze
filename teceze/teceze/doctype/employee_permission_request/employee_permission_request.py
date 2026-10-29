@@ -54,13 +54,12 @@ class EmployeePermissionRequest(Document):
                             if str(x.holiday_date) == str(self.permission_on):
                                 frappe.throw("Permission Requests are not allowed for weekdays and holidays. Please contact your RM.")
             ###If applied half day leave, permission cannot be availed for that day
-            leave_application = frappe.db.sql("""select name from `{0}`.`tabLeave Application` where (half_day = '1' or half_day = '0') and docstatus != '2' and status in ("Open","Approved")
-                                and from_date = '{1}' and to_date = '{1}' and employee = '{2}'""".format(current_db_name,self.permission_on,self.employee),as_dict=True)
+            leave_application = frappe.db.sql("""select name from `tabLeave Application` where (half_day = %s or half_day = %s) and docstatus != %s and status in (%s, %s) and from_date = %s and to_date = %s and employee = %s""", (1, 0, 2, "Open", "Approved", self.permission_on, self.permission_on, self.employee), as_dict=True)
+
             if leave_application:
                 frappe.throw("Permission cannot be availed because you already applied leave for that day. Please contact your RM")
 
-            leave = frappe.db.sql("""select name,leave_type from `{0}`.`tabLeave Application` where half_day = '0' and docstatus != '2' and status in ("Open","Approved")
-                                and '{1}' between from_date and to_date and employee = '{2}'""".format(current_db_name,self.permission_on,self.employee),as_dict=True)
+            leave = frappe.db.sql("""select name, leave_type from `tabLeave Application` where half_day = %s and docstatus != %s and status in (%s, %s) and %s between from_date and to_date and employee = %s""", (0, 2, "Open", "Approved", self.permission_on, self.employee), as_dict=True)
 
             if len(leave)>0:
                 frappe.throw("Permission cannot be availed because you already applied "+leave[0]['leave_type']+"for that day. Please contact your RM")
@@ -72,8 +71,7 @@ class EmployeePermissionRequest(Document):
 #Validate Permission limitation
 @frappe.whitelist()
 def validate_permission(employee,permission_on,name):
-	permission = frappe.db.sql("""select name from `{0}`.`tabEmployee Permission Request` where employee = '{1}' and docstatus != '2' and permission_on = '{2}' and name != '{3}'
-	""".format(current_db_name,employee,permission_on,name),as_dict=True)
+	permission = frappe.db.sql("""select name from `tabEmployee Permission Request` where employee = %s and docstatus != %s and permission_on = %s and name != %s""", (employee, 2, permission_on, name), as_dict=True)
 	if permission:
 		return permission
 

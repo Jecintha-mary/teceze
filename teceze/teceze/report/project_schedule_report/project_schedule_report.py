@@ -45,9 +45,7 @@ def execute(filters=None):
                             'task': '<a href="' + frappe.utils.get_url() + '/app/project/' + project + '"' + 'target="_blank"' + '>' + project + '</a>' + '&nbsp &nbsp' + button}
                 
                 data, tot_logged_hours, tot_expec_hrs = get_data(project)
-                type_count = frappe.db.sql('''
-                                        select status,count(*) as count from tabTask where project = '{0}' group by status;
-                                    '''.format(project), as_dict=True)
+                type_count = frappe.db.sql('''select status, count(*) as count from tabTask where project = %s group by status''', (project,), as_dict=True)
 
                 sum_count = []
                 for item in type_count:
@@ -99,9 +97,7 @@ def get_columns(filters):
                 "fieldtype": "Data", "width": 180, "align": "center", "hidden":1},
         ]
         if filters['project']:
-            project_data = frappe.db.sql("""SELECT month(expected_start_date) as start_month,month(expected_end_date) as end_month,expected_start_date,expected_end_date,
-                                         year(expected_start_date) as start_year,year(expected_end_date) as end_year FROM `tabProject`
-                                         WHERE name='{project_name}'""".format(project_name=filters.get('project')), as_dict=1)
+            project_data = frappe.db.sql("""SELECT month(expected_start_date) as start_month, month(expected_end_date) as end_month, expected_start_date, expected_end_date, year(expected_start_date) as start_year, year(expected_end_date) as end_year FROM `tabProject` WHERE name = %s""", (filters.get('project'),), as_dict=1)
 
             project_data = project_data[0]
 
@@ -129,12 +125,14 @@ def get_prject_log_data(filters):
 
         project_data = project_data[0]
         if filters.get("project") and project_data['expected_start_date'] and project_data['expected_end_date']:
-            data = frappe.db.sql("""SELECT e.employee,e.employee_name,e.status,t.custom_division as custom_division,t.start_date,month(t.start_date) as month_wise,
-                        year(t.start_date) as year_wise,td.project_name,td.project,td.task,sum(td.hours) as hours 
-                        FROM {0}.`tabEmployee` e INNER JOIN {0}.`tabTimesheet` t ON t.employee=e.employee
-                        INNER JOIN `tabTimesheet Detail` td ON td.parent=t.name WHERE td.project='{1}'and 
-                        t.docstatus=1 and date(td.creation) > "{2}" and date(td.creation) < "{3}" group by e.employee,td.project,month_wise,year_wise;""".format(current_db_name, filters.get("project"), project_data['expected_start_date'], project_data['expected_end_date']),as_dict=1)
-            
+            data = frappe.db.sql("""SELECT e.employee, e.employee_name, e.status, t.custom_division as custom_division, t.start_date, month(t.start_date) as month_wise, year(t.start_date) as year_wise, td.project_name, td.project, td.task, sum(td.hours) as hours
+                        FROM `tabEmployee` e
+                        INNER JOIN `tabTimesheet` t ON t.employee = e.employee
+                        INNER JOIN `tabTimesheet Detail` td ON td.parent = t.name
+                        WHERE td.project = %s AND t.docstatus = %s AND date(td.creation) > %s AND date(td.creation) < %s
+                        GROUP BY e.employee, td.project, month_wise, year_wise""",
+                        (filters.get("project"), 1, project_data['expected_start_date'], project_data['expected_end_date']),
+                        as_dict=1)
             
             if len(data)>0:
                 data = grouping_data(data, "employee", filters)
@@ -206,51 +204,45 @@ def get_data(project):
     tot_expec_hrs = None
     if project is not None:
         data = frappe.db.sql('''
-                            select progress,round(actual_time,2) as hrs, round(expected_time,2) as expected_hrs,name as task,parent_task,subject, 
-                             _assign, SUBSTR(_user_tags, 2) as tags,custom_division,type,priority,status,is_group,exp_start_date,act_start_date,
-                            datediff(act_start_date,exp_start_date) as start_diff,exp_end_date,act_end_date,datediff(act_end_date,exp_end_date) as end_diff
-                            # case when connected_to is not null then connected_to else parent_task end as parent_task
-                            from `tabTask` where project='{}' and (status!="Cancelled" or actual_time>0) order by subject;'''
-                             .format(project), as_dict=True)
+                select progress, round(actual_time, 2) as hrs, round(expected_time, 2) as expected_hrs, name as task, parent_task, subject,
+                _assign, SUBSTR(_user_tags, 2) as tags, custom_division, type, priority, status, is_group, exp_start_date, act_start_date,
+                datediff(act_start_date, exp_start_date) as start_diff, exp_end_date, act_end_date, datediff(act_end_date, exp_end_date) as end_diff
+                from `tabTask` where project = %s and (status != %s or actual_time > 0) order by subject
+            ''', (project, "Cancelled"), as_dict=True)
     
         data = frappe.db.sql('''
-                            SELECT 
-                                
-                                t.progress,
-                                count(f.name) as attachements,
-                                ROUND(t.actual_time, 2) as hrs,
-                                ROUND(t.expected_time, 2) as expected_hrs,
-                                t.name as task,
-                                t.parent_task,
-                                t.subject,
-                                t._assign,
-                                SUBSTR(t._user_tags, 2) as tags,
-                                t.custom_division,
-                                t.type,
-                                t.priority,
-                                t.status,
-                                t.is_group,
-                                t.exp_start_date,
-                                t.act_start_date,
-                                DATEDIFF(t.act_start_date, t.exp_start_date) as start_diff,
-                                t.exp_end_date,
-                                t.act_end_date,
-                                DATEDIFF(t.act_end_date, t.exp_end_date) as end_diff
-                            FROM 
-                                `tabTask` t
-                            LEFT JOIN 
-                                `tabFile` f ON t.name = f.attached_to_name
-                            WHERE 
-                                t.project = '{}'
-                                AND (t.status != 'Cancelled' OR t.actual_time > 0)
-                            GROUP BY 
-                                t.progress, t.name, t.parent_task, 
-                                t.subject, t._assign,  t.custom_division, t.type, t.priority, 
-                                t.status, t.is_group, t.exp_start_date, t.act_start_date, 
-                                t.exp_end_date, t.act_end_date
-                            ORDER BY 
-                                t.subject;'''
-                             .format(project), as_dict=True)
+                SELECT
+                    t.progress,
+                    count(f.name) as attachements,
+                    ROUND(t.actual_time, 2) as hrs,
+                    ROUND(t.expected_time, 2) as expected_hrs,
+                    t.name as task,
+                    t.parent_task,
+                    t.subject,
+                    t._assign,
+                    SUBSTR(t._user_tags, 2) as tags,
+                    t.custom_division,
+                    t.type,
+                    t.priority,
+                    t.status,
+                    t.is_group,
+                    t.exp_start_date,
+                    t.act_start_date,
+                    DATEDIFF(t.act_start_date, t.exp_start_date) as start_diff,
+                    t.exp_end_date,
+                    t.act_end_date,
+                    DATEDIFF(t.act_end_date, t.exp_end_date) as end_diff
+                FROM `tabTask` t
+                LEFT JOIN `tabFile` f ON t.name = f.attached_to_name
+                WHERE t.project = %s
+                    AND (t.status != 'Cancelled' OR t.actual_time > 0)
+                GROUP BY
+                    t.progress, t.name, t.parent_task, t.subject, t._assign,
+                    t._user_tags, t.custom_division, t.type, t.priority,
+                    t.status, t.is_group, t.exp_start_date, t.act_start_date,
+                    t.exp_end_date, t.act_end_date
+                ORDER BY t.subject
+            ''', (project,), as_dict=True)
 
         if data:
             par_child_data, total_hours, tot_expec_hrs = main(data)
@@ -623,14 +615,15 @@ def get_summarized_view(project):
                          '''.format(project), as_dict=True)
     # Get Total Count
     total_count = frappe.db.sql('''
-                        SELECT count(case when status= 'Open' Then 1 else null end) as 'Open',
-                        count(case when status= 'Working' Then 1 else null end) as 'Working',
-                        count(case when status= 'Pending Review' Then 1 else null end) as 'Pending Review',
-                        count(case when status= 'Overdue' Then 1 else null end) as 'Overdue',
-                        count(case when status= 'Completed' Then 1 else null end) as 'Completed',
-                        count(case when status= 'Cancelled' Then 1 else null end) as 'Cancelled',
-                        count(*) as Total
-                        FROM tabTask where project='{}';'''.format(project), as_dict=True)
+            SELECT count(case when status = 'Open' Then 1 else null end) as 'Open',
+            count(case when status = 'Working' Then 1 else null end) as 'Working',
+            count(case when status = 'Pending Review' Then 1 else null end) as 'Pending Review',
+            count(case when status = 'Overdue' Then 1 else null end) as 'Overdue',
+            count(case when status = 'Completed' Then 1 else null end) as 'Completed',
+            count(case when status = 'Cancelled' Then 1 else null end) as 'Cancelled',
+            count(*) as Total
+            FROM `tabTask` where project = %s
+        ''', (project,), as_dict=True)
 
     total_count = total_count[0]
     total_count['Type'] = '<b>' + 'Total' + '</b>'
@@ -744,10 +737,7 @@ def getColumn(tag_fil,en_var):
 @frappe.whitelist()
 def get_user_image():
     try:
-        data = frappe.db.sql(
-            '''select name,full_name as fullname,user_image as image from {0}.`tabUser` ;'''.format(
-                current_db_name),
-            as_dict=True)
+        data = frappe.db.sql('''select name, full_name as fullname, user_image as image from `tabUser`''', as_dict=True)
         return data
     except Exception as e:
         pass

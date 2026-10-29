@@ -13,7 +13,8 @@ def mark_absent_for_rh():
         "Employee",
         filters={
             "status": "Active",
-            "employment_type": ["!=", "Engineer"]
+             "employment_type": ["in", ["Full-Time"]],
+
         },
         fields=[
             "name",

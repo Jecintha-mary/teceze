@@ -31,7 +31,6 @@ app_license = "mit"
 
 # include js, css files in header of web template
 # web_include_css = "/assets/teceze/css/teceze.css"
-# web_include_js = "/assets/teceze/js/teceze.js"
 
 
 # include custom scss in every website theme (without file extension ".scss")
@@ -61,6 +60,7 @@ override_whitelisted_methods = {
 doctype_js = {
     "Employee" : ["public/js/employee.js"],
 	"Attendance Request": ["public/js/attendance_request.js"],
+    "Attendance": ["public/js/attendance.js"],
     "Leave Application" : ["public/js/leave_application.js"],
     "Opportunity" : ["public/js/oppurtunity.js"],
 	"Project" : ["public/js/project.js"],
@@ -70,6 +70,7 @@ doctype_js = {
     "Lead" : ["public/js/lead.js"],
     "Compensatory Leave Request" : ["public/js/compensatory_leave_request.js"],
     "Shift Request" : ["public/js/shift_request.js"],
+    "Leave Encashment" : ["public/js/leave_encashment.js"],
     
 
 }
@@ -107,22 +108,34 @@ doc_events = {
 	"Leave Application": {
         "validate": ["teceze.teceze.overrides.leave_application.validate"]
     },
-    # "Shift Request": {
-    # 	"before_submit": "teceze.teceze.overrides.shift_request.before_submit",
-    #     "on_submit": "teceze.teceze.overrides.shift_request.on_submit",
-    #     "validate": "teceze.teceze.overrides.shift_request.validate",
-    #     "on_cancel": "teceze.teceze.overrides.shift_request.on_cancel",
-	# },
+    "Shift Request": {
+    	"before_submit": "teceze.teceze.overrides.shift_request.before_submit",
+        "on_submit": "teceze.teceze.overrides.shift_request.on_submit",
+        "validate": "teceze.teceze.overrides.shift_request.validate",
+        "on_cancel": "teceze.teceze.overrides.shift_request.on_cancel",
+	},
     "Opportunity": {
         "validate": "teceze.api.clarification.validate_opportunity_clarifications",
     },
+    "Holiday List Assignment": {
+        "validate": "teceze.teceze.overrides.holiday_list_assignment.validate"
+    },
+    "Leave Encashment":{
+        "validate": "teceze.teceze.overrides.leave_encashment.validate"
+    }
 
 
+}
+override_doctype_class = {
+    "Shift Request": "teceze.teceze.overrides.shift_request.CustomShiftRequest",
 }
 
 extend_doctype_class = {
     "Salary Slip": [
         "teceze.teceze.overrides.salary_slip.CustomSalarySlip"
+    ],
+    "Attendance Request": [
+        "teceze.teceze.overrides.attendance_regularization.CustomAttendanceRequest"
     ]
 	
 }
@@ -269,7 +282,7 @@ scheduler_events = {
            "10 0 * * *": [
                
             "teceze.teceze.overrides.reminder.birthday_reminder.send_birthday_wishes",
-			"teceze.teceze.overrides.reminder.work_anniversary_reminder.send_work_anniversary_wishes"	,
+			"teceze.teceze.overrides.reminder.work_anniversary_reminder.send_work_anniversary_wishes",
              "teceze.teceze.overrides.employee.allocate_eligible_leaves",
    
 			],
@@ -302,6 +315,10 @@ scheduler_events = {
 # override_whitelisted_methods = {
 # 	"frappe.desk.doctype.event.event.get_events": "teceze.event.get_events"
 # }
+override_whitelisted_methods = {
+    "hrms.api.roster.get_events":
+        "teceze.teceze.overrides.roaster.get_events"
+}
 #
 # each overriding function accepts a `data` argument;
 # generated from the base implementation of the doctype dashboard,
@@ -391,7 +408,7 @@ fixtures = [
    	"Workflow Action Master",
    	"Workflow State",
    	# "Role",
-   	# "Workspace",
+   	"Workspace",
 	"Print Format",
    	"Custom DocPerm",
    	"Report",

@@ -1,4 +1,10 @@
 frappe.pages["crm-dashboards"].on_page_load = function (wrapper) {
+    frappe.require("/assets/teceze/js/component/charts.js").then(() => init_crm_dashboard(wrapper)).catch(() => {
+        frappe.msgprint(__("Unable to load the shared CRM chart components. Run bench build and clear cache."));
+    });
+};
+
+function init_crm_dashboard(wrapper) {
     const page = frappe.ui.make_app_page({
         parent: wrapper,
         title: __("CRM Dashboard"),
@@ -19,10 +25,7 @@ frappe.pages["crm-dashboards"].on_page_load = function (wrapper) {
           <label>Report currency <select id="crm-currency"><option>USD</option><option>INR</option><option>EUR</option><option>GBP</option><option>AED</option><option>SGD</option></select></label>
           <button class="btn btn-primary btn-sm" id="crm-apply">Apply</button>
         </div>
-        <div class="crm-rates-panel" id="crm-rates-panel">
-          <div><strong>Manual exchange rates</strong><small>Enter how much reporting currency equals one unit of each source currency. These rates only affect this dashboard.</small></div>
-          <div class="crm-rate-inputs" id="crm-rate-inputs"></div>
-        </div>
+        <div class="crm-rates-panel" id="crm-rates-panel"><div><strong>Reporting currency</strong><small>All monetary values are displayed in the selected currency. USD is the default; changing the selector recalculates dashboard totals only.</small></div></div>
         <div class="crm-tabs" id="crm-main-tabs">
           <button class="active" data-tab="overview">Executive overview</button>
           <button data-tab="pipeline">Pipeline & conversion</button>
@@ -33,22 +36,23 @@ frappe.pages["crm-dashboards"].on_page_load = function (wrapper) {
         <div id="crm-dash-content" style="display:none">
           <section class="crm-tab-panel active" data-panel="overview">
             <div class="crm-kpis" id="crm-overview-kpis"></div>
-            <div class="crm-two-col"><div class="crm-card"><div class="crm-card-head"><div><h3>Pipeline by workflow state</h3><p>Opportunity count by current workflow state</p></div></div><div id="crm-stage-chart"></div></div>
-            <div class="crm-card"><div class="crm-card-head"><div><h3>Quotation totals by currency</h3><p>Original totals and selected reporting currency</p></div></div><div id="crm-quote-currency"></div></div></div>
+            <div class="crm-card"><div class="crm-card-head"><div><h3>Commercial activity trend</h3><p>Daily lead creation, opportunity movement and quotation activity. Use the table below for exact counts and values.</p></div><span class="crm-card-period" id="crm-trend-period"></span></div><div id="crm-activity-chart"></div></div><div class="crm-card"><div class="crm-card-head"><div><h3>Daily commercial value</h3><p>Daily amount trend in the selected reporting currency. Exact counts and values remain available in the table below.</p></div></div><div id="crm-daily-value-chart"></div></div><div class="crm-card"><div class="crm-card-head"><div><h3>Daily activity & commercial value</h3><p>Counts and amounts are shown together for each record type.</p></div></div><div class="crm-table-wrap" id="crm-daily-trend"></div></div>
+            <div class="crm-two-col"><div class="crm-card"><div class="crm-card-head"><div><h3>Pipeline by workflow state</h3><p>Opportunity count and pipeline value in one interactive chart</p></div></div><div id="crm-stage-chart"></div></div>
+            <div class="crm-card"><div class="crm-card-head"><div><h3>Sales conversion health</h3><p>Outcome rate and quotation coverage for the selected period</p></div></div><div id="crm-conversion-health"></div></div></div>
             <div class="crm-card"><div class="crm-card-head"><div><h3>Priority opportunities</h3><p>Recent opportunity records in the selected date range</p></div></div><div class="crm-table-wrap" id="crm-priority-table"></div></div>
           </section>
           <section class="crm-tab-panel" data-panel="pipeline">
             <div class="crm-kpis" id="crm-pipeline-kpis"></div>
             <div class="crm-subtabs"><button class="active" data-sub="funnel">Funnel</button><button data-sub="aging">Record aging</button><button data-sub="deals">Deal register</button></div>
-            <div class="crm-subpanel active" data-subpanel="funnel"><div class="crm-two-col"><div class="crm-card"><h3>Lead-to-quotation movement</h3><p>Counts are based on each DocType's selected business date.</p><div id="crm-funnel"></div></div><div class="crm-card"><h3>Opportunity outcomes</h3><p>Won and lost status from matching opportunity records.</p><div id="crm-outcomes"></div></div></div></div>
+            <div class="crm-subpanel active" data-subpanel="funnel"><div class="crm-two-col"><div class="crm-card"><h3>Lead-to-quotation movement</h3><p>Counts are based on each DocType's selected business date.</p><div id="crm-funnel"></div></div><div class="crm-card"><h3>Opportunity outcomes</h3><p>Won and lost status from matching opportunity records.</p><div id="crm-outcomes"></div><div id="crm-outcome-pie"></div></div></div></div>
             <div class="crm-subpanel" data-subpanel="aging"><div class="crm-card"><h3>Opportunity record age</h3><p>Uses transaction date as a proxy; this is not time spent in a workflow stage.</p><div id="crm-aging"></div></div></div>
             <div class="crm-subpanel" data-subpanel="deals"><div class="crm-card"><div class="crm-card-head"><h3>Opportunity register</h3><input id="crm-deal-search" placeholder="Search opportunities…"></div><div class="crm-table-wrap" id="crm-deal-table"></div></div></div>
           </section>
           <section class="crm-tab-panel" data-panel="verticals">
             <div class="crm-kpis" id="crm-vertical-kpis"></div>
             <div class="crm-subtabs"><button class="active" data-sub="performance">Performance</button><button data-sub="commercial">Commercial mix</button><button data-sub="detail">Detail</button></div>
-            <div class="crm-subpanel active" data-subpanel="performance"><div class="crm-two-col"><div class="crm-card"><h3>Opportunities by service vertical</h3><div id="crm-vertical-chart"></div></div><div class="crm-card"><h3>Vertical scorecard</h3><div id="crm-vertical-score"></div></div></div></div>
-            <div class="crm-subpanel" data-subpanel="commercial"><div class="crm-card"><h3>Quotation totals by vertical and currency</h3><div id="crm-vertical-commercial"></div></div></div>
+            <div class="crm-subpanel active" data-subpanel="performance"><div class="crm-two-col"><div class="crm-card"><div class="crm-card-head"><div><h3>Opportunities by service vertical</h3><p>Opportunity count and pipeline value in the selected currency</p></div></div><div id="crm-vertical-chart"></div></div><div class="crm-card"><h3>Vertical scorecard</h3><div id="crm-vertical-score"></div></div></div><div class="crm-card crm-country-card"><div class="crm-card-head"><div><h3>Commercial performance by billing country</h3><p>Billing-address country · opportunity count and converted pipeline value</p></div></div><div id="crm-country-chart"></div></div></div>
+            <div class="crm-subpanel" data-subpanel="commercial"><div class="crm-card"><h3>Quotation-linked opportunities by service vertical</h3><div id="crm-vertical-commercial"></div></div></div>
             <div class="crm-subpanel" data-subpanel="detail"><div class="crm-card"><h3>Service vertical detail</h3><div class="crm-table-wrap" id="crm-vertical-table"></div></div></div>
           </section>
           <section class="crm-tab-panel" data-panel="team">
@@ -65,19 +69,20 @@ frappe.pages["crm-dashboards"].on_page_load = function (wrapper) {
 
     const $ = (selector) => page.main.find(selector);
     const state = { from: null, to: null, currency: "USD", rates: {}, data: null, activeTab: "overview" };
-    const sources = ["INR", "EUR", "GBP", "AED", "SGD"];
+    const sources = ["INR", "EUR", "GBP", "AED", "SGD", "CAD", "AUD", "JPY", "CHF", "NZD", "MYR", "THB"];
     const fmt = (n, currency) => {
         if (n === null || n === undefined || Number.isNaN(Number(n))) return "Rate required";
         try { return new Intl.NumberFormat(undefined, { style: "currency", currency: currency || "USD", maximumFractionDigits: 2 }).format(Number(n)); }
         catch (e) { return `${currency || "USD"} ${Number(n).toFixed(2)}`; }
     };
     const esc = (s) => frappe.utils.escape_html(String(s ?? ""));
+    const fullDate = (value) => { const parts=String(value||"").slice(0,10).split("-"); return parts.length===3 ? `${parts[2]}-${parts[1]}-${parts[0]}` : String(value||""); };
     const moneyByCurrency = (obj) => {
         const entries = Object.entries(obj || {});
         return entries.length ? `<div class="crm-currency-list">${entries.map(([c,v]) => `<div><span>${esc(c)}</span><strong>${fmt(v,c)}</strong></div>`).join("")}</div>` : `<div class="crm-empty">No records in this period</div>`;
     };
-    const kpi = (label, value, note, icon) => `<div class="crm-kpi"><div class="crm-kpi-top"><span>${label}</span><i>${icon}</i></div><strong>${value}</strong><small>${note}</small></div>`;
-    const table = (headers, rows) => `<table><thead><tr>${headers.map(h=>`<th>${h}</th>`).join("")}</tr></thead><tbody>${rows.length ? rows.join("") : `<tr><td colspan="${headers.length}" class="crm-empty">No records found for this date range.</td></tr>`}</tbody></table>`;
+    const kpi = (label, value, note, icon) => CRMCharts.metricCard(label, value, note, icon);
+    const table = (headers, rows) => CRMCharts.dataTable(headers, rows);
     const link = (doctype, name, label) => `<a href="/app/${frappe.router.slug(doctype)}/${encodeURIComponent(name)}">${esc(label || name)}</a>`;
 
     function renderRateInputs() {
@@ -115,18 +120,22 @@ frappe.pages["crm-dashboards"].on_page_load = function (wrapper) {
         const d = state.data;
         if (!d) return;
         const leads = d.leads, opp = d.opportunities, q = d.quotations;
-        const convertedQ = q.conversion_complete ? fmt(q.converted_amount, state.currency) : "Add missing rates";
-        const convertedO = opp.conversion_complete ? fmt(opp.converted_amount, state.currency) : "Add missing rates";
+        const fxEntries = Object.entries(d.meta?.fx_rates || {});
+        const fxLabel = fxEntries.length ? fxEntries.map(([pair,meta]) => `${pair}: ${meta.source}${meta.date ? ` (${meta.date})` : ""}`).join(" · ") : "Same-currency totals or no foreign-currency records";
+        $(".crm-dash-foot").text(`TECEZE · CRM REVENUE INTELLIGENCE · FX: ${fxLabel}. Dashboard-only rates never modify transaction records.`);
+        const convertedL = leads.conversion_complete ? fmt(leads.converted_amount, state.currency) : "Rate unavailable";
+        const convertedQ = q.conversion_complete ? fmt(q.converted_amount, state.currency) : "Rate unavailable";
+        const convertedO = opp.conversion_complete ? fmt(opp.converted_amount, state.currency) : "Rate unavailable";
         $("#crm-overview-kpis").html([
-            kpi("Leads generated", leads.count, "Lead creation date", "↗"),
-            kpi("Active opportunities", opp.open_count, "Open workflow records", "◎"),
-            kpi("Quotation value", convertedQ, `${q.count} quotations · ${state.currency}`, "$"),
-            kpi("Weighted pipeline", convertedO, `Opportunity amount · ${state.currency}`, "◈")
+            kpi("Leads generated", `${leads.count} · ${convertedL}`, `Lead value · ${state.currency}`, "↗"),
+            kpi("Active opportunities", `${opp.open_count} · ${convertedO}`, `Pipeline value · ${state.currency}`, "◎"),
+            kpi("Quotations", `${q.count} · ${convertedQ}`, `Quotation value · ${state.currency}`, "$"),
+            kpi("Won opportunities", `${opp.won_count} · ${opp.won_conversion_complete === false ? "Rate unavailable" : fmt(opp.won_converted_total, state.currency)}`, `Won value · ${opp.won_conversion_complete === false ? "some rates unavailable" : state.currency} · of ${opp.count} opportunities`, "◈")
         ].join(""));
         $("#crm-pipeline-kpis").html([
             kpi("Opportunity records", opp.count, "Transaction date", "◎"),
             kpi("Quotation coverage", `${q.count ? Math.round(q.count / Math.max(1,opp.count)*100) : 0}%`, "Quotation records / opportunities (not unique conversion)", "↗"),
-            kpi("Won opportunities", opp.won_count, "Current workflow/status value", "✓"),
+            kpi("Won opportunities", `${opp.won_count} · ${opp.won_conversion_complete === false ? "Rate unavailable" : fmt(opp.won_converted_total, state.currency)}`, "Count · converted won value", "✓"),
             kpi("Decided win rate", `${opp.win_rate}%`, "Won ÷ (Won + Lost)", "◈")
         ].join(""));
         const verticals = Object.entries(opp.verticals || {});
@@ -144,24 +153,46 @@ frappe.pages["crm-dashboards"].on_page_load = function (wrapper) {
             kpi("Open pipeline", convertedO, `Reporting currency · ${state.currency}`, "$")
         ].join(""));
 
-        const stages = Object.entries(opp.stage_counts || {}).sort((a,b)=>b[1]-a[1]);
-        $("#crm-stage-chart").html(barList(stages.map(([name,value])=>({name,value}))));
-        $("#crm-quote-currency").html(`<div class="crm-subtle-label">Original quotation totals</div>${moneyByCurrency(q.amount_by_currency)}<div class="crm-divider"></div><div class="crm-subtle-label">Converted to ${esc(state.currency)}</div><strong class="crm-large-value">${convertedQ}</strong>${!q.conversion_complete ? `<p class="crm-warning">One or more currency rates are missing. The converted total is intentionally withheld.</p>` : ""}`);
+        const stageSummary = opp.stage_summary || {};
+        $("#crm-stage-chart").html(CRMCharts.dualMetricBarChart(Object.entries(stageSummary).map(([name,v])=>({name,count:v.count,value:v.value_complete?v.value:null})), {currency:state.currency, countLabel:"Opportunities", valueLabel:"Pipeline value"}));
+        const quotationCoverage = opp.count ? (Number(q.count || 0) / Number(opp.count) * 100) : 0;
+        $("#crm-conversion-health").html(`<div class="crm-health-metrics"><div class="crm-health-metric"><span>Win rate</span><strong>${Number(opp.win_rate || 0).toFixed(1)}%</strong><small>${Number(opp.won_count || 0)} won · ${Number(opp.lost_count || 0)} lost</small></div><div class="crm-health-metric"><span>Quotation coverage</span><strong>${quotationCoverage.toFixed(1)}%</strong><small>${Number(q.count || 0)} quotations · ${Number(opp.count || 0)} opportunities</small></div><div class="crm-health-meter"><span style="width:${Math.max(0,Math.min(100,Number(opp.win_rate||0)))}%"></span></div><p class="crm-chart-footnote">Win rate is calculated from won and lost opportunities. Quotation coverage compares quotation records with opportunity records in the selected date range.</p></div>`);
+        const trend = (d.daily_trend || []).slice().reverse();
+        $("#crm-trend-period").text(`${fullDate(d.period.from_date)} – ${fullDate(d.period.to_date)}`);
+        $("#crm-activity-chart").html(CRMCharts.multiLineChart(trend.map(day => ({label:fullDate(day.date), leads:Number(day.lead_count||0), opportunities:Number(day.opportunity_count||0), quotations:Number(day.quotation_count||0), leadValue:day.lead_amount, opportunityValue:day.opportunity_amount, quotationValue:day.quotation_amount})), [{key:"leads",label:"Leads"},{key:"opportunities",label:"Opportunities"},{key:"quotations",label:"Quotations"}], {ariaLabel:"Daily CRM activity by record type", dateFormat:true, currencyFormat:v=>fmt(v,state.currency)}));
+        const dailyValueRows = trend.filter(day => day.lead_amount_complete && day.opportunity_amount_complete && day.quotation_amount_complete).map(day => ({label:fullDate(day.date), value:Number(day.lead_amount||0)+Number(day.opportunity_amount||0)+Number(day.quotation_amount||0)}));
+        $("#crm-daily-value-chart").html(CRMCharts.lineChart(dailyValueRows.map(day=>({label:day.label,value:day.value})), {format:v=>fmt(v,state.currency), currency:state.currency, ariaLabel:"Daily commercial value in selected reporting currency", dateFormat:true}));
+        const trendRows = trend.map(day => {
+            const amount = (key, completeKey) => day[completeKey] ? fmt(day[key], state.currency) : "Rate unavailable";
+            return `<tr><td>${esc(fullDate(day.date))}</td><td>${day.lead_count}</td><td>${amount("lead_amount","lead_amount_complete")}</td><td>${day.opportunity_count}</td><td>${amount("opportunity_amount","opportunity_amount_complete")}</td><td>${day.quotation_count}</td><td>${amount("quotation_amount","quotation_amount_complete")}</td></tr>`;
+        });
+        $("#crm-daily-trend").html(table(["Date","Leads #","Lead value","Opportunities #","Opportunity value","Quotations #","Quotation value"], trendRows));
         const priority = [...opp.records].sort((a,b)=>Number(b.opportunity_amount||0)-Number(a.opportunity_amount||0)).slice(0,8);
-        $("#crm-priority-table").html(table(["Opportunity","Customer","Stage","Owner","Original amount"],priority.map(o=>`<tr><td>${link("Opportunity",o.name,o.name)}</td><td>${esc(o.customer_name||o.party_name||"—")}</td><td><span class="crm-state">${esc(o.workflow_state||o.status||"—")}</span></td><td>${esc(o.opportunity_owner_name||o.opportunity_owner||"—")}</td><td>${fmt(o.opportunity_amount,o.currency)}</td></tr>`)));
-        $("#crm-funnel").html(barList([{name:"Leads",value:leads.count},{name:"Opportunities",value:opp.count},{name:"Quotations",value:q.count},{name:"Won",value:opp.won_count}]));
-        $("#crm-outcomes").html(`<div class="crm-outcome-grid"><div><strong>${opp.won_count}</strong><span>Won</span></div><div><strong>${opp.open_count}</strong><span>Open</span></div><div><strong>${opp.lost_count}</strong><span>Lost</span></div></div>`);
+        $("#crm-priority-table").html(table(["Opportunity","Customer","Stage","Owner",`Amount (${state.currency})`],priority.map(o=>`<tr><td>${link("Opportunity",o.name,o.name)}</td><td>${esc(o.customer_name||o.party_name||"—")}</td><td><span class="crm-state">${esc(o.workflow_state||o.status||"—")}</span></td><td>${esc(o.opportunity_owner_name||o.opportunity_owner||"—")}</td><td>${o.converted_opportunity_amount !== null && o.converted_opportunity_amount !== undefined ? fmt(o.converted_opportunity_amount,state.currency) : "Rate unavailable"}</td></tr>`)));
+        $("#crm-funnel").html(CRMCharts.dualMetricBarChart([
+            {name:"Leads",count:leads.count,value:leads.conversion_complete?leads.converted_amount:null,valueLabel:"Lead value"},
+            {name:"Opportunities",count:opp.count,value:opp.conversion_complete?opp.converted_amount:null,valueLabel:"Pipeline value"},
+            {name:"Quotations",count:q.count,value:q.conversion_complete?q.converted_amount:null,valueLabel:"Quotation value"},
+            {name:"Won opportunities",count:opp.won_count,value:opp.won_converted_total,valueLabel:"Won value"}
+        ], {currency:state.currency, countLabel:"Records", valueLabel:"Commercial value"}));
+        const outcomeGroups = {Won:[],Open:[],Lost:[]};
+        (opp.records||[]).forEach(o=>{const st=String(o.workflow_state||o.status||"").toLowerCase(); const group=(st==="won")?"Won":(st==="lost")?"Lost":"Open"; outcomeGroups[group].push(o);});
+        const outcomeMarkup = Object.entries(outcomeGroups).map(([label,rows])=>{let total=0,complete=true;rows.forEach(o=>{const converted=Number(o.converted_opportunity_amount); if(Number.isFinite(converted)) total+=converted; else complete=false;});return `<div class="crm-outcome-tile"><span class="crm-outcome-label">${label}</span><strong>${rows.length.toLocaleString()}</strong><small>opportunities</small><div class="crm-outcome-values"><span>${complete?fmt(total,state.currency):"Rate unavailable"}</span></div></div>`;}).join("");
+        $("#crm-outcomes").html(`<div class="crm-outcome-grid">${outcomeMarkup}</div><small class="crm-chart-footnote">Counts and values use the selected reporting currency.</small>`);
+        $("#crm-outcome-pie").html(CRMCharts.pieChart([{name:"Won",value:opp.won_count},{name:"Open",value:opp.open_count},{name:"Lost",value:opp.lost_count}], {ariaLabel:"Opportunity outcome distribution by count"}));
         const aging = opp.records.map(o=>({name:o.name, age: Math.max(0, Math.floor((new Date(d.period.to_date)-new Date(o.transaction_date||o.creation.slice(0,10)))/86400000)), stage:o.workflow_state||o.status||"—", owner:o.opportunity_owner||"—"})).sort((a,b)=>b.age-a.age).slice(0,12);
         $("#crm-aging").html(table(["Opportunity","Current state","Record age","Owner"],aging.map(o=>`<tr><td>${link("Opportunity",o.name)}</td><td>${esc(o.stage)}</td><td>${o.age} days</td><td>${esc(o.owner)}</td></tr>`)));
         renderDealTable();
-        $("#crm-vertical-chart").html(barList(verticals.map(([name,v])=>({name,value:v.opportunities}))));
-        $("#crm-vertical-score").html(verticals.map(([name,v])=>`<div class="crm-vertical-score"><div><strong>${esc(name)}</strong><span>${v.opportunities} opportunities</span></div>${moneyByCurrency(v.pipeline_value_by_currency)}</div>`).join("")||`<div class="crm-empty">No service vertical data</div>`);
+        $("#crm-vertical-chart").html(CRMCharts.dualMetricBarChart(verticals.map(([name,v])=>({name,count:v.opportunities,value:v.value_complete?v.pipeline_value:null})), {currency:state.currency,countLabel:"Opportunities",valueLabel:"Pipeline value"}));
+        const countryRows = Object.entries(opp.billing_country_summary || {}).map(([name,v])=>({name,count:v.count,value:v.value_complete?v.value:null})).sort((a,b)=>b.value-a.value);
+        $("#crm-country-chart").html(CRMCharts.dualMetricBarChart(countryRows, {currency:state.currency,countLabel:"Opportunities",valueLabel:"Pipeline value"}));
+        $("#crm-vertical-score").html(verticals.map(([name,v])=>`<div class="crm-vertical-score"><div><strong>${esc(name)}</strong><span>${v.opportunities} opportunities</span></div>${v.value_complete?fmt(v.pipeline_value,state.currency):"Rate unavailable"}</div>`).join("")||`<div class="crm-empty">No service vertical data</div>`);
         $("#crm-vertical-commercial").html(verticals.map(([name,v])=>`<div class="crm-vertical-score"><div><strong>${esc(name)}</strong><span>${v.quoted_opportunities} linked quotation opportunities</span></div></div>`).join(""));
-        $("#crm-vertical-table").html(table(["Service vertical","Opportunities","Won","Quoted opportunities","Pipeline by currency"],verticals.map(([name,v])=>`<tr><td>${esc(name)}</td><td>${v.opportunities}</td><td>${v.won}</td><td>${v.quoted_opportunities}</td><td>${Object.entries(v.pipeline_value_by_currency||{}).map(([c,n])=>`${fmt(n,c)}`).join(" · ")}</td></tr>`)));
+        $("#crm-vertical-table").html(table(["Service vertical","Opportunities","Won","Quoted opportunities",`Pipeline value (${state.currency})`],verticals.map(([name,v])=>`<tr><td>${esc(name)}</td><td>${v.opportunities}</td><td>${v.won}</td><td>${v.quoted_opportunities}</td><td>${v.value_complete?fmt(v.pipeline_value,state.currency):"Rate unavailable"}</td></tr>`)));
         const followRows = d.followups.map(f=>`<tr><td>${link("Lead",f.lead,f.lead_name)}</td><td>${esc(f.subject)}</td><td>${esc(f.owner||"—")}</td><td>${esc(f.follow_up_date)}</td><td><span class="crm-state ${f.status==="Overdue"?"crm-state-danger":""}">${esc(f.status)}</span></td></tr>`);
         $("#crm-action-table").html(table(["Lead","Follow-up","Owner","Due date","Status"],followRows));
         $("#crm-followup-table").html(table(["Lead","Follow-up","Owner","Due date","Status"],followRows));
-        $("#crm-owner-table").html(table(["Owner","Open opportunities","Pipeline by original currency"],ownerRows(opp.records)));
+        $("#crm-owner-table").html(table(["Owner","Open opportunities",`Pipeline value (${state.currency})`],ownerRows(opp.records)));
         $("#crm-followup-filter").on("change", function () {
             const value=$(this).val();
             const rows=d.followups.filter(f=>value==="all"||f.status===value);
@@ -170,26 +201,24 @@ frappe.pages["crm-dashboards"].on_page_load = function (wrapper) {
     }
 
     function barList(items) {
-        if (!items.length) return `<div class="crm-empty">No data for this period.</div>`;
-        const max=Math.max(1,...items.map(x=>Number(x.value)||0));
-        return `<div class="crm-bars">${items.map((x,i)=>`<div class="crm-bar-row"><span title="${esc(x.name)}">${esc(x.name)}</span><div class="crm-bar-track"><i style="width:${Math.max(2,(Number(x.value)||0)/max*100)}%;background:${["#5572f4","#21b7a8","#9273f5","#f3a64a","#ec6c79"][i%5]}"></i></div><b>${x.value}</b></div>`).join("")}</div>`;
+        return CRMCharts.barChart(items);
     }
     function ownerRows(records) {
         const map={};
         records.forEach(o=>{
             const owner=o.opportunity_owner_name||o.opportunity_owner||"Unassigned";
-            if(!map[owner])map[owner]={count:0,currencies:{}};
+            if(!map[owner])map[owner]={count:0,value:0,complete:true};
             if(!["won","lost","closed"].includes(String(o.status||"").toLowerCase()))map[owner].count++;
-            const c=o.currency||"UNKNOWN";
-            map[owner].currencies[c]=(map[owner].currencies[c]||0)+Number(o.opportunity_amount||0);
+            if(o.converted_opportunity_amount===null || o.converted_opportunity_amount===undefined) map[owner].complete=false;
+            else map[owner].value+=Number(o.converted_opportunity_amount||0);
         });
-        return Object.entries(map).map(([owner,v])=>`<tr><td>${esc(owner)}</td><td>${v.count}</td><td>${Object.entries(v.currencies).map(([c,n])=>fmt(n,c)).join(" · ")}</td></tr>`);
+        return Object.entries(map).map(([owner,v])=>`<tr><td>${esc(owner)}</td><td>${v.count}</td><td>${v.complete?fmt(v.value,state.currency):"Rate unavailable"}</td></tr>`);
     }
     function renderDealTable() {
         const records=(state.data?.opportunities.records||[]);
         const query=String($("#crm-deal-search").val()||"").toLowerCase();
         const rows=records.filter(o=>[o.name,o.customer_name,o.party_name,o.workflow_state,o.opportunity_owner,o.custom_service_vertical].join(" ").toLowerCase().includes(query));
-        $("#crm-deal-table").html(table(["Opportunity","Customer","Service vertical","Workflow state","Owner","Amount"],rows.map(o=>`<tr><td>${link("Opportunity",o.name)}</td><td>${esc(o.customer_name||o.party_name||"—")}</td><td>${esc(o.custom_service_vertical||"—")}</td><td>${esc(o.workflow_state||o.status||"—")}</td><td>${esc(o.opportunity_owner_name||o.opportunity_owner||"—")}</td><td>${fmt(o.opportunity_amount,o.currency)}</td></tr>`)));
+        $("#crm-deal-table").html(table(["Opportunity","Customer","Service vertical","Workflow state","Owner","Amount"],rows.map(o=>`<tr><td>${link("Opportunity",o.name)}</td><td>${esc(o.customer_name||o.party_name||"—")}</td><td>${esc(o.custom_service_vertical||"—")}</td><td>${esc(o.workflow_state||o.status||"—")}</td><td>${esc(o.opportunity_owner_name||o.opportunity_owner||"—")}</td><td>${o.converted_opportunity_amount !== null && o.converted_opportunity_amount !== undefined ? fmt(o.converted_opportunity_amount,state.currency) : "Rate unavailable"}</td></tr>`)));
     }
 
     function loadData() {
@@ -219,4 +248,4 @@ frappe.pages["crm-dashboards"].on_page_load = function (wrapper) {
     });
     $("#crm-deal-search").on("input",renderDealTable);
     renderRateInputs();setupDates();loadData();
-};
+}

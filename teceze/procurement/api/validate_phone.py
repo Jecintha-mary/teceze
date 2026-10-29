@@ -2,7 +2,7 @@ import frappe
 from phonenumbers import country_code_for_region
 
 
-@frappe.whitelist(allow_guest=True)
+@frappe.whitelist(allow_guest=False)
 def get_country_phone_details(country):
     try:
         # Get Country document

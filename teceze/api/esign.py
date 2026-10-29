@@ -5,7 +5,7 @@ from teceze.esign.token import TokenService
 from teceze.esign.validators import ESignValidator
 
 
-@frappe.whitelist(allow_guest=True)
+@frappe.whitelist(allow_guest=False)
 def get_document(key):
     """
     Fetch E-Sign Request using encrypted signing key.
@@ -50,7 +50,7 @@ def get_document(key):
     }
 
 
-@frappe.whitelist(allow_guest=True)
+@frappe.whitelist(allow_guest=False)
 def save_signature(key,signature):
     """
     Save candidate signature as an image file.
