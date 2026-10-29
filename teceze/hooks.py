@@ -128,6 +128,7 @@ doc_events = {
 }
 override_doctype_class = {
     "Shift Request": "teceze.teceze.overrides.shift_request.CustomShiftRequest",
+    "Leave Encashment": "teceze.teceze.overrides.leave_encashment.CustomLeaveEncashment"
 }
 
 extend_doctype_class = {
@@ -390,18 +391,18 @@ override_whitelisted_methods = {
 # ignore_translatable_strings_from = []
 
 fixtures = [
+	{
+	"doctype": "Notification",
+	"filters": [{"is_standard":0}]
+	},
 	# {
-	# "doctype": "Notification",
+	# "doctype": "Dashboard",
 	# "filters": [{"is_standard":0}]
 	# },
-	{
-	"doctype": "Dashboard",
-	"filters": [{"is_standard":0}]
-	},
-	{
-	"doctype": "Dashboard Chart",
-	"filters": [{"is_standard":0}]
-	},
+	# {
+	# "doctype": "Dashboard Chart",
+	# "filters": [{"is_standard":0}]
+	# },
    	"Custom Field",
    	"Property Setter",
 	"Workflow",
@@ -409,10 +410,10 @@ fixtures = [
    	"Workflow State",
    	# "Role",
    	"Workspace",
-	"Print Format",
+	# "Print Format",
    	"Custom DocPerm",
-   	"Report",
-	"Number Card",
+   	# "Report",
+	# "Number Card",
 	# "Web Form",
     # "Web Page",
 	"Desktop Icon",
