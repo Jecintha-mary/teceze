@@ -312,7 +312,7 @@ def credit_privilege_leave():
         "Employee",
         filters={
             "status": "Active",
-            "employment_type": ["in", ["Full-Time"]],
+            "employment_type": ["not in", ["Engineer", "Intern", ]],
             "custom_country": ["!=", "Sri Lanka"],
         },
         fields=[
@@ -660,7 +660,7 @@ def allocate_eligible_leaves():
             )
 
         elif rule.uom == "Day":
-
+  
             joining_date = getdate(
                 add_to_date(
                     current_date,
@@ -683,7 +683,8 @@ def allocate_eligible_leaves():
                 "custom_country": rule.country,
                 "status": "Active",
                 "date_of_joining": joining_date,
-                 "employment_type": ["in", ["Full-Time"]],
+                 "employment_type": ["not in", ["Engineer", "Intern", ]],
+
             },
             fields=[
                 "name",
@@ -712,7 +713,8 @@ def allocate_eligible_leaves():
                     "custom_country": rule.country,
                     "status": "Active",
                     "date_of_joining": leap_joining_date,
-                  "employment_type": ["in", ["Full-Time"]],
+                    "employment_type": ["not in", ["Engineer", "Intern", ]],
+
                 },
                 fields=[
                     "name",

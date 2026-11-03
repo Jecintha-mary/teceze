@@ -1,4 +1,69 @@
+import frappe
+from frappe import _
+from frappe.utils import getdate 
+from frappe.utils import getdate, flt
+from hrms.hr.doctype.leave_encashment.leave_encashment import LeaveEncashment
 
+class CustomLeaveEncashment(LeaveEncashment):
+
+    def set_actual_encashable_days(self):
+        settings = self.get_encashment_settings()
+
+        days = max(self.leave_balance - (settings.non_encashable_leaves or 0), 0)
+
+        if settings.max_encashable_leaves:
+            days = min(days, settings.max_encashable_leaves)
+
+        self.actual_encashable_days = days
+    def get_ssa(self):
+        ssa = frappe.db.get_value(
+            "Salary Structure Assignment",
+            {
+                "employee": self.employee,
+                "docstatus": ["<", 2],
+                "from_date": ["<=", getdate(self.encashment_date)],
+            },
+            ["name", "base", "salary_structure"],
+            order_by="from_date desc, docstatus desc, creation desc",
+            as_dict=True,
+        )
+
+        if not ssa:
+            frappe.throw(
+                _("No Salary Structure Assignment found for {0} on {1}.").format(
+                    self.employee, getdate(self.encashment_date)
+                )
+            )
+        return ssa
+
+    def set_salary_structure(self):
+        ssa = self.get_ssa()
+        if not ssa:
+            frappe.throw(
+                _("No Salary Structure Assignment found for {0} on {1}.").format(
+                    self.employee, getdate(self.encashment_date)
+                )
+            )
+        self._salary_structure = ssa.salary_structure
+
+    def set_encashment_amount(self):
+        if flt(self.encashment_days) <= 0:
+            self.encashment_amount = 0
+            return
+
+        ssa = self.get_ssa()
+        if not ssa:
+            frappe.throw(
+                _("No Salary Structure Assignment found for {0} on {1}.").format(
+                    self.employee, getdate(self.encashment_date)
+                )
+            )
+
+        monthly_base = flt(ssa.base)
+        if not monthly_base:
+            frappe.throw(_("Base (Gross Salary) is 0 in {0}.").format(ssa.name))
+
+        self.encashment_amount = round(flt(self.encashment_days) * monthly_base / 30, 0)
 
 def validate(doc, method):
     encashment_date = getdate(doc.encashment_date)
@@ -35,18 +100,3 @@ def validate(doc, method):
                     doc.leave_allocation, alloc_period or "None", doc.leave_period
                 )
             )
-    if not doc.encashment_amount and doc.encashment_days:
-        ssa = frappe.db.get_value(
-            "Salary Structure Assignment",
-            {
-                "employee": doc.employee,
-                "docstatus": 1,
-                "from_date": ["<=", doc.encashment_date],
-            },
-            ["base"],
-            order_by="from_date desc",
-            as_dict=True,
-        )
-        if ssa and ssa.base:
-            per_day = ssa.base / 30  
-            doc.encashment_amount = doc.encashment_days * per_day

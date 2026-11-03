@@ -388,7 +388,7 @@ def get_all_employees():
         "Employee",
         filters={
             "status": "Active",
-            "employment_type": ["in", ["Full-Time"]],
+            "employment_type": ["not in", ["Engineer", "Intern", ]],
             "company_email": ["!=", ""],
         },
         pluck="company_email"
@@ -418,7 +418,8 @@ def send_work_anniversary_wishes():
             user_id 
         FROM `tabEmployee` 
         WHERE status = 'Active' 
-            AND (employment_type IS NULL OR employment_type != 'Engineer') 
+              AND ( employment_type IS NULL
+                        OR employment_type NOT IN ('Engineer', 'Intern'))
             AND date_of_joining IS NOT NULL
             AND MONTH(date_of_joining) = %s
             AND DAY(date_of_joining) = %s
