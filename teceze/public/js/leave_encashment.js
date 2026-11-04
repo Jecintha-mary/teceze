@@ -4,8 +4,8 @@ frappe.ui.form.on("Leave Encashment", {
 			return {
 				filters: {
 					status: "Active",
-					// employment_type: "Full Time",
-					employment_type: "Full-Time",
+					employment_type: "Full Time",
+					// employment_type: "Full-Time",
 				},
 			};
 		});
