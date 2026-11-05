@@ -38,7 +38,8 @@
    "fieldname": "qty",
    "fieldtype": "Float",
    "in_list_view": 1,
-   "label": "Qty"
+   "label": "Qty",
+   "read_only": 1
   },
   {
    "default": "0",
@@ -101,7 +102,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-10-06 14:21:11.342901",
+ "modified": "2026-10-29 13:01:25.300438",
  "modified_by": "Administrator",
  "module": "Teceze",
  "name": "Quotation Supplier",

@@ -38,11 +38,11 @@
     const CLEARABLE = [...Object.values(ITEM_TO_SUPPLIER), "amount"];
 
     // [supplier field, quotation item field] copied when a supplier is selected (qty is handled separately)
-    const SYNCED = [
-        ["rate", "rate"],
-        ["budget_value", "custom_budget_value"],
-    ];
-
+const SYNCED = [
+    ["supplier", "custom_supplier"],
+    ["rate", "rate"],
+    ["budget_value", "custom_budget_value"],
+];
     // Quotation Item fields that change the supplier "items" dropdown
     const WATCHED_ITEM_FIELDS = [
         "custom_items", "custom_descriptions", "description",
@@ -186,7 +186,10 @@
     function link_to_item(cdt, cdn, item) {
         frappe.model.set_value(cdt, cdn, "item_row_reference", item ? item.name : "");
         frappe.model.set_value(cdt, cdn, "descriptions", item ? item.custom_descriptions || "" : "");
-    }
+frappe.model.set_value(
+        cdt, cdn, "qty",
+        item ? flt(item.qty) : 0
+    );    }
 
     // Copy qty / rate / budget of the SELECTED supplier onto the Quotation Item
     function sync_to_quotation(frm, cdt, cdn) {
@@ -209,9 +212,16 @@
 
         SYNCED.forEach(([supplier_field, item_field]) => {
             const value = row[supplier_field];
-            if (value !== undefined && value !== null) set_item(item_field, flt(value));
-        });
 
+            if (value !== undefined && value !== null) {
+                set_item(
+                    item_field,
+                    ["rate", "custom_budget_value"].includes(item_field)
+                        ? flt(value)
+                        : value
+                );
+            }
+});
         frm.refresh_field("items");
         frm.refresh_field(supplier_table(frm));
     }
@@ -450,12 +460,12 @@ frappe.ui.form.on("Quotation", {
             );
         });
     },
-    refresh(frm) {
-        // Ensure totals are calculated on refresh
-        (frm.doc.items || []).forEach(row => {
-            calculate_quotation_item_totals(
-                frm, row.doctype, row.name
-            );
-        });
-    }
+    // refresh(frm) {
+    //     // Ensure totals are calculated on refresh
+    //     (frm.doc.items || []).forEach(row => {
+    //         calculate_quotation_item_totals(
+    //             frm, row.doctype, row.name
+    //         );
+    //     });
+    // }
 });

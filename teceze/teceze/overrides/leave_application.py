@@ -74,42 +74,50 @@ def validate(doc,method):
 
         current_date = add_days(current_date, 1)
 
+
 def validate_probation_leave(doc):
     if not doc.from_date:
         return
+
     if (doc.total_leave_days or 0) > 1:
-        frappe.throw("Probation employees can apply for only one leave day at a time.")
-    # Read Leave Type records dynamically
+        frappe.throw(
+            "Probation employees can apply for only one leave day at a time."
+        )
+
     leave_types = frappe.get_all("Leave Type", pluck="name")
 
     restricted_types = [
-        name for name in leave_types
-        if "restricted" in name.lower()
+        name for name in leave_types if "restricted" in name.lower()
     ]
     sick_types = [
-        name for name in leave_types
-        if "sick" in name.lower()
+        name for name in leave_types if "sick" in name.lower()
     ]
     casual_types = [
-        name for name in leave_types
-        if "casual" in name.lower()
+        name for name in leave_types if "casual" in name.lower()
     ]
 
-    if doc.leave_type not in (
-        restricted_types + sick_types + casual_types
-    ):
+    if doc.leave_type not in restricted_types + sick_types + casual_types:
         return
 
     from_date = getdate(doc.from_date)
     to_date = getdate(doc.to_date or doc.from_date)
 
     requested_days = defaultdict(float)
-    current_date = from_date
 
-    while current_date <= to_date:
-        month = current_date.strftime("%Y-%m")
-        requested_days[month] += 1
-        current_date = add_days(current_date, 1)
+    if from_date == to_date:
+        requested_days[from_date.strftime("%Y-%m")] = (
+            doc.total_leave_days or 0
+        )
+    else:
+        total_dates = (to_date - from_date).days + 1
+        current = from_date
+
+        while current <= to_date:
+            month = current.strftime("%Y-%m")
+            requested_days[month] += (
+                (doc.total_leave_days or 0) / total_dates
+            )
+            current = add_days(current, 1)
 
     applications = frappe.get_all(
         "Leave Application",
@@ -122,22 +130,21 @@ def validate_probation_leave(doc):
             "leave_type",
             "from_date",
             "to_date",
+            "total_leave_days",
             "status",
             "workflow_state",
         ],
     )
 
     monthly_totals = defaultdict(float)
-    monthly_types = defaultdict(set)
 
     for application in applications:
-        if not doc.is_new() and application.name == doc.name:
+
+        if application.name == doc.name:
             continue
 
         status = (application.status or "").lower()
-        workflow_state = (
-            application.workflow_state or ""
-        ).lower()
+        workflow_state = (application.workflow_state or "").lower()
 
         if status in ("rejected", "cancelled"):
             continue
@@ -147,34 +154,33 @@ def validate_probation_leave(doc):
 
         leave_type = application.leave_type
 
-        if leave_type not in (
-            restricted_types + sick_types + casual_types
-        ):
+        if leave_type not in restricted_types + sick_types + casual_types:
             continue
 
-        current = getdate(application.from_date)
-        end = getdate(
-            application.to_date or application.from_date
-        )
+        start = getdate(application.from_date)
+        end = getdate(application.to_date or application.from_date)
+
+        total_dates = (end - start).days + 1
+        leave_days = application.total_leave_days or 0
+        daily_leave = leave_days / total_dates
+
+        current = start
 
         while current <= end:
             month = current.strftime("%Y-%m")
 
             if leave_type in restricted_types:
-                monthly_totals[("restricted", month)] += 1
+                monthly_totals[("restricted", month)] += daily_leave
 
             elif leave_type in sick_types + casual_types:
-                monthly_totals[("sick_casual", month)] += 1
-                monthly_types[month].add(leave_type)
+                monthly_totals[("sick_casual", month)] += daily_leave
 
             current = add_days(current, 1)
 
     for month, days in requested_days.items():
 
         if doc.leave_type in restricted_types:
-            if (
-                monthly_totals[("restricted", month)] + days > 1
-            ):
+            if monthly_totals[("restricted", month)] + days > 1:
                 frappe.throw(
                     f"Probation employees can take only one day of "
                     f"Restricted Leave per month. You have already used "
@@ -183,29 +189,10 @@ def validate_probation_leave(doc):
                 )
 
         elif doc.leave_type in sick_types + casual_types:
-            other_types = (
-                casual_types
-                if doc.leave_type in sick_types
-                else sick_types
-            )
-
-            if any(
-                leave_type in monthly_types[month]
-                for leave_type in other_types
-            ):
+            if monthly_totals[("sick_casual", month)] + days > 1:
                 frappe.throw(
-                    f"As a probation employee, you can take only one day of "
-                    f"either Sick Leave or Casual Leave per month. "
-                    f"You cannot apply for both types of leave in the same month "
-                    f"({getdate(month + '-01').strftime('%B %Y')})."
-                )
-
-            if (
-                monthly_totals[("sick_casual", month)] + days > 1
-            ):
-                frappe.throw(
-                    f"Probation employees can take only one day of Sick or "
-                    f"Casual Leave per month. You have already used your "
-                    f"leave allowance for "
+                    f"Probation employees can take only one day of Sick "
+                    f"or Casual Leave per month. You have already used "
+                    f"your leave allowance for "
                     f"{getdate(month + '-01').strftime('%B %Y')}."
                 )

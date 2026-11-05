@@ -1,9 +1,5 @@
 {
- "cards": [
-  {
-   "card": "Total Tickets"
-  }
- ],
+ "cards": [],
  "charts": [
   {
    "width": "Half"
@@ -16,7 +12,7 @@
  "idx": 0,
  "is_default": 0,
  "is_standard": 1,
- "modified": "2026-06-25 16:49:02.469867",
+ "modified": "2026-11-05 16:33:15.907398",
  "modified_by": "Administrator",
  "module": "Teceze",
  "name": "FSO Desk",

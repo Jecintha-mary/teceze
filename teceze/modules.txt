@@ -1,4 +1,3 @@
 Teceze
 Dispatch Model
-Teceze Dispatch
 Procurement

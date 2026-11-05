@@ -184,11 +184,17 @@ window.teceze = window.teceze || {};
         const count = show_all ? fields.length : Object.keys(chosen).length;
         const columns = Math.max(1, Math.floor(10 / (count || 1)));
 
-        fields.forEach(df => {
-            const row = chosen[df.fieldname];
-            const show = show_all || !!row;
-            const set = (prop, value) => grid.update_docfield_property(df.fieldname, prop, value);
+fields.forEach(df => {
+    const row = chosen[df.fieldname];
+    const show = show_all || !!row;
+    const set = (prop, value) => grid.update_docfield_property(df.fieldname, prop, value);
 
+    // Always hide Amount in Opportunity only
+    if (grid.frm?.doctype === "Opportunity" && df.fieldname === "amount") {
+        set("hidden", 1);
+        set("in_list_view", 0);
+        return;
+    }
             if (!(df.fieldname in original_reqd)) original_reqd[df.fieldname] = df.reqd;
 
             set("hidden", show ? 0 : 1);
@@ -1226,7 +1232,57 @@ function render_clarification_center(frm) {
         }
     });
 }
+function calculate_opportunity_amount(frm) {
+    let total = 0;
 
+    (frm.doc.items || []).forEach(row => {
+        total += flt(row.amount);
+    });
+
+    frm.set_value("opportunity_amount", total);
+}
+
+frappe.ui.form.on("Opportunity", {
+    refresh(frm) {
+        calculate_opportunity_amount(frm);
+    },
+
+    items_add(frm) {
+        calculate_opportunity_amount(frm);
+    },
+
+    items_remove(frm) {
+        calculate_opportunity_amount(frm);
+    },
+     custom_assessment_date(frm) {
+        const selected_date = frm.doc.custom_assessment_date;
+        const today = frappe.datetime.get_today();
+
+        if (selected_date && selected_date < today) {
+            frappe.msgprint({
+                title: __("Invalid Date"),
+                message: __("Previous date is not allowed. Please select today or a future date."),
+                indicator: "red"
+            });
+
+            frm.set_value("custom_assessment_date", "");
+        }
+    }
+});
+
+frappe.ui.form.on("Opportunity Item", {
+    amount(frm) {
+        calculate_opportunity_amount(frm);
+    },
+
+    rate(frm) {
+        calculate_opportunity_amount(frm);
+    },
+
+    qty(frm) {
+        calculate_opportunity_amount(frm);
+    }
+});
     
 })(window.teceze);
 

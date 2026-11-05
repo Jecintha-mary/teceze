@@ -89,7 +89,7 @@ def execute(filters=None):
 					"gross_pay": flt(ss.gross_pay) * flt(ss.exchange_rate),
 					"total_deduction": (flt(ss.total_deduction) + flt(ss.total_loan_repayment))
 					* flt(ss.exchange_rate),
-					"net_pay": flt(ss.net_pay) * flt(ss.exchange_rate),
+					"net_pay": flt(ss.rounded_total) * flt(ss.exchange_rate),
 				}
 			)
 
@@ -98,7 +98,7 @@ def execute(filters=None):
 				{
 					"gross_pay": ss.gross_pay,
 					"total_deduction": flt(ss.total_deduction) + flt(ss.total_loan_repayment),
-					"net_pay": ss.net_pay,
+					"net_pay": ss.rounded_total,
 				}
 			)
 
