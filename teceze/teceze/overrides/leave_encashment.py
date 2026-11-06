@@ -68,9 +68,9 @@ class CustomLeaveEncashment(LeaveEncashment):
 def validate(doc, method):
     encashment_date = getdate(doc.encashment_date)
 
-    if encashment_date.month != 11 or encashment_date.day > 11:
+    if encashment_date.month != 12 or encashment_date.day > 11:
         frappe.throw(
-            _("Leave Encashment can be applied only between 1st and 11th November.")
+            _("Leave Encashment can be applied only between 1st and 11th December.")
         )
 
     if not doc.leave_period:
@@ -100,3 +100,19 @@ def validate(doc, method):
                     doc.leave_allocation, alloc_period or "None", doc.leave_period
                 )
             )
+
+    existing_record = frappe.db.get_value(
+    "Leave Encashment",
+    {
+        "employee": doc.employee,
+        "leave_period": doc.leave_period,
+        "leave_type": doc.leave_type
+    },
+    "name"
+    )
+    frappe.log_error("existing_record",str(existing_record))
+    if existing_record and existing_record != doc.name:
+        frappe.throw(
+        "Leave Encashment already exists for this Year, Kindly check with HR.",
+        title="Duplicate Leave Encashment"
+    )

@@ -16,12 +16,12 @@ frappe.ui.form.on("Leave Encashment", {
 
 		let d = moment(frm.doc.encashment_date);
 
-		// moment months start from 0, so November = 10
-		let is_valid = d.month() === 10 && d.date() >= 1 && d.date() <= 11;
+		// moment months start from 0, so December = 11
+		let is_valid = d.month() === 11 && d.date() >= 1 && d.date() <= 11;
 
 		if (!is_valid) {
 			frappe.throw(
-				__("Leave Encashment can be applied only from 1st to 11th November.")
+				__("Leave Encashment can be applied only from 1st to 11th December.")
 			);
 		}
 	},
