@@ -1572,7 +1572,31 @@ class CRUD:
 
 from frappe.utils import add_days, getdate
 
+import time
+import frappe
+from functools import wraps
+
+
+def calculate_time_function_taken():
+    def wrapper(func):
+        @wraps(func)
+        def inner(*args, **kwargs):
+            start_time = time.perf_counter()
+
+            try:
+                return func(*args, **kwargs)
+
+            finally:
+                time_taken = time.perf_counter() - start_time
+
+                frappe.log_error(time_taken )
+
+        return inner
+
+    return wrapper
+
 @frappe.whitelist(allow_guest=False)
+@calculate_time_function_taken()
 def employee_checkin():
 
     payload = CRUD.get_json_payload()
@@ -2237,6 +2261,8 @@ def team_members():
         "reports_to"
     )
 
+    # report_to_name = report_to_name.employee_name
+
     if not reports_to:
         return {
             "success": True,
@@ -2355,6 +2381,11 @@ def team_members():
     return {
         "success": True,
         "data": employees,
+        "reports_to": report_to_name,
+        "checkin_status": get_current_checkin_status(
+            reports_to,
+            today
+        ),
         "pagination": {
             "page": page,
             "page_size": page_size,
@@ -2471,313 +2502,8 @@ from frappe.utils import (
 )
 
 
-@frappe.whitelist(allow_guest=False)
-def get_attendance_list(
-    from_date=None,
-    to_date=None
-):
-
-    if not from_date or not to_date:
-        frappe.throw(
-            "from_date and to_date are required",
-            frappe.ValidationError
-        )
-
-    from_date = getdate(from_date)
-    to_date = getdate(to_date)
-
-    if to_date < from_date:
-        frappe.throw(
-            "to_date cannot be earlier than from_date",
-            frappe.ValidationError
-        )
-
-
-    employee = get_logged_in_employee()
-
-
-    employee_data = frappe.db.get_value(
-        "Employee",
-        employee,
-        [
-            "employee_name",
-            "default_shift",
-            "holiday_list",
-            "custom_shift"
-        ],
-        as_dict=True
-    )
-
-    if not employee_data:
-        frappe.throw(
-            "Employee not found",
-            frappe.DoesNotExistError
-        )
-
-    default_shift = employee_data.default_shift
-    holiday_list = employee_data.holiday_list
-    shift = employee_data.custom_shift
-
-
-    attendance_records = frappe.get_all(
-        "Attendance",
-        filters={
-            "employee": employee,
-            "attendance_date": [
-                "between",
-                [from_date, to_date]
-            ]
-        },
-        fields=[
-            "name",
-            "attendance_date",
-            "status",
-            "in_time",
-            "out_time",
-            "working_hours"
-        ],
-        order_by="attendance_date asc"
-    )
-
-
-
-    attendance_map = {
-        getdate(record.attendance_date): record
-        for record in attendance_records
-    }
-
-    # =====================================================
-    # 6. GET HOLIDAY LIST RECORDS
-    # =====================================================
-
-    holiday_records = []
-
-    if holiday_list:
-
-        holiday_records = frappe.get_all(
-            "Holiday",
-            filters=[
-                ["parent", "=", holiday_list],
-                ["parenttype", "=", "Holiday List"],
-                ["holiday_date", "between", [from_date, to_date]]
-            ],
-            fields=[
-                "holiday_date",
-                "description",
-                "weekly_off"
-            ],
-            order_by="holiday_date asc"
-        )
-
-    # =====================================================
-    # 7. CREATE HOLIDAY MAP
-    # =====================================================
-
-    holiday_map = {
-        getdate(record.holiday_date): record
-        for record in holiday_records
-    }
-
-    # =====================================================
-    # 8. INITIALIZE SUMMARY
-    # =====================================================
-
-    total_present = 0
-    total_absent = 0
-    total_half_day = 0
-    total_weekend = 0
-    total_holiday = 0
-
-    # =====================================================
-    # 9. INITIALIZE RESULT
-    # =====================================================
-
-    result = {}
-
-    total_days = (
-        date_diff(
-            to_date,
-            from_date
-        ) + 1
-    )
-
-    # =====================================================
-    # 10. LOOP THROUGH EACH DATE
-    # =====================================================
-
-    for i in range(total_days):
-
-        current_date = getdate(
-            add_to_date(
-                from_date,
-                days=i
-            )
-        )
-
-        attendance = attendance_map.get(
-            current_date
-        )
-
-        holiday = holiday_map.get(
-            current_date
-        )
-
-        # =================================================
-        # 11. ATTENDANCE EXISTS
-        # =================================================
-
-        if attendance:
-
-            status = (
-                attendance.status.lower()
-                if attendance.status
-                else "absent"
-            )
-
-            # ---------------------------------------------
-            # COUNT PRESENT
-            # ---------------------------------------------
-
-            if status == "present":
-                total_present += 1
-
-            # ---------------------------------------------
-            # COUNT ABSENT
-            # ---------------------------------------------
-
-            elif status == "absent":
-                total_absent += 1
-
-            # ---------------------------------------------
-            # COUNT HALF DAY
-            # ---------------------------------------------
-
-            elif status == "half day":
-                total_half_day += 1
-
-            # ---------------------------------------------
-            # ADD ATTENDANCE DATA
-            # ---------------------------------------------
-
-            result[str(current_date)] = {
-                "time": (
-                    attendance.in_time.strftime("%H:%M")
-                    if attendance.in_time
-                    else "00:00"
-                ),
-
-                "in_time": (
-                    attendance.in_time.strftime("%H:%M")
-                    if attendance.in_time
-                    else None
-                ),
-
-                "out_time": (
-                    attendance.out_time.strftime("%H:%M")
-                    if attendance.out_time
-                    else None
-                ),
-
-                "working_hours": (
-                    attendance.working_hours
-                    if attendance.working_hours is not None
-                    else 0
-                ),
-
-                "status": status
-            }
-
-            continue
-
-        # =================================================
-        # 12. NO ATTENDANCE → CHECK HOLIDAY
-        # =================================================
-
-        if holiday:
-
-            # ---------------------------------------------
-            # WEEKLY OFF
-            # ---------------------------------------------
-
-            if holiday.weekly_off:
-
-                total_weekend += 1
-
-                result[str(current_date)] = {
-                    "time": "00:00",
-                    "in_time": None,
-                    "out_time": None,
-                    "working_hours": 0,
-                    "status": "weekend"
-                }
-
-            # ---------------------------------------------
-            # NORMAL HOLIDAY
-            # ---------------------------------------------
-
-            else:
-
-                total_holiday += 1
-
-                result[str(current_date)] = {
-                    "time": "00:00",
-                    "in_time": None,
-                    "out_time": None,
-                    "working_hours": 0,
-                    "status": holiday.description
-                    if holiday.description
-                    else "holiday"
-                }
-
-            continue
-
-        # =================================================
-        # 13. NO ATTENDANCE + NO HOLIDAY → ABSENT
-        # =================================================
-
-        total_absent += 1
-
-        result[str(current_date)] = {
-            "time": "00:00",
-            "in_time": None,
-            "out_time": None,
-            "working_hours": 0,
-            "status": "absent"
-        }
-
-    # =====================================================
-    # 14. RETURN RESPONSE
-    # =====================================================
-
-    return {
-        "success": True,
-
-        "employee": employee,
-
-        "employee_name": employee_data.employee_name,
-
-        "default_shift": default_shift,
-
-        "shift": shift,
-
-        "holiday_list": holiday_list,
-
-        "from_date": str(from_date),
-
-        "to_date": str(to_date),
-
-        "total_days": total_days,
-
-        "summary": {
-            "present": total_present,
-            "absent": total_absent,
-            "half_day": total_half_day,
-            "weekend": total_weekend,
-            "holiday": total_holiday
-        },
-
-        "data": result
-    }
+import frappe
+from frappe.utils import getdate, add_to_date, date_diff
 
 
 
@@ -3024,6 +2750,7 @@ def regularization_date(employee, from_date):
         "check_out": checkin_data.get("check_out", "")
         }
     }
+
 
 from frappe.utils import getdate, today
 @frappe.whitelist(allow_guest=False)
