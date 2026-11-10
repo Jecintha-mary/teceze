@@ -2261,7 +2261,7 @@ def team_members():
         "reports_to"
     )
 
-    # report_to_name = report_to_name.employee_name
+    report_to_name = report_to_name.employee_name
 
     if not reports_to:
         return {
