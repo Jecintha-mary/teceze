@@ -28,7 +28,11 @@
   "regularization_full_day_hours",
   "min_regularization_allowed_hours",
   "custom_performance_improvement_plan",
-  "custom_dress_code_policy_url"
+  "custom_dress_code_policy_url",
+  "mobile_apps_section",
+  "client_id",
+  "column_break_hpjr",
+  "tenant_id"
  ],
  "fields": [
   {
@@ -160,13 +164,32 @@
    "fieldname": "intern_prefix",
    "fieldtype": "Data",
    "label": "Intern Naming Prefix"
+  },
+  {
+   "fieldname": "mobile_apps_section",
+   "fieldtype": "Section Break",
+   "label": "Mobile Apps "
+  },
+  {
+   "fieldname": "client_id",
+   "fieldtype": "Data",
+   "label": "Client ID "
+  },
+  {
+   "fieldname": "tenant_id",
+   "fieldtype": "Data",
+   "label": "Tenant ID "
+  },
+  {
+   "fieldname": "column_break_hpjr",
+   "fieldtype": "Column Break"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-10-28 15:25:24.366699",
+ "modified": "2026-11-09 16:12:44.893603",
  "modified_by": "Administrator",
  "module": "Teceze",
  "name": "Teceze Settings",
