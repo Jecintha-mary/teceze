@@ -226,7 +226,7 @@
   {
    "fieldname": "all_expence_reimbursements",
    "fieldtype": "Select",
-   "label": "All expence Reimbursements",
+   "label": "All expense Reimbursements",
    "options": "\nYes\nNo"
   },
   {
@@ -445,7 +445,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-07-02 12:56:01.971332",
+ "modified": "2026-11-11 16:47:53.577309",
  "modified_by": "Administrator",
  "module": "Teceze",
  "name": "Exit Clearance Form",

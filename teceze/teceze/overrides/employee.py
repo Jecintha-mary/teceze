@@ -30,7 +30,11 @@ def autoname(doc, method):
     if doc.employment_type == "Engineer":
         prefix = (settings.engineer_prefix or "").upper()
     if doc.employment_type == "Intern":
-        prefix = (settings.intern_prefix or "").upper()
+        prefix = (settings.employee_prefix or "").upper()
+        intern_prefix = (settings.intern_prefix or "").upper()
+        series = f"{prefix}-{country_code}-{intern_prefix}-.{series}"
+        doc.name = make_autoname(series)
+        return
 
     series = f"{prefix}-{country_code}-.{series}"
     doc.name = make_autoname(series)
@@ -298,7 +302,7 @@ def create_first_pl(emp, leave_type, current_date, results):
 
 
 
-def credit_privilege_leave():
+def credit_privilege_leave_old_one():
     current_date = getdate(today())
     leave_type = "Privilege Leave"
 
@@ -951,3 +955,308 @@ def get_month_number(month):
         "November": 11,
         "December": 12,
     }.get(month)
+
+
+def credit_privilege_leave():
+
+
+    import frappe
+    from frappe.utils import getdate, today, add_years
+
+
+    # --------------------------------------------------
+    # CONFIGURATION
+    # --------------------------------------------------
+
+    LEAVE_TYPE = "Privilege Leave"
+    MONTHLY_CREDIT = 0.5
+    FIRST_YEAR_CREDIT = 6
+
+    EXCLUDED_EMPLOYMENT_TYPES = ["Engineer", "Intern"]
+    EXCLUDED_COUNTRY = "Sri Lanka"
+
+
+    # --------------------------------------------------
+    # CURRENT DATE AND LEAVE PERIOD
+    # --------------------------------------------------
+
+    current_date = getdate(today())
+    # current_date = frappe.utils.getdate("2026-11-11")
+    results = []
+
+    leave_period = frappe.get_value(
+        "Leave Period",
+        {
+            "from_date": ["<=", current_date],
+            "to_date": [">=", current_date]
+        },
+        ["name", "from_date", "to_date"],
+        as_dict=True
+    )
+
+    if not leave_period:
+        frappe.log_error(
+            title="PL Allocation Error",
+            message="Current Leave Period not found for " + str(current_date)
+        )
+
+    else:
+
+        # --------------------------------------------------
+        # GET ELIGIBLE EMPLOYEES
+        # --------------------------------------------------
+        # test_employee = "TCZ-IN-0060"
+        employees = frappe.get_all(
+            "Employee",
+            filters={
+                "status": "Active",
+                # "name": test_employee,
+                "employment_type": [
+                    "not in",
+                    EXCLUDED_EMPLOYMENT_TYPES
+                ],
+                "custom_country": ["!=", EXCLUDED_COUNTRY]
+            },
+            fields=[
+                "name",
+                "date_of_joining"
+            ]
+        )
+
+        # --------------------------------------------------
+        # PROCESS EACH EMPLOYEE
+        # --------------------------------------------------
+        frappe.log_error("employees",str(employees))
+        for emp in employees:
+
+            try:
+
+                if not emp.date_of_joining:
+                    continue
+
+                joining_date = getdate(emp.date_of_joining)
+
+                # Employee one-year completion date
+                completion_date = add_years(
+                    joining_date,
+                    1
+                )
+
+                # --------------------------------------------------
+                # CONDITION 1: BEFORE ONE YEAR
+                # --------------------------------------------------
+
+                if current_date < completion_date:
+
+                    results.append({
+                        "employee": emp.name,
+                        "action": "Skipped - One Year Not Completed"
+                    })
+
+                    continue
+
+                # --------------------------------------------------
+                # GET EXISTING SUBMITTED PL ALLOCATION
+                # IN CURRENT LEAVE PERIOD
+                # --------------------------------------------------
+
+                allocation_name = frappe.db.get_value(
+                    "Leave Allocation",
+                    {
+                        "employee": emp.name,
+                        "leave_type": LEAVE_TYPE,
+                        "leave_period": leave_period.name,
+                        "docstatus": 1
+                    },
+                    "name",
+                    order_by="creation desc"
+                )
+
+                # --------------------------------------------------
+                # CONDITION 2: FIRST YEAR COMPLETION
+                # ALLOCATE 6 PL ON EXACT COMPLETION DATE
+                # --------------------------------------------------
+
+                if current_date == completion_date:
+
+                    if allocation_name:
+
+                        results.append({
+                            "employee": emp.name,
+                            "action": "Skipped - Existing HR Allocation",
+                            "allocation": allocation_name,
+                            "date": str(current_date)
+                        })
+
+                        continue
+
+                    allocation = frappe.new_doc(
+                        "Leave Allocation"
+                    )
+
+                    allocation.employee = emp.name
+                    allocation.leave_type = LEAVE_TYPE
+                    allocation.leave_period = leave_period.name
+
+                    allocation.from_date = leave_period.from_date
+                    allocation.to_date = leave_period.to_date
+
+                    allocation.new_leaves_allocated = FIRST_YEAR_CREDIT
+
+                    allocation.insert(
+                        ignore_permissions=True
+                    )
+
+                    allocation.submit()
+
+                    results.append({
+                        "employee": emp.name,
+                        "action": "First Year PL Allocation",
+                        "added": FIRST_YEAR_CREDIT,
+                        "date": str(current_date),
+                        "allocation": allocation.name
+                    })
+
+                    # Do not add monthly 0.5 on the same date
+                    continue
+
+                # --------------------------------------------------
+                # CONDITION 3: MONTHLY CREDIT
+                # ONLY ON FIRST DAY OF THE MONTH
+                # --------------------------------------------------
+
+                if current_date.day != 1:
+                    continue
+
+                # Monthly credit starts from the month
+                # AFTER one-year completion
+
+                if current_date <= completion_date:
+                    continue
+
+                # --------------------------------------------------
+                # CHECK EXISTING ALLOCATION
+                # --------------------------------------------------
+
+                if not allocation_name:
+
+                    results.append({
+                        "employee": emp.name,
+                        "action": "Skipped - PL Allocation Not Found",
+                        "date": str(current_date)
+                    })
+
+                    continue
+
+                # --------------------------------------------------
+                # DUPLICATE CREDIT PREVENTION
+                # --------------------------------------------------
+
+                existing_log = frappe.db.exists(
+                    "PL Monthly Credit Log",
+                    {
+                        "employee": emp.name,
+                        "credit_date": current_date
+                    }
+                )
+
+                if existing_log:
+
+                    results.append({
+                        "employee": emp.name,
+                        "action": "Skipped - Already Credited",
+                        "date": str(current_date)
+                    })
+
+                    continue
+
+                # --------------------------------------------------
+                # GET LEAVE ALLOCATION
+                # --------------------------------------------------
+
+                allocation = frappe.get_doc(
+                    "Leave Allocation",
+                    allocation_name
+                )
+
+                old_value = float(
+                    allocation.total_leaves_allocated or 0
+                )
+
+                new_value = round(
+                    old_value + MONTHLY_CREDIT,
+                    2
+                )
+
+                # --------------------------------------------------
+                # UPDATE MONTHLY PL CREDIT
+                # --------------------------------------------------
+
+                frappe.db.set_value(
+                    "Leave Allocation",
+                    allocation.name,
+                    {
+                        "total_leaves_allocated": new_value,
+                        "new_leaves_allocated": new_value
+                    }
+                )
+
+                # --------------------------------------------------
+                # CREATE CREDIT LOG
+                # --------------------------------------------------
+
+                log = frappe.new_doc(
+                    "PL Monthly Credit Log"
+                )
+
+                log.employee = emp.name
+                log.credit_date = current_date
+                log.leave_allocation = allocation.name
+                log.credited_leaves = MONTHLY_CREDIT
+
+                log.insert(
+                    ignore_permissions=True
+                )
+
+                results.append({
+                    "employee": emp.name,
+                    "action": "Monthly PL Credit",
+                    "old_value": old_value,
+                    "added": MONTHLY_CREDIT,
+                    "new_value": new_value,
+                    "date": str(current_date),
+                    "allocation": allocation.name
+                })
+
+            except Exception:
+
+                frappe.log_error(
+                    title="Privilege Leave Credit Error - " + emp.name,
+                    message=frappe.get_traceback()
+                )
+
+                results.append({
+                    "employee": emp.name,
+                    "action": "Error"
+                })
+
+                continue
+
+
+        # --------------------------------------------------
+        # COMMIT TRANSACTIONS
+        # --------------------------------------------------
+
+        frappe.db.commit()
+
+
+    # --------------------------------------------------
+    # RETURN EXECUTION DETAILS
+    # --------------------------------------------------
+
+    return {
+        "success": True,
+        "run_date": str(current_date),
+        "employees_processed": len(results),
+        "data": results
+    }

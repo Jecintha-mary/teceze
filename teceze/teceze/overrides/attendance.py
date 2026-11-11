@@ -7,13 +7,14 @@ def mark_absent_for_rh():
 
     # Previous date
     attendance_date = getdate(add_days(today(), -2))
-    # attendance_date = frappe.utils.getdate("2026-09-14")
+    #attendance_date = frappe.utils.getdate("2026-09-14")
+    #attendance_date = frappe.utils.getdate("2026-11-08")
     # Active employees, excluding Engineer
     employees = frappe.get_all(
         "Employee",
         filters={
             "status": "Active",
-             "employment_type": ["in", ["Full-Time"]],
+             "employment_type": ["in", ["Full-Time","Probation"]],
 
         },
         fields=[
@@ -53,18 +54,23 @@ def mark_absent_for_rh():
             continue
 
         # Check RH holiday
-        rh_holiday = frappe.db.exists(
+        rh_holiday = frappe.db.get_value(
             "Holiday",
             {
                 "parent": holiday_list,
                 "holiday_date": attendance_date,
                 "custom_status": "RH"
-            }
+            },
+            ["name", "weekly_off"],
+            as_dict=True
         )
 
         if not rh_holiday:
             continue
-
+        # Skip absent if RH holiday has Weekly Off enabled
+        if rh_holiday.weekly_off:
+            continue
+        
         # Check approved Restricted Leave
         rh_leave = frappe.db.exists(
             "Leave Application",
@@ -86,7 +92,8 @@ def mark_absent_for_rh():
             "Attendance",
             {
                 "employee": employee_id,
-                "attendance_date": attendance_date
+                "attendance_date": attendance_date,
+                "docstatus": 1
             }
         )
 

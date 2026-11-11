@@ -1,6 +1,6 @@
 {
  "app": "teceze",
- "creation": "2026-10-22 15:27:31.991693",
+ "creation": "2026-11-04 17:26:40.728437",
  "docstatus": 0,
  "doctype": "Workspace Sidebar",
  "idx": 0,
@@ -160,6 +160,17 @@
    "type": "Link"
   },
   {
+   "child": 1,
+   "collapsible": 1,
+   "indent": 0,
+   "keep_closed": 0,
+   "label": "Ticket Management Report",
+   "link_to": "Raised Concerns Report",
+   "link_type": "Report",
+   "show_arrow": 0,
+   "type": "Link"
+  },
+  {
    "child": 0,
    "collapsible": 1,
    "icon": "list",
@@ -205,9 +216,30 @@
    "link_type": "Report",
    "show_arrow": 0,
    "type": "Link"
+  },
+  {
+   "child": 0,
+   "collapsible": 1,
+   "indent": 0,
+   "keep_closed": 0,
+   "label": "Leave",
+   "link_type": "DocType",
+   "show_arrow": 0,
+   "type": "Section Break"
+  },
+  {
+   "child": 1,
+   "collapsible": 1,
+   "indent": 0,
+   "keep_closed": 0,
+   "label": "Leave Encashment Report",
+   "link_to": "Leave Encashment Report",
+   "link_type": "Report",
+   "show_arrow": 0,
+   "type": "Link"
   }
  ],
- "modified": "2026-10-22 16:01:02.440953",
+ "modified": "2026-11-11 16:46:33.394453",
  "modified_by": "Administrator",
  "module": "Teceze",
  "name": "Reports",

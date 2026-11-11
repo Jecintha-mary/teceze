@@ -39,6 +39,7 @@ def execute(filters=None):
 	ss_ded_map = get_salary_slip_details(salary_slips, currency, company_currency, "deductions")
 
 	doj_map = get_employee_doj_map()
+	location_map = get_employee_location_map()
 
 	data = []
 	for ss in salary_slips:
@@ -73,6 +74,8 @@ def execute(filters=None):
 			"total_loan_repayment": ss.total_loan_repayment,
 			"custom_ifsc_code":ss.custom_ifsc_code,
 			"custom_bank_holder_name":ss.custom_bank_holder_name,
+			"custom_work_location":location_map.get(ss.employee),
+
 		}
 
 		# update_column_width(ss, columns)
@@ -135,7 +138,6 @@ def update_column_width(ss, columns):
 	if ss.leave_without_pay is not None:
 		columns[9].update({"width": 120})
 
-
 def get_columns(earning_types, ded_types):
 	columns = [
 		{
@@ -186,6 +188,13 @@ def get_columns(earning_types, ded_types):
 			"width": 120,
 		},
 		{
+			"label": _("Work Location"),
+			"fieldname": "custom_work_location", 
+			"fieldtype": "Link",
+			"options": "Location",
+			"width": 110,
+		},
+		{
 			"label": _("Start Date"),
 			"fieldname": "start_date",
 			"fieldtype": "Date",
@@ -209,6 +218,7 @@ def get_columns(earning_types, ded_types):
 			"fieldtype": "select",
 			"width": 110,
 		},
+		
 		
 		# {
 		# 	"label": _("Current Payroll Period"),
@@ -398,6 +408,15 @@ def get_employee_doj_map():
 
 	result = (frappe.qb.from_(employee).select(employee.name, employee.date_of_joining)).run()
 
+	return frappe._dict(result)
+
+def get_employee_location_map():
+	if not frappe.db.has_column("Employee", "custom_work_location"):
+		return {}
+	employee = frappe.qb.DocType("Employee")
+	result = (
+		frappe.qb.from_(employee).select(employee.name, employee.custom_work_location)
+	).run()
 	return frappe._dict(result)
 
 
