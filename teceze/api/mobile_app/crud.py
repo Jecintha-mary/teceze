@@ -1811,7 +1811,6 @@ def get_shift_window(employee, shift_date):
         "to_time": to_time
     }
 
-
 def get_checkin(employee, from_time, to_time, log_type, order):
 
     records = frappe.get_all(
@@ -1827,36 +1826,6 @@ def get_checkin(employee, from_time, to_time, log_type, order):
     )
 
     return records[0] if records else None
-
-def calculate_worked_time(first_in, last_out=None):
-
-    # No check-in
-    if not first_in:
-        return None
-
-    # If OUT exists, calculate until OUT
-    end_time = last_out or now_datetime()
-
-    seconds = int(
-        (end_time - first_in).total_seconds()
-    )
-
-    if seconds < 0:
-        return None
-
-    hours, remainder = divmod(seconds, 3600)
-    minutes, seconds = divmod(remainder, 60)
-
-    return {
-        "total_seconds": (
-            hours * 3600
-            + minutes * 60
-            + seconds
-        ),
-        "formatted":
-            f"{hours:02d}:{minutes:02d}:{seconds:02d}"
-    }
-
 
 
 @frappe.whitelist(allow_guest=False)
@@ -1922,8 +1891,8 @@ def get_date_range(days=None, from_date=None, to_date=None):
     return from_date, to_date
 
 from frappe.utils import time_diff_in_seconds    
-@frappe.whitelist(allow_guest=False)
 
+@frappe.whitelist(allow_guest=False)
 def get_employee_checkin_summary(days=None, from_date=None, to_date=None):
 
     employee = get_logged_in_employee()
@@ -2066,113 +2035,170 @@ def get_employee_checkin_summary(days=None, from_date=None, to_date=None):
 
     }
 
- 
-# @frappe.whitelist(allow_guest=False)
-# def get_employee_checkin_summary(
-#     days=None,
-#     from_date=None,
-#     to_date=None
-# ):
+import frappe
+from frappe.utils import (
+    now_datetime,
+    get_datetime,
+    getdate,
+    add_days,
+    get_time,
+)
 
-#     employee = get_logged_in_employee()
 
-#     from_date, to_date = get_date_range(
-#         days,
-#         from_date,
-#         to_date
-#     )
+@frappe.whitelist(allow_guest=False)
+def get_my_checkin_status():
 
-#     total_days = date_diff(
-#         to_date,
-#         from_date
-#     ) + 1
+    employee = get_logged_in_employee()
+    server_time = now_datetime()
+    today = getdate(server_time)
 
-#     result = []
+    # -------------------------------------------------
+    # 1. FIND TODAY'S OR YESTERDAY'S SHIFT
+    # -------------------------------------------------
 
-#     for i in range(total_days):
+    shift_data = None
+    shift_date = None
 
-#         current_date = add_to_date(
-#             from_date,
-#             days=i
-#         )
+    for candidate_date in [today, add_to_date(today, days=-1)]:
 
-#         shift_data = get_shift_window(
-#             employee,
-#             current_date
-#         )
+        window = get_shift_window(employee, candidate_date)
 
-#         # No shift
-#         if not shift_data:
+        if not window:
+            continue
 
-#             result.append({
-#                 "date": str(current_date),
-#                 "shift_type": None,
-#                 "first_in": None,
-#                 "last_out": None,
-#                 "worked_hours": None
-#             })
+        if window["from_time"] <= server_time <= window["to_time"]:
+            shift_data = window
+            shift_date = getdate(candidate_date)
+            break
 
-#             continue
+    # Fallback to today's shift
+    if not shift_data:
+        shift_data = get_shift_window(employee, today)
+        shift_date = today
 
-#         # First IN
-#         first_in = get_checkin(
-#             employee,
-#             shift_data["from_time"],
-#             shift_data["to_time"],
-#             "IN",
-#             "asc"
-#         )
+    if not shift_data:
+        frappe.throw("Shift Assignment not found")
 
-#         # Last OUT
-#         last_out = get_checkin(
-#             employee,
-#             shift_data["from_time"],
-#             shift_data["to_time"],
-#             "OUT",
-#             "desc"
-#         )
+    shift_name = shift_data["shift_type"]
+    shift_start = shift_data["shift_start"]
+    shift_end = shift_data["shift_end"]
 
-#         first_time = (
-#             first_in.time
-#             if first_in
-#             else None
-#         )
+    from_time = shift_data["from_time"]
+    to_time = min(server_time, shift_data["to_time"])
 
-#         last_time = (
-#             last_out.time
-#             if last_out
-#             else None
-#         )
+    # -------------------------------------------------
+    # 2. FETCH CHECKIN RECORDS
+    # -------------------------------------------------
 
-#         worked_time = calculate_worked_time(
-#             first_time,
-#             last_time
-#         )
+    checkins = frappe.get_all(
+        "Employee Checkin",
+        filters={
+            "employee": employee,
+            "time": ["between", [from_time, to_time]]
+        },
+        fields=[
+            "name",
+            "log_type",
+            "time"
+        ],
+        order_by="time asc, creation asc",
+        ignore_permissions=True,
+        limit_page_length=0
+    )
 
-#         result.append({
-#             "date": str(current_date),
-#             "shift_type": shift_data["shift_type"],
-#             "first_in": str(first_time) if first_time else None,
-#             "last_out": str(last_time) if last_time else None,
-#             "worked_hours": (
-#                 worked_time["formatted"]
-#                 if worked_time
-#                 else None
-#             ),
-#             "total_seconds": (
-#                 worked_time["total_seconds"]
-#                 if worked_time
-#                 else 0
-#             )
-#         })
+    # -------------------------------------------------
+    # 3. CALCULATE PREVIOUS AND CURRENT HOURS
+    # -------------------------------------------------
 
-#     return {
-#         "employee": employee,
-#         "from_date": str(from_date),
-#         "to_date": str(to_date),
-#         "total_days": total_days,
-#         "data": result
-#     }
+    previous_seconds = 0
+    current_start = None
+    first_checkin = None
+    last_checkout = None
+
+    for row in checkins:
+
+        event_time = get_datetime(row.time)
+
+        if row.log_type == "IN":
+
+            if first_checkin is None:
+                first_checkin = event_time
+
+            if current_start is None:
+                current_start = event_time
+
+        elif row.log_type == "OUT":
+
+            if current_start is not None:
+
+                previous_seconds += max(
+                    0,
+                    int((event_time - current_start).total_seconds())
+                )
+
+                current_start = None
+
+            last_checkout = event_time
+
+    # -------------------------------------------------
+    # 4. CURRENT SESSION
+    # -------------------------------------------------
+
+    is_checked_in = current_start is not None
+
+    current_session_seconds = 0
+
+    if is_checked_in:
+
+        current_session_seconds = max(
+            0,
+            int((to_time - current_start).total_seconds())
+        )
+
+    # -------------------------------------------------
+    # 5. TOTAL WORKED HOURS
+    # -------------------------------------------------
+
+    total_worked_seconds = (
+        previous_seconds + current_session_seconds
+    )
+
+    # -------------------------------------------------
+    # 6. STATUS
+    # -------------------------------------------------
+
+    if is_checked_in:
+        status = "CHECKED_IN"
+    elif last_checkout:
+        status = "CHECKED_OUT"
+    else:
+        status = "NOT_CHECKED_IN"
+
+    # -------------------------------------------------
+    # 7. RESPONSE
+    # -------------------------------------------------
+
+    return {
+        "success": True,
+        "data": {
+            "status": status,
+            "is_checked_in": is_checked_in,
+            "employee": employee,
+            "shift": shift_name,
+            "shift_date": str(shift_date),
+            "shift_start": str(shift_start),
+            "shift_end": str(shift_end),
+            "session_start": str(first_checkin) if first_checkin else None,
+            "current_session_start": str(current_start) if current_start else None,
+            "last_checkout": str(last_checkout) if last_checkout else None,
+            "previous_seconds": previous_seconds,
+            "current_session_seconds": current_session_seconds,
+            "total_worked_seconds": total_worked_seconds,
+            "elapsed_seconds": total_worked_seconds,
+            "server_time": str(server_time)
+        }
+    }
+
 from frappe.utils import get_datetime, getdate, now_datetime, add_to_date
 
 
@@ -2254,19 +2280,18 @@ def team_members():
     # ---------------------------------------------------------
     # GET REPORTING MANAGER
     # ---------------------------------------------------------
-
     reports_to = frappe.db.get_value(
         "Employee",
         current_employee,
         "reports_to"
     )
 
-    report_to_name = report_to_name.employee_name
-
     if not reports_to:
         return {
             "success": True,
             "data": [],
+            "reports_to": None,
+            "checkin_status": None,
             "pagination": {
                 "page": 1,
                 "page_size": CRUD.DEFAULT_PAGE_SIZE,
@@ -2277,6 +2302,11 @@ def team_members():
             }
         }
 
+    report_to_name = frappe.db.get_value(
+        "Employee",
+        reports_to,
+        "employee_name"
+    )
     # ---------------------------------------------------------
     # REUSE GENERIC CRUD PAGINATION
     # ---------------------------------------------------------
@@ -2426,11 +2456,12 @@ def leave_balance():
 
     leave_balance = {}
 
-    # Get only logged-in employee's allocations
+    # Get only submitted employee allocations
     allocations = frappe.get_list(
         "Leave Allocation",
         filters={
-            "employee": employee
+            "employee": employee,
+            "docstatus": 1
         },
         fields=[
             "leave_type",
@@ -2454,12 +2485,13 @@ def leave_balance():
             allocation.total_leaves_allocated or 0
         )
 
-    # Get only logged-in employee's approved applications
+    # Get only submitted and approved leave applications
     applications = frappe.get_list(
         "Leave Application",
         filters={
             "employee": employee,
-            "status": "Approved"
+            "status": "Approved",
+            "docstatus": 1
         },
         fields=[
             "leave_type",
@@ -2495,12 +2527,6 @@ def leave_balance():
         "data": list(leave_balance.values())
     }
 
-from frappe.utils import (
-    getdate,
-    date_diff,
-    add_to_date,
-)
-
 
 import frappe
 from frappe.utils import getdate, add_to_date, date_diff
@@ -2520,6 +2546,24 @@ def leave():
             doctype="Leave Application",
             permission=False
         )
+    
+    """Need remove next build in app"""
+
+    data = frappe.form_dict.copy()
+    if method == "POST" and data.get("name") and data.get("action") in ("Approve", "Reject"):        
+        frappe.log_error(
+            title="Leave Workflow Debug",
+            message={
+                "document": data.get("name"),
+                "requested_action": data.get("action"),
+                "current_user": frappe.session.user,
+                "roles": frappe.get_roles()
+            }
+        )
+        method = "PUT"
+    frappe.log_error("Leave API Method", method)
+
+    """Need remove next build in app"""
 
     # POST = Create + Submit
     if method == "POST":
@@ -2568,10 +2612,32 @@ def leave():
         # Workflow action
         # --------------------------------
         if action:
-
+            from frappe.model.workflow import get_transitions
             doc = frappe.get_doc("Leave Application", name)
+            
 
+            transitions = get_transitions(doc)
+
+            frappe.log_error(
+                title="Leave Workflow Debug",
+                message={
+                    "document": doc.name,
+                    "workflow_state": doc.workflow_state,
+                    "docstatus": doc.docstatus,
+                    "current_user": frappe.session.user,
+                    "roles": frappe.get_roles(),
+                    "requested_action": action,
+                    "available_actions": [
+                        row.action for row in transitions
+                    ]
+                }
+            )
+           
             doc = apply_workflow(doc, action)
+
+            # doc = frappe.get_doc("Leave Application", name)
+
+            # doc = apply_workflow(doc, action)
 
             return {
                 "success": True,
@@ -2763,6 +2829,7 @@ def attendance_request():
         return CRUD.handle(
             doctype="Attendance Request"
         )
+    
 
     # POST = Create + Submit
     if method == "POST":
@@ -3042,3 +3109,407 @@ def salary_slip_pdf(name=None):
     frappe.local.response.filename = f"{slip_name.replace('/', '-')}.pdf"
     frappe.local.response.filecontent = pdf
     frappe.local.response.type = "pdf"
+
+
+
+@frappe.whitelist(allow_guest=False)
+def get_attendance_list(from_date=None, to_date=None):
+
+    from datetime import timedelta
+    from frappe.utils import getdate, cint
+
+    # =====================================================
+    # 1. VALIDATE DATES
+    # =====================================================
+
+    if not from_date or not to_date:
+        frappe.throw("from_date and to_date are required")
+
+    from_date = getdate(from_date)
+    to_date = getdate(to_date)
+
+    if to_date < from_date:
+        frappe.throw("to_date cannot be earlier than from_date")
+
+    # =====================================================
+    # 2. GET LOGGED-IN EMPLOYEE
+    # =====================================================
+
+    employee = get_logged_in_employee()
+
+    employee_data = frappe.db.get_value(
+        "Employee",
+        employee,
+        ["employee_name", "company"],
+        as_dict=True
+    )
+
+    if not employee_data:
+        frappe.throw("Employee not found")
+
+    company = employee_data.company
+
+    # =====================================================
+    # 3. GET SHIFT ASSIGNMENTS
+    # =====================================================
+
+    shift_assignments = frappe.get_all(
+        "Shift Assignment",
+        filters={
+            "employee": employee,
+            "docstatus": 1,
+            "status": "Active",
+            "start_date": ["<=", to_date]
+        },
+        fields=[
+            "name",
+            "shift_type",
+            "start_date",
+            "end_date"
+        ],
+        order_by="start_date asc"
+    )
+
+    def get_shift_for_date(current_date):
+
+        applicable = [
+            row for row in shift_assignments
+            if (
+                getdate(row.start_date) <= current_date
+                and (
+                    not row.end_date
+                    or getdate(row.end_date) >= current_date
+                )
+            )
+        ]
+
+        if not applicable:
+            return None
+
+        selected = max(
+            applicable,
+            key=lambda row: getdate(row.start_date)
+        )
+
+        return selected.shift_type
+
+    # =====================================================
+    # 4. GET HOLIDAY LIST ASSIGNMENTS
+    # =====================================================
+
+    assigned_to = [employee]
+
+    if company:
+        assigned_to.append(company)
+
+    holiday_assignments = frappe.get_all(
+        "Holiday List Assignment",
+        filters={
+            "assigned_to": ["in", assigned_to],
+            "docstatus": 1
+        },
+        fields=[
+            "name",
+            "assigned_to",
+            "holiday_list",
+            "from_date"
+        ],
+        order_by="from_date asc"
+    )
+
+    employee_holiday_assignments = [
+        row for row in holiday_assignments
+        if row.assigned_to == employee
+    ]
+
+    company_holiday_assignments = [
+        row for row in holiday_assignments
+        if row.assigned_to == company
+    ]
+
+    # =====================================================
+    # 5. GET HOLIDAY LIST APPLICABLE FOR EACH DATE
+    # =====================================================
+
+    def get_holiday_list_for_date(current_date):
+
+        # First check employee-specific assignments
+        employee_applicable = [
+            row for row in employee_holiday_assignments
+            if (
+                row.from_date
+                and row.holiday_list
+                and getdate(row.from_date) <= current_date
+            )
+        ]
+
+        if employee_applicable:
+            selected = max(
+                employee_applicable,
+                key=lambda row: getdate(row.from_date)
+            )
+
+            return selected.holiday_list
+
+        # Otherwise use company assignment
+        company_applicable = [
+            row for row in company_holiday_assignments
+            if (
+                row.from_date
+                and row.holiday_list
+                and getdate(row.from_date) <= current_date
+            )
+        ]
+
+        if company_applicable:
+            selected = max(
+                company_applicable,
+                key=lambda row: getdate(row.from_date)
+            )
+
+            return selected.holiday_list
+
+        return None
+
+    # =====================================================
+    # 6. GET ATTENDANCE RECORDS
+    # =====================================================
+
+    attendance_records = frappe.get_all(
+        "Attendance",
+        filters={
+            "employee": employee,
+            "attendance_date": [
+                "between",
+                [from_date, to_date]
+            ]
+        },
+        fields=[
+            "name",
+            "attendance_date",
+            "status",
+            "in_time",
+            "out_time",
+            "working_hours"
+        ],
+        order_by="attendance_date asc"
+    )
+
+    attendance_map = {
+        getdate(row.attendance_date): row
+        for row in attendance_records
+    }
+
+    # =====================================================
+    # 7. GET HOLIDAY RECORDS
+    # =====================================================
+
+    holiday_list_names = list(set(
+        row.holiday_list
+        for row in holiday_assignments
+        if row.holiday_list
+    ))
+
+    holiday_map = {}
+
+    if holiday_list_names:
+
+        holiday_records = frappe.get_all(
+            "Holiday",
+            filters={
+                "parent": ["in", holiday_list_names],
+                "parenttype": "Holiday List",
+                "holiday_date": [
+                    "between",
+                    [from_date, to_date]
+                ]
+            },
+            fields=[
+                "parent",
+                "holiday_date",
+                "description",
+                "weekly_off"
+            ],
+            order_by="holiday_date asc"
+        )
+
+        holiday_map = {
+            (
+                row.parent,
+                getdate(row.holiday_date)
+            ): row
+            for row in holiday_records
+        }
+
+    # =====================================================
+    # 8. INITIALIZE SUMMARY
+    # =====================================================
+
+    total_present = 0
+    total_absent = 0
+    total_half_day = 0
+    total_weekend = 0
+    total_holiday = 0
+
+    result = {}
+
+    total_days = (to_date - from_date).days + 1
+
+    # =====================================================
+    # 9. PROCESS EACH DATE
+    # =====================================================
+
+    for i in range(total_days):
+
+        current_date = from_date + timedelta(days=i)
+
+        # Get attendance
+        attendance = attendance_map.get(current_date)
+
+        # Get applicable shift
+        current_shift = get_shift_for_date(current_date)
+
+        # Get applicable Holiday List
+        current_holiday_list = get_holiday_list_for_date(
+            current_date
+        )
+
+        # Get holiday ONLY from the selected Holiday List
+        holiday = None
+
+        if current_holiday_list:
+            holiday = holiday_map.get(
+                (current_holiday_list, current_date)
+            )
+
+        # =================================================
+        # 10. ATTENDANCE EXISTS - HIGHEST PRIORITY
+        # =================================================
+
+        if attendance:
+
+            status = (
+                attendance.status.lower()
+                if attendance.status
+                else "absent"
+            )
+
+            if status == "present":
+                total_present += 1
+
+            elif status == "absent":
+                total_absent += 1
+
+            elif status == "half day":
+                total_half_day += 1
+
+            result[str(current_date)] = {
+                "time": (
+                    attendance.in_time.strftime("%H:%M")
+                    if attendance.in_time
+                    else "00:00"
+                ),
+                "in_time": (
+                    attendance.in_time.strftime("%H:%M")
+                    if attendance.in_time
+                    else None
+                ),
+                "out_time": (
+                    attendance.out_time.strftime("%H:%M")
+                    if attendance.out_time
+                    else None
+                ),
+                "working_hours": (
+                    attendance.working_hours
+                    if attendance.working_hours is not None
+                    else 0
+                ),
+                "status": status
+            }
+
+            continue
+
+        # =================================================
+        # 11. NO ATTENDANCE - CHECK HOLIDAY
+        # =================================================
+
+        if holiday:
+
+            if cint(holiday.weekly_off) == 1:
+
+                total_weekend += 1
+
+                status = "weekend"
+
+            else:
+
+                total_holiday += 1
+
+                status = (
+                    holiday.description
+                    if holiday.description
+                    else "holiday"
+                )
+
+            result[str(current_date)] = {
+                "time": "00:00",
+                "in_time": None,
+                "out_time": None,
+                "working_hours": 0,
+                "status": status
+            }
+
+            continue
+
+        # =================================================
+        # 12. NEITHER ATTENDANCE NOR HOLIDAY
+        # =================================================
+
+        result[str(current_date)] = {
+            "time": "00:00",
+            "in_time": None,
+            "out_time": None,
+            "working_hours": 0,
+            "status": ""
+        }
+
+    # =====================================================
+    # 13. GET CURRENT SHIFT AND HOLIDAY LIST
+    # =====================================================
+
+    shift = get_shift_for_date(to_date)
+
+    holiday_list = get_holiday_list_for_date(to_date)
+
+    # =====================================================
+    # 14. RETURN RESPONSE
+    # =====================================================
+
+    return {
+        "success": True,
+
+        "employee": employee,
+
+        "employee_name": employee_data.employee_name,
+
+        "shift": shift,
+
+        "holiday_list": holiday_list,
+
+        "from_date": str(from_date),
+
+        "to_date": str(to_date),
+
+        "total_days": total_days,
+
+        "summary": {
+            "present": total_present,
+            "absent": total_absent,
+            "half_day": total_half_day,
+            "weekend": total_weekend,
+            "holiday": total_holiday
+        },
+
+        "data": result
+    }
+
