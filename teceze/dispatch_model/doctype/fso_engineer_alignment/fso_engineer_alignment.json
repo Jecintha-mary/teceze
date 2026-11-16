@@ -1,0 +1,417 @@
+{
+ "actions": [],
+ "allow_bulk_edit": 1,
+ "allow_rename": 1,
+ "autoname": "FSO-ENG-.####",
+ "creation": "2026-11-04 14:26:46.521925",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "details",
+  "ticket_received_by_section",
+  "fso_team",
+  "column_break_uvht",
+  "service_delivery_team",
+  "section_break_pbfs",
+  "amended_from",
+  "ticket",
+  "activity_date",
+  "service_level",
+  "column_break_tipb",
+  "category",
+  "activity_time",
+  "spoc",
+  "column_break_aupy",
+  "activity",
+  "duration",
+  "spoc_contact",
+  "section_break_onxp",
+  "location",
+  "tools",
+  "scope",
+  "engineer_details_tab",
+  "engineer_details_section",
+  "engineer_name",
+  "engineer_email",
+  "engineer_contact",
+  "country",
+  "column_break_jevy",
+  "recruiter_name",
+  "fso_owner",
+  "region",
+  "section_break_acnr",
+  "currency",
+  "hourly_rate",
+  "half_day_rate",
+  "column_break_cnzk",
+  "full_day_rate",
+  "fixed_rate",
+  "travel_cost",
+  "bank_details_section",
+  "name_on_account",
+  "swift_bic",
+  "column_break_joqg",
+  "account_number",
+  "sort_code",
+  "column_break_vxei",
+  "bank_name",
+  "iban",
+  "section_break_ubsi",
+  "bank_address",
+  "tab_break_dgnr",
+  "visit_schedule_section",
+  "scheduled_date",
+  "arrival_time",
+  "notes"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_break_pbfs",
+   "fieldtype": "Section Break",
+   "label": "<b style=\"color:#2490EF;font-size:15px\">Ticket at a Glance</b>"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "FSO Engineer Alignment",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "engineer_details_section",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "engineer_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Engineer Name",
+   "mandatory_depends_on": "eval:doc.workflow_state==\"Assign FSO\"",
+   "options": "Name"
+  },
+  {
+   "fieldname": "engineer_email",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Engineer Email",
+   "options": "Email"
+  },
+  {
+   "fieldname": "engineer_contact",
+   "fieldtype": "Phone",
+   "in_list_view": 1,
+   "label": "Engineer Contact",
+   "mandatory_depends_on": "eval:doc.workflow_state==\"Assign FSO\""
+  },
+  {
+   "fieldname": "recruiter_name",
+   "fieldtype": "Data",
+   "label": "Recruiter Name"
+  },
+  {
+   "fieldname": "column_break_jevy",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "region",
+   "fieldtype": "Link",
+   "label": "Region",
+   "mandatory_depends_on": "eval:doc.workflow_state==\"Assign FSO\"",
+   "options": "Region"
+  },
+  {
+   "fieldname": "country",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Country",
+   "mandatory_depends_on": "eval:doc.workflow_state==\"Assign FSO\"",
+   "options": "Country"
+  },
+  {
+   "fieldname": "fso_owner",
+   "fieldtype": "Data",
+   "label": "FSO Owner",
+   "mandatory_depends_on": "eval:doc.workflow_state==\"Assign FSO\""
+  },
+  {
+   "fieldname": "ticket_received_by_section",
+   "fieldtype": "Section Break",
+   "hidden": 1,
+   "label": "<b style=\"color:#2490EF;font-size:15px\">Ticket Received By</b>"
+  },
+  {
+   "default": "0",
+   "fieldname": "fso_team",
+   "fieldtype": "Check",
+   "label": "Fso Team"
+  },
+  {
+   "fieldname": "column_break_uvht",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "service_delivery_team",
+   "fieldtype": "Check",
+   "label": "Service Delivery Team"
+  },
+  {
+   "fieldname": "section_break_acnr",
+   "fieldtype": "Section Break",
+   "label": "<b style=\"color:#2490EF;font-size:15px\">Engineer Rates</b>"
+  },
+  {
+   "fieldname": "currency",
+   "fieldtype": "Link",
+   "label": "Rate Currency",
+   "mandatory_depends_on": "eval:doc.workflow_state==\"Assign FSO\"",
+   "options": "Currency"
+  },
+  {
+   "fieldname": "column_break_cnzk",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "visit_schedule_section",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "scheduled_date",
+   "fieldtype": "Date",
+   "label": "Scheduled Date",
+   "mandatory_depends_on": "eval:doc.workflow_state==\"Assign FSO\""
+  },
+  {
+   "fieldname": "arrival_time",
+   "fieldtype": "Time",
+   "label": "Arrival Time(Site Local)"
+  },
+  {
+   "fieldname": "notes",
+   "fieldtype": "Small Text",
+   "label": "Notes For Engineer"
+  },
+  {
+   "fieldname": "engineer_details_tab",
+   "fieldtype": "Tab Break",
+   "label": "<b style=\"color:#555555;font-size:15px\">Engineer Details</b>"
+  },
+  {
+   "fieldname": "tab_break_dgnr",
+   "fieldtype": "Tab Break",
+   "label": "<b style=\"color:#555555;font-size:15px\">Visit Schedule</b>"
+  },
+  {
+   "fieldname": "ticket",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Ticket",
+   "options": "Ticket",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "ticket.activity__details",
+   "fieldname": "activity",
+   "fieldtype": "Data",
+   "label": "Activity",
+   "read_only": 1
+  },
+  {
+   "fieldname": "service_level",
+   "fieldtype": "Data",
+   "label": "Service Level",
+   "read_only": 1
+  },
+  {
+   "fieldname": "duration",
+   "fieldtype": "Data",
+   "label": "Duration",
+   "read_only": 1
+  },
+  {
+   "fieldname": "location",
+   "fieldtype": "Small Text",
+   "label": "Location",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_tipb",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "spoc",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "SPOC",
+   "read_only": 1
+  },
+  {
+   "fieldname": "tools",
+   "fieldtype": "Small Text",
+   "label": "Tools",
+   "options": "Tool Required Items"
+  },
+  {
+   "fieldname": "scope",
+   "fieldtype": "Small Text",
+   "label": "Scope of Work",
+   "read_only": 1
+  },
+  {
+   "fieldname": "spoc_contact",
+   "fieldtype": "Data",
+   "label": "SPOC Contact",
+   "read_only": 1
+  },
+  {
+   "fieldname": "activity_date",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Activity Date",
+   "read_only": 1
+  },
+  {
+   "fieldname": "name_on_account",
+   "fieldtype": "Data",
+   "label": "Name On Account",
+   "mandatory_depends_on": "eval:doc.workflow_state==\"Assign FSO\""
+  },
+  {
+   "fieldname": "account_number",
+   "fieldtype": "Data",
+   "label": "Account Number",
+   "mandatory_depends_on": "eval:doc.workflow_state==\"Assign FSO\""
+  },
+  {
+   "fieldname": "bank_name",
+   "fieldtype": "Data",
+   "label": "Bank Name",
+   "mandatory_depends_on": "eval:doc.workflow_state==\"Assign FSO\""
+  },
+  {
+   "fieldname": "column_break_joqg",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "swift_bic",
+   "fieldtype": "Data",
+   "label": "SWIFT / BIC / IFSC"
+  },
+  {
+   "fieldname": "sort_code",
+   "fieldtype": "Data",
+   "label": "Sort Code"
+  },
+  {
+   "fieldname": "iban",
+   "fieldtype": "Data",
+   "label": "IBAN"
+  },
+  {
+   "fieldname": "bank_address",
+   "fieldtype": "Small Text",
+   "label": "Bank Address"
+  },
+  {
+   "fieldname": "hourly_rate",
+   "fieldtype": "Float",
+   "label": "Hourly Rate"
+  },
+  {
+   "fieldname": "half_day_rate",
+   "fieldtype": "Float",
+   "label": "Half Day Rate"
+  },
+  {
+   "fieldname": "full_day_rate",
+   "fieldtype": "Float",
+   "label": "Full Day Rate"
+  },
+  {
+   "fieldname": "fixed_rate",
+   "fieldtype": "Float",
+   "label": "Fixed Visit Rate"
+  },
+  {
+   "fieldname": "travel_cost",
+   "fieldtype": "Float",
+   "label": "Travel Cost"
+  },
+  {
+   "fieldname": "category",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Category",
+   "read_only": 1
+  },
+  {
+   "fieldname": "bank_details_section",
+   "fieldtype": "Section Break",
+   "label": "<b style=\"color:#2490EF;font-size:15px\">Bank Details</b>"
+  },
+  {
+   "fieldname": "section_break_ubsi",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "activity_time",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Activity Time",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_aupy",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_onxp",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_vxei",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "details",
+   "fieldtype": "Tab Break",
+   "label": "<b style=\"color:#555555;font-size:15px\">Details</b>"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2026-11-13 18:35:49.474979",
+ "modified_by": "Administrator",
+ "module": "Dispatch Model",
+ "name": "FSO Engineer Alignment",
+ "naming_rule": "Expression",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}

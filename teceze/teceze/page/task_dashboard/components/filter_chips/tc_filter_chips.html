@@ -1,0 +1,6 @@
+<div class="tc-chips{%= row_cls %}" data-chips="{%= name %}">
+    {% if (label) { %}<span class="tc-muted">{%= label %}</span>{% } %}
+    {% for (var i = 0; i < chips.length; i++) { var c = chips[i]; %}
+    <button type="button" class="tc-chip{%= c.active_cls %}" data-value="{%= c.value %}">{%= c.label %}</button>
+    {% } %}
+</div>

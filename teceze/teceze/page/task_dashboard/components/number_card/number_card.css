@@ -1,0 +1,45 @@
+/* ===== Number cards: a row of cards with a big number ===== */
+.tc-number-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(var(--tc-card-min, 10.5rem), 1fr));
+    gap: var(--margin-md);
+}
+
+.tc-number-card {
+    border-top: 3px solid var(--c-accent, var(--border-color));
+}
+
+.tc-number-card-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--margin-sm);
+}
+
+.tc-number-card-label {
+    font-weight: 600;
+}
+
+.tc-number-card-icon {
+    color: var(--c-ink);
+}
+
+.tc-number-card-main {
+    display: flex;
+    align-items: baseline;
+    gap: var(--margin-sm);
+    margin: var(--margin-sm) 0 var(--margin-xs);
+}
+
+.tc-number-card-value {
+    font-size: var(--text-3xl);
+    font-weight: 600;
+    color: var(--heading-color);
+    line-height: 1.1;
+}
+
+.tc-number-card-badge {
+    padding: 0 var(--padding-sm);
+    color: var(--c-ink);
+    background: var(--c-soft);
+}

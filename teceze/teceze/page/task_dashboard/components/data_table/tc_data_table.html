@@ -1,0 +1,24 @@
+<div class="tc-card tc-table-card" data-table="{%= key %}">
+    <div class="tc-table-head">
+        <div class="tc-table-title">
+            <h5 class="tc-section-title">{%= title %}</h5>
+            {% if (count_label) { %}<span class="tc-pill tc-table-count">{%= count_label %}</span>{% } %}
+        </div>
+        {%= actions_html %}
+    </div>
+    {%= toolbar_html %}
+    <div class="tc-table-wrap{%= scroll_cls %}" data-scroll-rows="{%= scroll_rows %}">
+        <table class="tc-table">
+            <thead>
+                <tr>
+                    {% for (var i = 0; i < columns.length; i++) { var c = columns[i]; %}
+                    <th class="{%= c.cls %}">{%= c.label %}</th>
+                    {% } %}
+                </tr>
+            </thead>
+            <tbody class="tc-table-body">{%= body_html %}</tbody>
+            {% if (footer_html) { %}<tfoot>{%= footer_html %}</tfoot>{% } %}
+        </table>
+    </div>
+    <div class="tc-table-pager">{%= pager_html %}</div>
+</div>

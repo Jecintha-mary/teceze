@@ -1,0 +1,15 @@
+<!-- Task dashboard layout. Each block is built by a component in components/ -->
+<div class="td-root">
+    {%= profile_html %}
+    {%= cards_html %}
+    <div class="td-panels">
+        {%= status_html %}
+        {%= projects_html %}
+        {%= sprints_html %}
+    </div>
+    {% if (workload_html) { %}
+    <div class="td-panels td-workload">{%= workload_html %}</div>
+    {% } %}
+    {%= tasks_html %}
+    {%= timesheets_html %}
+</div>

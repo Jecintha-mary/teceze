@@ -1,0 +1,11 @@
+<div class="tc-stat-tiles">
+    {% if (title) { %}<div class="tc-label tc-stat-tiles-title">{%= title %}</div>{% } %}
+    <div class="tc-stat-tiles-grid" style="--tc-tile-cols: {%= columns %}">
+        {% for (var i = 0; i < tiles.length; i++) { var t = tiles[i]; %}
+        <div class="tc-stat-tile{%= t.color_cls %}">
+            <span class="tc-stat-tile-value">{%= t.value %}</span>
+            <span class="tc-stat-tile-label"><span class="tc-dot"></span>{%= t.label %}</span>
+        </div>
+        {% } %}
+    </div>
+</div>

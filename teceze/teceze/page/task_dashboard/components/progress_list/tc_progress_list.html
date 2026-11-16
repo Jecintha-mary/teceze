@@ -1,0 +1,25 @@
+<div class="tc-card tc-progress-list">
+    <div class="tc-card-head">
+        <h5 class="tc-section-title">{%= title %}</h5>
+        <span class="tc-muted">{%= meta %}</span>
+    </div>
+    {% if (items.length) { %}
+    {% for (var i = 0; i < items.length; i++) { var it = items[i]; %}
+    <div class="tc-progress-item{%= it.color_cls %}">
+        <div class="tc-progress-head"><span>{%= it.label %}</span><b>{%= it.value_text %}</b></div>
+        <div class="tc-progress-track">
+            <div class="tc-progress-fill" style="width:{%= it.percent %}%"></div>
+        </div>
+        {% if (it.tags.length) { %}
+        <div class="tc-progress-tags">
+            {% for (var j = 0; j < it.tags.length; j++) { var tg = it.tags[j]; %}
+            <span class="tc-pill tc-tag{%= tg.color_cls %}">{%= tg.label %}</span>
+            {% } %}
+        </div>
+        {% } %}
+    </div>
+    {% } %}
+    {% } else { %}
+    <div class="tc-empty">{%= empty_text %}</div>
+    {% } %}
+</div>

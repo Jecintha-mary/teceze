@@ -1,0 +1,42 @@
+/* ===== Progress list: rows with a label, a value and a progress bar ===== */
+.tc-progress-item {
+    margin-bottom: var(--margin-md);
+}
+
+.tc-progress-item:last-child {
+    margin-bottom: 0;
+}
+
+.tc-progress-head {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--margin-md);
+    font-size: var(--text-md);
+    color: var(--text-color);
+    margin-bottom: var(--margin-xs);
+}
+
+.tc-progress-head b {
+    color: var(--heading-color);
+    white-space: nowrap;
+}
+
+.tc-progress-track {
+    height: 0.375rem;
+    border-radius: var(--border-radius-full);
+    background: var(--control-bg);
+    overflow: hidden;
+}
+
+.tc-progress-fill {
+    height: 100%;
+    border-radius: var(--border-radius-full);
+    background: var(--c, var(--tc-brand));
+}
+
+.tc-progress-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--margin-xs);
+    margin-top: var(--margin-sm);
+}

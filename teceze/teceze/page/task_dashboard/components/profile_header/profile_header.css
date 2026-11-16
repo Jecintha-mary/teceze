@@ -1,0 +1,78 @@
+/* ===== Profile header: avatar, name, meta pill and facts on the right ===== */
+.tc-profile,
+.tc-profile-name-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.tc-profile {
+    justify-content: space-between;
+    gap: var(--margin-lg);
+}
+
+.tc-profile-left {
+    display: flex;
+    align-items: center;
+    gap: var(--margin-md);
+    min-width: 0;
+}
+
+.tc-avatar {
+    position: relative;
+    flex: none;
+    width: 3.75rem;
+    height: 3.75rem;
+    border-radius: var(--border-radius-lg);
+    background: var(--tc-brand);
+    color: var(--neutral, #fff);
+    display: grid;
+    place-items: center;
+    font-size: var(--text-xl);
+    font-weight: 600;
+}
+
+.tc-avatar-dot {
+    position: absolute;
+    right: -0.25rem;
+    bottom: -0.25rem;
+    width: 0.875rem;
+    height: 0.875rem;
+    border-radius: var(--border-radius-full);
+    background: var(--green-500);
+    border: 2px solid var(--card-bg);
+}
+
+.tc-profile-name-row {
+    gap: var(--margin-sm) var(--margin-md);
+}
+
+.tc-profile-name {
+    font-size: var(--text-2xl);
+    font-weight: 600;
+    color: var(--heading-color);
+    margin: 0;
+}
+
+.tc-profile-meta {
+    font-size: var(--text-sm);
+    font-weight: 400;
+}
+
+.tc-profile-subtitle {
+    font-size: var(--text-md);
+    color: var(--text-muted);
+    margin-top: var(--margin-xs);
+}
+
+.tc-profile-facts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--margin-lg);
+}
+
+.tc-profile-fact {
+    font-size: var(--text-md);
+    font-weight: 600;
+    color: var(--heading-color);
+}

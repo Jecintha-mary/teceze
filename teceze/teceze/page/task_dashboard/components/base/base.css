@@ -1,0 +1,108 @@
+/* ===== teceze.ui base: tokens and building blocks shared by all components ===== */
+:root {
+    --tc-brand: #0f9b9b;   /* brand colour */
+    --tc-gutter: 1.25rem;  /* side padding of a page */
+}
+
+.tc-svg {
+    width: 1rem;
+    height: 1rem;
+    display: block;
+}
+
+/* white card with a thin border */
+.tc-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-lg);
+    box-shadow: var(--shadow-sm);
+    padding: var(--padding-lg);
+}
+
+/* card title row: title on the left, extra info on the right */
+.tc-card-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--margin-md);
+    margin-bottom: var(--margin-md);
+}
+
+.tc-section-title {
+    font-size: var(--text-lg);
+    font-weight: 600;
+    color: var(--heading-color);
+    margin: 0;
+}
+
+.tc-section-title .tc-svg {
+    display: inline-block;
+    vertical-align: -2px;
+}
+
+.tc-muted {
+    font-size: var(--text-sm);
+    color: var(--text-muted);
+}
+
+.tc-dash {
+    color: var(--text-muted);
+}
+
+/* small uppercase label */
+.tc-label {
+    font-size: var(--text-xs);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+}
+
+/* rounded pill */
+.tc-pill {
+    font-size: var(--text-xs);
+    font-weight: 600;
+    color: var(--text-color);
+    background: var(--subtle-accent);
+    border-radius: var(--border-radius-full);
+    padding: var(--padding-xs) var(--padding-md);
+    white-space: nowrap;
+}
+
+/* pill that takes the colour of its tc-c-* class (brand colour if none) */
+.tc-tag {
+    display: inline-block;
+    color: var(--c, var(--tc-brand));
+    background: var(--c-tint, var(--subtle-accent));
+}
+
+/* small round colour dot */
+.tc-dot {
+    width: 0.625rem;
+    height: 0.625rem;
+    border-radius: var(--border-radius-full);
+    background: var(--c);
+    flex: none;
+}
+
+.tc-empty {
+    text-align: center;
+    color: var(--text-muted);
+    padding: var(--padding-lg);
+}
+
+/* ---- colours: add tc-c-<name> to any element, its children use the variables ----
+   --c        strong colour (charts, dots, tags)
+   --c-accent card top border
+   --c-ink    icons and badge text
+   --c-soft   badge background                                         */
+.tc-c-primary { --c: var(--tc-brand); --c-accent: var(--tc-brand); --c-ink: var(--tc-brand); --c-soft: var(--subtle-accent); }
+.tc-c-blue    { --c: #1d4ed8; --c-accent: var(--blue-500);   --c-ink: var(--blue-600);   --c-soft: var(--blue-50); }
+.tc-c-orange  { --c: #c2410c; --c-accent: var(--orange-500); --c-ink: var(--orange-600); --c-soft: var(--orange-50); }
+.tc-c-green   { --c: #15803d; --c-accent: var(--green-500);  --c-ink: var(--green-600);  --c-soft: var(--green-50); }
+.tc-c-red     { --c: #b91c1c; --c-accent: var(--red-500);    --c-ink: var(--red-600);    --c-soft: var(--red-50); }
+.tc-c-purple  { --c: #7e22ce; --c-accent: var(--purple-500); --c-ink: var(--purple-600); --c-soft: var(--purple-50); }
+.tc-c-gray    { --c: #6b7280; --c-accent: var(--gray-500);   --c-ink: var(--gray-600);   --c-soft: var(--gray-50); }
+
+[class*="tc-c-"] {
+    --c-tint: color-mix(in srgb, var(--c) 12%, transparent);
+}

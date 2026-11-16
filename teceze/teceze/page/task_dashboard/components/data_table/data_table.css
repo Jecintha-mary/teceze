@@ -1,0 +1,114 @@
+/* ===== Data table: a card with a header, a table and an optional pager ===== */
+.tc-table-card {
+    padding: 0;
+    overflow: hidden;
+}
+
+.tc-table-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--margin-md);
+    padding: var(--padding-lg);
+}
+
+.tc-table-title {
+    display: flex;
+    align-items: center;
+    gap: var(--margin-sm);
+}
+
+.tc-table-wrap {
+    overflow-x: auto;
+}
+
+/* scroll inside the table after N rows (the height is set by data_table.fit_height) */
+.tc-table-scroll {
+    overflow-y: auto;
+}
+
+/* header and footer stay visible while the rows scroll */
+.tc-table-scroll thead th {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+}
+
+.tc-table-scroll tfoot td {
+    position: sticky;
+    bottom: 0;
+    z-index: 1;
+    box-shadow: 0 -1px 0 var(--border-color);  /* keeps the line above the footer */
+}
+
+.tc-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.tc-table th,
+.tc-table td {
+    padding: var(--padding-md) var(--padding-lg);
+    color: var(--text-color);
+}
+
+.tc-table th {
+    text-align: left;
+    font-size: var(--text-sm);
+    font-weight: 600;
+    background: var(--subtle-accent);
+    white-space: nowrap;
+}
+
+.tc-table td {
+    font-size: var(--text-md);
+    vertical-align: middle;
+    border-top: 1px solid var(--border-color);
+}
+
+.tc-table tbody tr:hover td {
+    background: var(--subtle-fg);
+}
+
+.tc-table tfoot td {
+    font-size: var(--text-lg);
+    font-weight: 600;
+    color: var(--heading-color);
+    background: var(--subtle-fg);
+}
+
+/* "nothing to show" row (more specific than .tc-table td) */
+.tc-table .tc-empty {
+    color: var(--text-muted);
+    padding: var(--padding-lg);
+}
+
+/* status badges (Frappe's indicator pills) stay on one line: a wrapped badge
+   splits its dot and rounded background ("Pending / Review") */
+.tc-table .indicator-pill {
+    white-space: nowrap;
+}
+
+/* column helpers */
+.tc-table .tc-num {
+    text-align: right;
+}
+
+.tc-table .tc-text-danger {
+    color: var(--red-500);
+    font-weight: 600;
+}
+
+/* while new rows load, dim the table */
+.tc-table-card.is-loading .tc-table-wrap {
+    opacity: 0.5;
+    pointer-events: none;
+    transition: opacity 0.15s ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .tc-table-card.is-loading .tc-table-wrap {
+        transition: none;
+    }
+}

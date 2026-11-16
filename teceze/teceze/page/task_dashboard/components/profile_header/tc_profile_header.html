@@ -1,0 +1,20 @@
+<div class="tc-profile">
+    <div class="tc-profile-left">
+        <div class="tc-avatar">{%= initials %}{% if (online) { %}<span class="tc-avatar-dot"></span>{% } %}</div>
+        <div>
+            <div class="tc-profile-name-row">
+                <h3 class="tc-profile-name">{%= name %}</h3>
+                {% if (meta) { %}<span class="tc-pill tc-profile-meta">{%= meta %}</span>{% } %}
+            </div>
+            {% if (subtitle) { %}<div class="tc-profile-subtitle">{%= subtitle %}</div>{% } %}
+        </div>
+    </div>
+    <div class="tc-profile-facts">
+        {% for (var i = 0; i < facts.length; i++) { var f = facts[i]; %}
+        <div>
+            <div class="tc-label">{%= f.label %}</div>
+            <div class="tc-profile-fact">{%= f.value %}</div>
+        </div>
+        {% } %}
+    </div>
+</div>

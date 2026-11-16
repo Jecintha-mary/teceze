@@ -1,0 +1,40 @@
+<div class="tc-picker">
+    <button type="button" class="tc-picker-btn" aria-haspopup="listbox" aria-expanded="false"
+        aria-label="{%= current.aria %}">
+        <span class="tc-mini-avatar">{%= current.initials %}</span>
+        <span class="tc-picker-name">{%= current.name %}</span>
+        <span class="tc-picker-caret">{%= icons.caret %}</span>
+    </button>
+
+    <div class="tc-picker-menu" role="listbox" aria-label="Employees" hidden>
+        {% if (show_search) { %}
+        <div class="tc-picker-search">
+            {%= icons.search %}
+            <input type="text" placeholder="Search by name, role or ID" aria-label="Search employees">
+        </div>
+        {% } %}
+
+        <div class="tc-picker-list">
+            {% for (var i = 0; i < items.length; i++) { var it = items[i]; %}
+            {% if (it.group) { %}
+            <div class="tc-picker-group">{%= it.group %}</div>
+            {% } else { %}
+            <div class="tc-picker-item{%= it.cls %}" role="option" tabindex="-1" data-value="{%= it.value %}"
+                data-search="{%= it.search %}" aria-selected="{%= it.selected %}">
+                <span class="tc-mini-avatar">{%= it.initials %}</span>
+                <span class="tc-picker-text">
+                    <span class="tc-picker-name">{%= it.name %}{% if (it.you) { %}<span class="tc-you">You</span>{% } %}</span>
+                    <span class="tc-picker-sub"><span>{%= it.sub %}</span><span class="tc-picker-id">{%= it.value %}</span></span>
+                </span>
+                <span class="tc-picker-check">{%= icons.check %}</span>
+            </div>
+            {% } %}
+            {% } %}
+        </div>
+
+        <div class="tc-picker-none" hidden>No employees match your search</div>
+        {% if (!has_team) { %}
+        <div class="tc-picker-note">Employees who report to you will be listed here.</div>
+        {% } %}
+    </div>
+</div>

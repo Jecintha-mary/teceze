@@ -78,12 +78,16 @@
    "fetch_from": "employee_id.employee_name",
    "fieldname": "employee_name",
    "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Employee Name",
    "options": "Employee"
   },
   {
    "fieldname": "employee_id",
    "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Employee ID",
    "options": "Employee"
   },
@@ -91,6 +95,8 @@
    "fetch_from": "employee_id.department",
    "fieldname": "department",
    "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Department"
   },
   {
@@ -101,11 +107,13 @@
    "fetch_from": "employee_id.date_of_joining",
    "fieldname": "data_of_joined",
    "fieldtype": "Data",
+   "in_list_view": 1,
    "label": "Data Of Joined"
   },
   {
    "fieldname": "date_of_resignation",
    "fieldtype": "Date",
+   "in_list_view": 1,
    "label": "Date Of Resignation"
   },
   {
@@ -117,6 +125,7 @@
   {
    "fieldname": "resignation_effective_date",
    "fieldtype": "Date",
+   "in_list_view": 1,
    "label": "Resignation Effective Date"
   },
   {
@@ -434,6 +443,7 @@
    "fetch_from": "employee_id.personal_email",
    "fieldname": "employee_email",
    "fieldtype": "Data",
+   "in_list_view": 1,
    "label": "Employee Email(Persnal)"
   },
   {
@@ -445,7 +455,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-11-11 16:47:53.577309",
+ "modified": "2026-11-16 10:52:31.118831",
  "modified_by": "Administrator",
  "module": "Teceze",
  "name": "Exit Clearance Form",

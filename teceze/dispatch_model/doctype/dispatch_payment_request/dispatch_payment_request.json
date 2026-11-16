@@ -1,0 +1,327 @@
+{
+ "actions": [],
+ "allow_bulk_edit": 1,
+ "allow_rename": 1,
+ "autoname": "PAY-REQ-.####",
+ "creation": "2026-11-04 15:09:46.232008",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "engineer_name",
+  "activity_date",
+  "fso_owner",
+  "recruiter_name",
+  "region",
+  "column_break_ohau",
+  "country",
+  "currency",
+  "client_name",
+  "project_name",
+  "bank_details_tab",
+  "account_name",
+  "acc_no",
+  "bank_name",
+  "column_break_bqfv",
+  "swift_bic",
+  "sort_code",
+  "iban",
+  "section_break_dmku",
+  "bank_address",
+  "activity_details_tab",
+  "act_src",
+  "tot_amt",
+  "currency_unit",
+  "activity_details",
+  "engineer_cost_tab",
+  "section_break_ahuq",
+  "engineer_cost",
+  "other_cost",
+  "note",
+  "column_break_gvhx",
+  "travel_cost",
+  "total_cost",
+  "engineer_total",
+  "billing_cost_tab",
+  "section_break_arwj",
+  "billing_cost",
+  "trvl_cost",
+  "billing_total",
+  "column_break_xzmu",
+  "othr_cost",
+  "tot_cost",
+  "sdm_note",
+  "finance_team_tab",
+  "section_break_wuge",
+  "status",
+  "notes"
+ ],
+ "fields": [
+  {
+   "fieldname": "engineer_name",
+   "fieldtype": "Data",
+   "label": "Engineer Name"
+  },
+  {
+   "fieldname": "column_break_ohau",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "activity_date",
+   "fieldtype": "Date",
+   "label": "Activity Date"
+  },
+  {
+   "fieldname": "fso_owner",
+   "fieldtype": "Data",
+   "label": "FSO Owner"
+  },
+  {
+   "fieldname": "recruiter_name",
+   "fieldtype": "Data",
+   "label": "Recruiter Name"
+  },
+  {
+   "fieldname": "region",
+   "fieldtype": "Data",
+   "label": "Region"
+  },
+  {
+   "fieldname": "country",
+   "fieldtype": "Data",
+   "label": "Country"
+  },
+  {
+   "fieldname": "currency",
+   "fieldtype": "Data",
+   "label": "Currency"
+  },
+  {
+   "fieldname": "client_name",
+   "fieldtype": "Data",
+   "label": "Client Name"
+  },
+  {
+   "fieldname": "project_name",
+   "fieldtype": "Data",
+   "label": "Project Name"
+  },
+  {
+   "fieldname": "bank_details_tab",
+   "fieldtype": "Tab Break",
+   "label": "Bank Details"
+  },
+  {
+   "fieldname": "account_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Name Of Account",
+   "reqd": 1
+  },
+  {
+   "fieldname": "acc_no",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Account Number",
+   "reqd": 1
+  },
+  {
+   "fieldname": "bank_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Bank Name",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_bqfv",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "swift_bic",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "SWIFT/BIC",
+   "reqd": 1
+  },
+  {
+   "fieldname": "sort_code",
+   "fieldtype": "Data",
+   "label": "Sort Code"
+  },
+  {
+   "fieldname": "iban",
+   "fieldtype": "Data",
+   "label": "IBAN"
+  },
+  {
+   "fieldname": "section_break_dmku",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "bank_address",
+   "fieldtype": "Small Text",
+   "label": "Bank Address"
+  },
+  {
+   "fieldname": "activity_details_tab",
+   "fieldtype": "Tab Break",
+   "label": "Activity Details"
+  },
+  {
+   "fieldname": "act_src",
+   "fieldtype": "Select",
+   "label": "Actvity Details Source",
+   "options": "\nDefault\nManual"
+  },
+  {
+   "fieldname": "tot_amt",
+   "fieldtype": "Data",
+   "label": "Grand Total Amount"
+  },
+  {
+   "fieldname": "currency_unit",
+   "fieldtype": "Data",
+   "label": "Currency"
+  },
+  {
+   "fieldname": "activity_details",
+   "fieldtype": "Data",
+   "label": "Activity Details"
+  },
+  {
+   "fieldname": "engineer_cost_tab",
+   "fieldtype": "Tab Break",
+   "label": "Engineer Cost"
+  },
+  {
+   "fieldname": "engineer_cost",
+   "fieldtype": "Float",
+   "label": "Engineer Cost"
+  },
+  {
+   "fieldname": "column_break_gvhx",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "other_cost",
+   "fieldtype": "Float",
+   "label": "Other Cost"
+  },
+  {
+   "fieldname": "note",
+   "fieldtype": "Small Text",
+   "label": "Note"
+  },
+  {
+   "fieldname": "travel_cost",
+   "fieldtype": "Float",
+   "label": "Travel Cost"
+  },
+  {
+   "fieldname": "total_cost",
+   "fieldtype": "Float",
+   "label": "Total cost"
+  },
+  {
+   "fieldname": "engineer_total",
+   "fieldtype": "Float",
+   "label": "Engineer Total"
+  },
+  {
+   "fieldname": "section_break_ahuq",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "billing_cost_tab",
+   "fieldtype": "Tab Break",
+   "hidden": 1,
+   "label": "Billing Cost"
+  },
+  {
+   "fieldname": "billing_cost",
+   "fieldtype": "Float",
+   "label": "Billing Cost"
+  },
+  {
+   "fieldname": "trvl_cost",
+   "fieldtype": "Float",
+   "label": "Travel Cost"
+  },
+  {
+   "fieldname": "column_break_xzmu",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "othr_cost",
+   "fieldtype": "Float",
+   "label": "Other Cost"
+  },
+  {
+   "fieldname": "tot_cost",
+   "fieldtype": "Float",
+   "label": "Total Cost"
+  },
+  {
+   "fieldname": "billing_total",
+   "fieldtype": "Float",
+   "label": "Billing Total"
+  },
+  {
+   "fieldname": "section_break_arwj",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "finance_team_tab",
+   "fieldtype": "Tab Break",
+   "hidden": 1,
+   "label": "Finance Team"
+  },
+  {
+   "fieldname": "section_break_wuge",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "options": "\nDraft\nAwaiting For Payment\nOn Hold\nPayment Done"
+  },
+  {
+   "fieldname": "notes",
+   "fieldtype": "Small Text",
+   "label": "Notes(Finance Team)"
+  },
+  {
+   "fieldname": "sdm_note",
+   "fieldtype": "Small Text",
+   "label": "SDM Note"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-11-10 17:20:56.075243",
+ "modified_by": "Administrator",
+ "module": "Dispatch Model",
+ "name": "Dispatch Payment Request",
+ "naming_rule": "Expression",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}

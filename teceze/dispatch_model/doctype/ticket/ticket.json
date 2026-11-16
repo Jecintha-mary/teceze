@@ -1,0 +1,364 @@
+{
+ "actions": [],
+ "allow_bulk_edit": 1,
+ "autoname": "naming_series:",
+ "creation": "2026-11-04 14:15:28.651795",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "details",
+  "section_break_zj7i",
+  "amended_from",
+  "naming_series",
+  "client_and_project_section",
+  "categroy",
+  "column_break_bvws",
+  "client_name",
+  "column_break_fkdw",
+  "project_name",
+  "section_break_xsgu",
+  "activity__details",
+  "ticket_details",
+  "custom_ticket_owner",
+  "timing_and_service_level_section",
+  "service_level",
+  "email_received_time",
+  "period",
+  "column_break_xlmt",
+  "country",
+  "activity_date",
+  "column_break_ovjf",
+  "city",
+  "activity_time",
+  "column_break_yxap",
+  "time_zone",
+  "activity_duration",
+  "activity_time_zone",
+  "site_and_scope_section",
+  "location_address",
+  "requirement__description",
+  "scope_of_work",
+  "tools_required",
+  "others",
+  "spoc_details_section",
+  "spoc_name",
+  "column_break_snbj",
+  "spoc_email_id",
+  "column_break_wezh",
+  "contact",
+  "more_section",
+  "fso_engineer",
+  "activity_log_tab",
+  "activity_log_html",
+  "activity_history"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_break_zj7i",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Ticket",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "bold": 1,
+   "fieldname": "client_and_project_section",
+   "fieldtype": "Section Break",
+   "label": "<b style=\"color:#2490EF;font-size:15px\">Client and Project</b>"
+  },
+  {
+   "fieldname": "column_break_bvws",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "client_name",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Client Name",
+   "options": "Client",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_fkdw",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "project_name",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Project Name",
+   "options": "Project",
+   "reqd": 1
+  },
+  {
+   "fieldname": "section_break_xsgu",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "activity__details",
+   "fieldtype": "Small Text",
+   "in_list_view": 1,
+   "label": "Activity  Details",
+   "reqd": 1
+  },
+  {
+   "bold": 1,
+   "fieldname": "timing_and_service_level_section",
+   "fieldtype": "Section Break",
+   "label": "<b style=\"color:#2490EF;font-size:15px\">Timing And Service Level</b>"
+  },
+  {
+   "fieldname": "email_received_time",
+   "fieldtype": "Datetime",
+   "label": "Email Received Time",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_xlmt",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "time_zone",
+   "fieldtype": "Select",
+   "label": "Time Zone",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_ovjf",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "service_level",
+   "fieldtype": "Select",
+   "label": "Service level",
+   "options": "Same business day(SBD)\nNext business day (NBD)",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_yxap",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "Hour",
+   "fieldname": "period",
+   "fieldtype": "Select",
+   "label": "Period",
+   "options": "Hour\nDays",
+   "reqd": 1
+  },
+  {
+   "fieldname": "activity_duration",
+   "fieldtype": "Float",
+   "label": "Activity Duration",
+   "non_negative": 1,
+   "reqd": 1
+  },
+  {
+   "bold": 1,
+   "fieldname": "site_and_scope_section",
+   "fieldtype": "Section Break",
+   "label": "<b style=\"color:#2490EF;font-size:15px\">Site And Scope</b>"
+  },
+  {
+   "fieldname": "requirement__description",
+   "fieldtype": "Small Text",
+   "label": "Requirement / Description"
+  },
+  {
+   "fieldname": "scope_of_work",
+   "fieldtype": "Small Text",
+   "label": "Scope Of Work"
+  },
+  {
+   "fieldname": "tools_required",
+   "fieldtype": "Table MultiSelect",
+   "label": "Tools Required",
+   "options": "Tool Required Items",
+   "reqd": 1
+  },
+  {
+   "bold": 1,
+   "fieldname": "spoc_details_section",
+   "fieldtype": "Section Break",
+   "label": "<b style=\"color:#2490EF;font-size:15px\">SPOC Details</b>"
+  },
+  {
+   "fieldname": "column_break_snbj",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_wezh",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "<span style=\"color:#f97316;font-style:italic;font-weight:600\">\n    Other tools or materials\n</span>",
+   "fieldname": "others",
+   "fieldtype": "Small Text",
+   "label": "Others"
+  },
+  {
+   "fieldname": "activity_date",
+   "fieldtype": "Date",
+   "label": "Activity Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "activity_time_zone",
+   "fieldtype": "Select",
+   "label": "Activity Time Zone",
+   "reqd": 1
+  },
+  {
+   "fieldname": "categroy",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Category",
+   "options": "Issue Catgeory",
+   "reqd": 1
+  },
+  {
+   "fieldname": "activity_time",
+   "fieldtype": "Time",
+   "label": "Activity Time(Site Local)",
+   "reqd": 1
+  },
+  {
+   "fieldname": "ticket_details",
+   "fieldtype": "Section Break",
+   "hidden": 1,
+   "label": "<b style=\"color:#2490EF;font-size:15px\">Ticket Details</b>"
+  },
+  {
+   "default": "__user",
+   "fieldname": "custom_ticket_owner",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Ticket Owner",
+   "options": "User",
+   "read_only": 1
+  },
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "label": "Series",
+   "options": "TD-.YYYY.-"
+  },
+  {
+   "fieldname": "activity_log_tab",
+   "fieldtype": "Tab Break",
+   "label": "<b style=\"color:#555555;font-size:15px\">Activity Log</b>"
+  },
+  {
+   "fieldname": "spoc_email_id",
+   "fieldtype": "Data",
+   "label": "Email",
+   "options": "Email",
+   "reqd": 1
+  },
+  {
+   "fieldname": "activity_history",
+   "fieldtype": "Long Text",
+   "hidden": 1,
+   "label": "Activity History",
+   "read_only": 1
+  },
+  {
+   "fieldname": "activity_log_html",
+   "fieldtype": "HTML",
+   "label": "Activity Log Html"
+  },
+  {
+   "fieldname": "contact",
+   "fieldtype": "Phone",
+   "label": "Contact Number",
+   "reqd": 1
+  },
+  {
+   "fieldname": "location_address",
+   "fieldtype": "Small Text",
+   "label": "Location / Address",
+   "reqd": 1
+  },
+  {
+   "fieldname": "spoc_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "SPOC Name",
+   "options": "Employee",
+   "reqd": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "more_section",
+   "fieldtype": "Section Break",
+   "label": "<b style=\"color:#2490EF;font-size:15px\">More</b>"
+  },
+  {
+   "fieldname": "fso_engineer",
+   "fieldtype": "Link",
+   "label": "FSO Engineer Alignment",
+   "options": "FSO Engineer Alignment",
+   "read_only": 1
+  },
+  {
+   "fieldname": "details",
+   "fieldtype": "Tab Break",
+   "label": "<b style=\"color:#555555;font-size:15px\">Details</b>"
+  },
+  {
+   "fieldname": "country",
+   "fieldtype": "Link",
+   "label": "Country",
+   "options": "Country",
+   "reqd": 1
+  },
+  {
+   "fieldname": "city",
+   "fieldtype": "Link",
+   "label": "City",
+   "options": "City",
+   "reqd": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2026-11-16 12:16:41.479367",
+ "modified_by": "Administrator",
+ "module": "Dispatch Model",
+ "name": "Ticket",
+ "naming_rule": "By \"Naming Series\" field",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}

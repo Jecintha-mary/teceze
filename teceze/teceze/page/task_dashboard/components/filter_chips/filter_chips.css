@@ -1,0 +1,33 @@
+/* ===== Filter chips: a row of pill buttons, one can be active ===== */
+.tc-chips {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--margin-sm);
+}
+
+/* full-width row under a table header */
+.tc-chips-row {
+    padding: 0 var(--padding-lg) var(--padding-md);
+}
+
+.tc-chip {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    color: var(--text-color);
+    font-size: var(--text-sm);
+    padding: var(--padding-xs) var(--padding-md);
+    border-radius: var(--border-radius-full);
+    cursor: pointer;
+}
+
+.tc-chip:hover {
+    background: var(--subtle-fg);
+}
+
+.tc-chip.active {
+    background: var(--tc-brand);
+    border-color: var(--tc-brand);
+    color: var(--neutral, #fff);
+    font-weight: 600;
+}

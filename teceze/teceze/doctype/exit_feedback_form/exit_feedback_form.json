@@ -36,6 +36,8 @@
   {
    "fieldname": "employee_id",
    "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Employee Id",
    "options": "Employee"
   },
@@ -43,18 +45,22 @@
    "fetch_from": "employee_id.employee_name",
    "fieldname": "name1",
    "fieldtype": "Data",
+   "in_list_view": 1,
    "label": "Name"
   },
   {
    "fetch_from": "employee_id.department",
    "fieldname": "department",
    "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Department"
   },
   {
    "fetch_from": "employee_id.custom_reporting_manager",
    "fieldname": "manager",
    "fieldtype": "Data",
+   "in_list_view": 1,
    "label": "Manager"
   },
   {
@@ -65,6 +71,7 @@
   {
    "fieldname": "reason_for_leaving",
    "fieldtype": "Select",
+   "in_list_view": 1,
    "label": "Reason for Leaving",
    "options": "\nNew job opportunity\nCareer change\nRelocation\nPersonal reasons\nHealth reasons\nRetirement\nDissatisfaction with role/company\nOthers"
   },
@@ -115,6 +122,7 @@
   {
    "fieldname": "date_of_interview",
    "fieldtype": "Date",
+   "in_list_view": 1,
    "label": "Date Of Interview"
   },
   {
@@ -170,7 +178,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-07-02 11:49:50.813284",
+ "modified": "2026-11-16 10:53:07.738266",
  "modified_by": "Administrator",
  "module": "Teceze",
  "name": "Exit Feedback Form",

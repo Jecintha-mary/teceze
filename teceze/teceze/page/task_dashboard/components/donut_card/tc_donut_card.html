@@ -1,0 +1,49 @@
+<div class="tc-card tc-donut-card">
+    <div class="tc-card-head">
+        <h5 class="tc-section-title">{%= title %}
+            {% if (info) { %}<span class="tc-muted" title="{%= info %}">{%= info_icon %}</span>{% } %}
+        </h5>
+        {% if (badge) { %}<span class="tc-pill tc-tag tc-donut-badge{%= badge_cls %}">{%= badge %}</span>{% } %}
+    </div>
+
+    {% if (total) { %}
+    <div class="tc-donut-body">
+        <div class="tc-donut-wrap">
+            <div class="tc-donut-chart">
+                <svg class="tc-donut-svg" viewBox="0 0 100 100" role="img" aria-label="{%= title %}">
+                    <g transform="rotate(-90 50 50)">
+                        {% for (var i = 0; i < slices.length; i++) { var s = slices[i]; %}
+                        <circle class="{%= s.color_cls %}" cx="50" cy="50" r="44" pathLength="100"
+                            stroke-dasharray="{%= s.dash %}" stroke-dashoffset="{%= s.offset %}">
+                            <title>{%= s.title %}</title>
+                        </circle>
+                        {% } %}
+                    </g>
+                </svg>
+                <div class="tc-donut-center">
+                    <span class="tc-donut-total">{%= total %}</span>
+                    <span class="tc-label tc-donut-caption">{%= caption %}</span>
+                </div>
+            </div>
+            <div class="tc-donut-legend">
+                {% for (var i = 0; i < legend.length; i++) { var l = legend[i]; %}
+                <div class="tc-donut-row{%= l.color_cls %}">
+                    <span class="tc-dot"></span>
+                    <span class="tc-donut-name">{%= l.label %}</span>
+                    <b class="tc-donut-count">{%= l.value %}</b>
+                    <span class="tc-donut-pct">({%= l.pct %}%)</span>
+                </div>
+                {% } %}
+            </div>
+        </div>
+
+        {%= extra_html %}
+
+        {% if (footer) { %}
+        <div class="tc-label tc-donut-foot"><span>{%= footer.label %}</span><b class="{%= footer.color_cls %}">{%= footer.value %}</b></div>
+        {% } %}
+    </div>
+    {% } else { %}
+    <div class="tc-empty">{%= empty_text %}</div>
+    {% } %}
+</div>

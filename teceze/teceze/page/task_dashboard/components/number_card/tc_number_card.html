@@ -1,0 +1,15 @@
+<div class="tc-number-cards">
+    {% for (var i = 0; i < cards.length; i++) { var c = cards[i]; %}
+    <div class="tc-card tc-number-card{%= c.color_cls %}">
+        <div class="tc-number-card-top">
+            <span class="tc-label tc-number-card-label">{%= c.label %}</span>
+            <span class="tc-number-card-icon">{%= c.icon_html %}</span>
+        </div>
+        <div class="tc-number-card-main">
+            <span class="tc-number-card-value">{%= c.value %}</span>
+            {% if (c.badge) { %}<span class="tc-pill tc-number-card-badge">{%= c.badge %}</span>{% } %}
+        </div>
+        <div class="tc-muted">{%= c.note %}</div>
+    </div>
+    {% } %}
+</div>

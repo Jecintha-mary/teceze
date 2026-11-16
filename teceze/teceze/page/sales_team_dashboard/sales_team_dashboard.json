@@ -1,0 +1,29 @@
+{
+ "content": null,
+ "creation": "2026-11-15 11:15:48.351829",
+ "docstatus": 0,
+ "doctype": "Page",
+ "idx": 0,
+ "modified": "2026-11-15 11:57:54.733783",
+ "modified_by": "Administrator",
+ "module": "Teceze",
+ "name": "sales-team-dashboard",
+ "owner": "Administrator",
+ "page_name": "sales-team-dashboard",
+ "roles": [
+  {
+   "role": "System Manager"
+  },
+  {
+   "role": "Sales Manager"
+  },
+  {
+   "role": "Sales User"
+  }
+ ],
+ "script": null,
+ "standard": "Yes",
+ "style": null,
+ "system_page": 0,
+ "title": "Sales Team Dashboard "
+}

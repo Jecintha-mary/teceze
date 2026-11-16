@@ -1,0 +1,22 @@
+/* Task dashboard: page layout only.
+   The look of each block (cards, charts, tables ...) comes from components/. */
+.td-root {
+    padding: var(--padding-sm) var(--tc-gutter) var(--padding-lg);
+}
+
+/* space between the blocks */
+.td-root > * {
+    margin-bottom: var(--margin-lg);
+}
+
+/* status / project / sprint cards side by side, stacking on small screens */
+.td-panels {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr));
+    gap: var(--margin-md);
+}
+
+/* keep the Subject column readable */
+.td-subject {
+    min-width: 10.5rem;
+}
