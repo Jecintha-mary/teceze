@@ -37,13 +37,6 @@
  {
   "docstatus": 0,
   "doctype": "Workflow Action Master",
-  "modified": "2026-10-08 23:37:14.520682",
-  "name": "Submit Quotation",
-  "workflow_action_name": "Submit Quotation"
- },
- {
-  "docstatus": 0,
-  "doctype": "Workflow Action Master",
   "modified": "2026-06-10 15:03:44.701465",
   "name": "Review",
   "workflow_action_name": "Review"
@@ -93,13 +86,6 @@
  {
   "docstatus": 0,
   "doctype": "Workflow Action Master",
-  "modified": "2026-10-08 23:37:14.516436",
-  "name": "Prepare Quotation",
-  "workflow_action_name": "Prepare Quotation"
- },
- {
-  "docstatus": 0,
-  "doctype": "Workflow Action Master",
   "modified": "2026-06-10 15:03:44.700673",
   "name": "Reject",
   "workflow_action_name": "Reject"
@@ -110,20 +96,6 @@
   "modified": "2026-10-08 23:37:14.507601",
   "name": "Respond",
   "workflow_action_name": "Respond"
- },
- {
-  "docstatus": 0,
-  "doctype": "Workflow Action Master",
-  "modified": "2026-10-08 23:37:14.529553",
-  "name": "Won",
-  "workflow_action_name": "Won"
- },
- {
-  "docstatus": 0,
-  "doctype": "Workflow Action Master",
-  "modified": "2026-10-08 23:37:14.534118",
-  "name": "Lost",
-  "workflow_action_name": "Lost"
  },
  {
   "docstatus": 0,
@@ -156,6 +128,69 @@
  {
   "docstatus": 0,
   "doctype": "Workflow Action Master",
+  "modified": "2026-09-30 18:20:50.735137",
+  "name": "Save",
+  "workflow_action_name": "Save"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow Action Master",
+  "modified": "2026-11-12 12:20:07.855683",
+  "name": "Assign",
+  "workflow_action_name": "Assign"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow Action Master",
+  "modified": "2026-11-12 12:20:51.363016",
+  "name": "Start Process",
+  "workflow_action_name": "Start Process"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow Action Master",
+  "modified": "2026-11-12 12:20:59.113733",
+  "name": "Send to SDC",
+  "workflow_action_name": "Send to SDC"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow Action Master",
+  "modified": "2026-11-12 12:21:05.594416",
+  "name": "Validate",
+  "workflow_action_name": "Validate"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow Action Master",
+  "modified": "2026-11-12 12:21:54.823960",
+  "name": "Complete Sign-off",
+  "workflow_action_name": "Complete Sign-off"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow Action Master",
+  "modified": "2026-11-16 15:48:29.363041",
+  "name": "Send back to FSO",
+  "workflow_action_name": "Send back to FSO"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow Action Master",
+  "modified": "2026-10-08 23:37:14.520682",
+  "name": "Submit Quotation",
+  "workflow_action_name": "Submit Quotation"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow Action Master",
+  "modified": "2026-10-08 23:37:14.516436",
+  "name": "Prepare Quotation",
+  "workflow_action_name": "Prepare Quotation"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow Action Master",
   "modified": "2026-06-11 13:31:29.383315",
   "name": "Submit",
   "workflow_action_name": "Submit"
@@ -163,8 +198,36 @@
  {
   "docstatus": 0,
   "doctype": "Workflow Action Master",
-  "modified": "2026-09-30 18:20:50.735137",
-  "name": "Save",
-  "workflow_action_name": "Save"
+  "modified": "2026-11-06 15:35:15.530092",
+  "name": "Revert",
+  "workflow_action_name": "Revert"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow Action Master",
+  "modified": "2026-10-08 23:37:14.529553",
+  "name": "Won",
+  "workflow_action_name": "Won"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow Action Master",
+  "modified": "2026-10-08 23:37:14.534118",
+  "name": "Lost",
+  "workflow_action_name": "Lost"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow Action Master",
+  "modified": "2026-11-12 12:21:43.547618",
+  "name": "Send for Billing",
+  "workflow_action_name": "Send for Billing"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow Action Master",
+  "modified": "2026-11-12 12:22:02.282790",
+  "name": "Send to Finance",
+  "workflow_action_name": "Send to Finance"
  }
 ]

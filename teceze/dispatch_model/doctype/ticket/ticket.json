@@ -21,18 +21,23 @@
   "ticket_details",
   "custom_ticket_owner",
   "timing_and_service_level_section",
-  "service_level",
   "email_received_time",
-  "period",
   "column_break_xlmt",
   "country",
-  "activity_date",
   "column_break_ovjf",
   "city",
-  "activity_time",
   "column_break_yxap",
+  "filter_time_zone",
   "time_zone",
+  "section_break_kyey",
+  "service_level",
+  "activity_date",
+  "column_break_cwcp",
   "activity_duration",
+  "activity_time",
+  "column_break_vqry",
+  "period",
+  "act_time",
   "activity_time_zone",
   "site_and_scope_section",
   "location_address",
@@ -129,8 +134,8 @@
   {
    "fieldname": "time_zone",
    "fieldtype": "Select",
-   "label": "Time Zone",
-   "reqd": 1
+   "hidden": 1,
+   "label": "Time Zone"
   },
   {
    "fieldname": "column_break_ovjf",
@@ -214,8 +219,8 @@
   {
    "fieldname": "activity_time_zone",
    "fieldtype": "Select",
-   "label": "Activity Time Zone",
-   "reqd": 1
+   "hidden": 1,
+   "label": "Activity Time Zone"
   },
   {
    "fieldname": "categroy",
@@ -329,13 +334,37 @@
    "label": "City",
    "options": "City",
    "reqd": 1
+  },
+  {
+   "fieldname": "filter_time_zone",
+   "fieldtype": "Link",
+   "label": "Time Zone",
+   "options": "Time Zone"
+  },
+  {
+   "fieldname": "act_time",
+   "fieldtype": "Link",
+   "label": "Activity Time Zone",
+   "options": "Time Zone"
+  },
+  {
+   "fieldname": "section_break_kyey",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_cwcp",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_vqry",
+   "fieldtype": "Column Break"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-11-16 12:16:41.479367",
+ "modified": "2026-11-16 17:47:00.845982",
  "modified_by": "Administrator",
  "module": "Dispatch Model",
  "name": "Ticket",

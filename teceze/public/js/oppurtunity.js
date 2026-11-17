@@ -1,11 +1,10 @@
 /* =========================================================================
    OPPORTUNITY SCRIPT  (/assets/teceze/js/oppurtunity.js)
 
-   Sections
-     1. Shared helpers        -> exposed as window.teceze (Quotation uses them)
-     2. Service Vertical      -> item columns + automatic Item on every row
-     3. Opportunity UI        -> styles, pipeline, quotation items table
-     4. Form events           -> Opportunity doctype handlers
+     1. Shared helpers      -> window.teceze (Quotation uses them too)
+     2. Service Vertical    -> item columns + automatic Item on every row
+     3. Opportunity UI      -> pipeline, quotation items, clarifications
+     4. Form events         -> ONE handler block for the Opportunity doctype
    ========================================================================= */
 
 window.teceze = window.teceze || {};
@@ -13,8 +12,7 @@ window.teceze = window.teceze || {};
 (function (ns) {
     "use strict";
 
-    // This file can be loaded twice (Quotation requires it too).
-    // Registering the handlers twice would make every event fire twice.
+    // Loaded twice (Quotation requires it too) -> register everything only once
     if (ns.loaded) return;
     ns.loaded = true;
 
@@ -31,7 +29,7 @@ window.teceze = window.teceze || {};
     // "Hours Worked" / "hours_worked" / "hours-worked" -> "hoursworked"
     const norm = v => String(v ?? "").trim().toLowerCase().replace(/[\s_-]+/g, "");
 
-    // Fields that actually hold a value (no Section Break, Column Break, etc.)
+    // Fields that hold a value (no Section Break, Column Break, ...)
     const value_fields = doctype =>
         frappe.get_meta(doctype).fields.filter(df => !frappe.model.no_value_type.includes(df.fieldtype));
 
@@ -41,15 +39,10 @@ window.teceze = window.teceze || {};
         return key ? fields.find(df => norm(df.fieldname) === key || norm(df.label) === key) : null;
     };
 
-    // Update one or many fields of a saved document
     const set_values = (doctype, name, values) =>
-        frappe.call({
-            method: "frappe.client.set_value",
-            args: { doctype, name, fieldname: values },
-        });
+        frappe.call({ method: "frappe.client.set_value", args: { doctype, name, fieldname: values } });
 
     // Fetch a document and reuse it for a few minutes
-    // (expires, so edits to a Service Vertical are picked up without a hard reload)
     const doc_cache = {};
     const get_cached_doc = async (doctype, name) => {
         const key = `${doctype}::${name}`;
@@ -64,15 +57,13 @@ window.teceze = window.teceze || {};
     Object.assign(ns, { norm, match_field, value_fields, set_values, get_cached_doc });
 
     /* =====================================================================
-       2. SERVICE VERTICAL -> ITEMS
-          Works for any form with an "items" table (Opportunity, Quotation)
+       2. SERVICE VERTICAL -> ITEMS   (any form with an "items" table)
        ===================================================================== */
 
-    const original_reqd = {};              // each field's original "mandatory" flag
+    const original_reqd = {};              // field -> original "mandatory" flag
     const mappings_registered = new Set(); // "Doctype.fieldname" already wired
-    const item_requests = {};              // item code -> pending lookup (avoids duplicate inserts)
+    const item_requests = {};              // item code -> pending lookup (no duplicate inserts)
 
-    /* ---------- Item lookup / creation ---------- */
     async function get_or_create_item(item_code) {
         const { message } = await frappe.db.get_value("Item", item_code, [
             "name", "item_code", "item_name", "stock_uom",
@@ -95,24 +86,21 @@ window.teceze = window.teceze || {};
     function get_item(item_code) {
         if (!item_requests[item_code]) {
             item_requests[item_code] = get_or_create_item(item_code).catch(error => {
-                delete item_requests[item_code]; // allow a retry next time
+                delete item_requests[item_code]; // allow a retry
                 throw error;
             });
         }
         return item_requests[item_code];
     }
 
-    /* ---------- Fill one row with the Service Vertical's Item ---------- */
-    // Synchronous: uses the item already loaded by ensure_items()
+    // Fill one row with the Service Vertical's Item (uses the item loaded by ensure_items)
     ns.fill_row = function (frm, row) {
         const cached = frm.sv_item;
         if (!row || !cached || cached.vertical !== frm.doc.custom_service_vertical) return;
 
         const { item } = cached;
         const set = (field, value, force = false) => {
-            if (value && frappe.meta.has_field(row.doctype, field) && (force || !row[field])) {
-                row[field] = value;
-            }
+            if (value && frappe.meta.has_field(row.doctype, field) && (force || !row[field])) row[field] = value;
         };
 
         set("item_code", item.item_code, true);
@@ -125,16 +113,11 @@ window.teceze = window.teceze || {};
     // Load the Item for the current Service Vertical and put it on every row
     ns.ensure_items = async function (frm, table = ITEM_TABLE) {
         const vertical = frm.doc.custom_service_vertical;
-        if (!vertical) {
-            frm.sv_item = null;
-            return null;
-        }
+        frm.sv_item = null;
+        if (!vertical) return null;
 
         const service = await get_cached_doc("Service Vertical", vertical);
-        if (!service.item_name) {
-            frm.sv_item = null;
-            return null;
-        }
+        if (!service.item_name) return null;
 
         const item = await get_item(service.item_name);
         frm.sv_item = { vertical, item };
@@ -144,8 +127,8 @@ window.teceze = window.teceze || {};
         return item;
     };
 
-    // Call from "validate": makes sure rows have an Item BEFORE the server checks them
-    //   strict = true  -> also block saving if any row is still without an Item
+    // Call from "validate": rows get an Item BEFORE the server checks them
+    //   strict = true -> also block saving if any row is still without an Item
     ns.validate_items = async function (frm, strict = false, table = ITEM_TABLE) {
         if (!(frm.doc[table] || []).length) return;
 
@@ -153,26 +136,19 @@ window.teceze = window.teceze || {};
             await ns.ensure_items(frm, table);
         } catch (error) {
             console.error("Item setup failed:", error);
-            frappe.throw(
-                __("Could not set the Item for Service Vertical {0}. Check that the Item can be created.", [
-                    frm.doc.custom_service_vertical,
-                ])
-            );
+            frappe.throw(__("Could not set the Item for Service Vertical {0}. Check that the Item can be created.",
+                [frm.doc.custom_service_vertical]));
         }
 
         if (strict && (frm.doc[table] || []).some(row => !row.item_code)) {
-            frappe.throw(
-                frm.doc.custom_service_vertical
-                    ? __("Item is not set. Add an Item to the Service Vertical {0}.", [frm.doc.custom_service_vertical])
-                    : __("Item is not set. Please select a Service Vertical.")
-            );
+            frappe.throw(frm.doc.custom_service_vertical
+                ? __("Item is not set. Add an Item to the Service Vertical {0}.", [frm.doc.custom_service_vertical])
+                : __("Item is not set. Please select a Service Vertical."));
         }
     };
 
-    /* ---------- Grid columns ---------- */
     // config = Service Vertical "required_fields" rows, or null to show everything
     function apply_grid_columns(grid, fields, config) {
-        const show_all = !config;
         const chosen = {}; // fieldname -> config row
 
         (config || []).forEach(row => {
@@ -181,20 +157,22 @@ window.teceze = window.teceze || {};
             else console.warn("Service Vertical field not found:", row.field || row.label);
         });
 
-        const count = show_all ? fields.length : Object.keys(chosen).length;
-        const columns = Math.max(1, Math.floor(10 / (count || 1)));
+        const count = config ? Object.keys(chosen).length : fields.length;
+        const columns = Math.max(1, Math.floor(20 / (count || 1)));
+        const is_opportunity = grid.frm?.doctype === "Opportunity";
 
-fields.forEach(df => {
-    const row = chosen[df.fieldname];
-    const show = show_all || !!row;
-    const set = (prop, value) => grid.update_docfield_property(df.fieldname, prop, value);
+        fields.forEach(df => {
+            const row = chosen[df.fieldname];
+            const show = !config || !!row;
+            const set = (prop, value) => grid.update_docfield_property(df.fieldname, prop, value);
 
-    // Always hide Amount in Opportunity only
-    if (grid.frm?.doctype === "Opportunity" && df.fieldname === "amount") {
-        set("hidden", 1);
-        set("in_list_view", 0);
-        return;
-    }
+            // Amount is never shown in the Opportunity item grid
+            if (is_opportunity && df.fieldname === "amount") {
+                set("hidden", 1);
+                set("in_list_view", 0);
+                return;
+            }
+
             if (!(df.fieldname in original_reqd)) original_reqd[df.fieldname] = df.reqd;
 
             set("hidden", show ? 0 : 1);
@@ -234,8 +212,7 @@ fields.forEach(df => {
         const grid = frm.fields_dict[table]?.grid;
         if (!grid) return;
 
-        // Newer call wins if two run at once
-        const run = (frm.__sv_run = (frm.__sv_run || 0) + 1);
+        const run = (frm.__sv_run = (frm.__sv_run || 0) + 1); // newer call wins
         const fields = value_fields(grid.doctype);
         frm.sv_config = [];
 
@@ -253,8 +230,7 @@ fields.forEach(df => {
             register_mappings(fields, grid.doctype);
         } catch (error) {
             console.error("Failed to load Service Vertical:", error);
-            frappe.show_alert({ message: __("Could not load Service Vertical settings."), indicator: "red" });
-            return;
+            return frappe.show_alert({ message: __("Could not load Service Vertical settings."), indicator: "red" });
         }
 
         try {
@@ -311,7 +287,7 @@ fields.forEach(df => {
     };
     const icon = status => `<svg viewBox="0 0 24 24">${ICONS[status] || '<circle cx="12" cy="12" r="8"/>'}</svg>`;
 
-    // NOTE: must match the Status options exactly ("Negotitation" is spelled as in your original)
+    // Must match the Status options exactly
     const PIPELINE_STAGES = ["Open", "Presales Assessment", "Quotation", "negotiation", "Converted"];
     const STATE_LABEL = { completed: "COMPLETED", active: "CURRENT" };
 
@@ -337,8 +313,7 @@ fields.forEach(df => {
 
         let html = PIPELINE_STAGES.map((name, i) => {
             const state = cur > i ? "completed" : cur === i ? "active" : "";
-            const line_state =
-                i < cur - 1 ? "completed" : i === cur - 1 || (cur === 0 && i === 0) ? "active" : "";
+            const line_state = i < cur - 1 ? "completed" : i === cur - 1 || (cur === 0 && i === 0) ? "active" : "";
             return stage(name, state) + (i < PIPELINE_STAGES.length - 1 ? line(line_state) : "");
         }).join("");
 
@@ -401,18 +376,14 @@ fields.forEach(df => {
             if (amount) columns.push(amount);
 
             if (!columns.length) {
-                return box(
-                    __("No matching configured fields or Amount field found. Please check the Service Vertical configuration."),
-                    "#b45309", "#fde68a"
-                );
+                return box(__("No matching configured fields or Amount field found. Please check the Service Vertical configuration."),
+                    "#b45309", "#fde68a");
             }
 
             const cell = (df, row) => {
                 const value = row[df.fieldname];
                 if (is_blank(value)) return "—";
-                return df.fieldtype === "Currency"
-                    ? format_currency(flt(value), row.currency || currency)
-                    : esc(value);
+                return df.fieldtype === "Currency" ? format_currency(flt(value), row.currency || currency) : esc(value);
             };
 
             const head = columns.map(df => `<th style="${TH}">${esc(df.label)}</th>`).join("");
@@ -424,9 +395,7 @@ fields.forEach(df => {
                 <div style="border:1px solid #e2e8f0;border-radius:12px;overflow:hidden;background:#fff;">
                     <div style="padding:16px 18px;border-bottom:1px solid #e2e8f0;">
                         <div style="font-size:16px;font-weight:700;color:#0f172a;">Quotation Items</div>
-                        <div style="font-size:12px;color:#64748b;margin-top:4px;">
-                            ${esc(quotation.name)} · ${items.length} item(s)
-                        </div>
+                        <div style="font-size:12px;color:#64748b;margin-top:4px;">${esc(quotation.name)} · ${items.length} item(s)</div>
                     </div>
                     <div style="overflow-x:auto;">
                         <table style="width:100%;border-collapse:collapse;font-size:13px;min-width:max-content;">
@@ -447,19 +416,36 @@ fields.forEach(df => {
         }
     }
 
-    /* ---------- Small actions ---------- */
+    /* ---------- Amounts ---------- */
     function calculate_base_amount(frm) {
-        frm.set_value("base_opportunity_amount", flt(frm.doc.opportunity_amount) * flt(frm.doc.custom_exchange_rates));
+        frm.set_value("base_opportunity_amount", flt(frm.doc.opportunity_amount) * (flt(frm.doc.custom_exchange_rates) || 1));
     }
 
+    function calculate_opportunity_amount(frm) {
+        const total = (frm.doc.items || []).reduce((sum, row) => sum + flt(row.amount), 0);
+        frm.set_value("opportunity_amount", total);
+    }
+
+    /* ---------- Buttons ---------- */
     function toggle_create_menu(frm) {
         setTimeout(() => {
-            frm.page.wrapper
-                .find('.inner-group-button[data-label="Create"]')
-                .toggle(frm.doc.status === "Quotation");
+            frm.page.wrapper.find('.inner-group-button[data-label="Create"]').toggle(frm.doc.status === "Quotation");
         }, 100);
     }
 
+    function toggle_lost_button(frm) {
+        frm.remove_custom_button(__("Lost"));
+
+        const status = (frm.doc.status || "").trim().toLowerCase();
+        if (frm.is_new() || !["closed", "not feasible"].includes(status)) return;
+
+        frm.add_custom_button(__("Lost"), () => {
+            frm.set_df_property("status", "hidden", 0);
+            frm.set_value("status", "Closed").then(() => frm.save());
+        });
+    }
+
+    /* ---------- Quotation / revision workflow ---------- */
     async function create_quotation_from_workflow(frm) {
         if (frm.is_new()) return;
 
@@ -478,11 +464,7 @@ fields.forEach(df => {
             });
             if (!mapped.message) throw new Error("Quotation mapping returned no document");
 
-            const result = await frappe.call({
-                method: "frappe.client.insert",
-                args: { doc: mapped.message },
-            });
-
+            const result = await frappe.call({ method: "frappe.client.insert", args: { doc: mapped.message } });
             if (result.message) {
                 frappe.show_alert({
                     message: __("Quotation {0} created successfully", [result.message.name]),
@@ -491,11 +473,7 @@ fields.forEach(df => {
             }
         } catch (error) {
             console.error("Quotation creation failed:", error);
-            frappe.msgprint({
-                title: __("Quotation Creation Failed"),
-                message: __("Unable to create the Quotation."),
-                indicator: "red",
-            });
+            frappe.msgprint({ title: __("Quotation Creation Failed"), message: __("Unable to create the Quotation."), indicator: "red" });
         }
     }
 
@@ -535,17 +513,247 @@ fields.forEach(df => {
             });
 
             // Closed without submitting -> cancel the workflow action
-            dialog.$wrapper.on("hidden.bs.modal", () => {
-                if (!done) reject(new Error("Revision cancelled"));
-            });
+            dialog.$wrapper.on("hidden.bs.modal", () => { if (!done) reject(new Error("Revision cancelled")); });
 
             dialog.show();
             $("#freeze").hide();
         });
     }
 
+    /* ---------- Presales owner (users of the Service Vertical's department) ---------- */
+    async function load_presales_owners(frm) {
+        frm.presales_owner_users = [];
+
+        try {
+            const service = await get_cached_doc("Service Vertical", frm.doc.custom_service_vertical);
+
+            if (service.department) {
+                const employees = await frappe.db.get_list("Employee", {
+                    filters: { department: service.department, status: "Active", user_id: ["is", "set"] },
+                    fields: ["user_id"],
+                    limit_page_length: 5000,
+                });
+                const user_ids = [...new Set(employees.map(e => e.user_id).filter(Boolean))];
+
+                if (user_ids.length) {
+                    const users = await frappe.db.get_list("User", {
+                        filters: { name: ["in", user_ids], enabled: 1 },
+                        fields: ["name"],
+                        limit_page_length: 5000,
+                    });
+                    frm.presales_owner_users = users.map(u => u.name);
+                }
+            }
+        } catch (error) {
+            console.error("Presales Owner loading error:", error);
+        }
+
+        frm.refresh_field("custom_presales_owner");
+    }
+
+    /* ---------- Field input rules ---------- */
+    function lock_past_closing_date(frm) {
+        const field = frm.fields_dict.expected_closing;
+        if (!field?.$input) return;
+
+        const lock = () => {
+            const dp = field.datepicker;
+            if (!dp || dp._past_locked) return;
+
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            dp.update({
+                minDate: today,
+                onRenderCell: (date, type) => (type === "day" && date < today ? { disabled: true } : {}),
+            });
+            dp._past_locked = true;
+        };
+
+        lock();
+        setTimeout(lock, 500);
+        field.$input.off("focus.mindate").on("focus.mindate", lock);
+    }
+
+    function restrict_inputs(frm) {
+        // Probability: digits only, 0-100
+        frm.fields_dict.probability?.$input?.off("input.probcheck").on("input.probcheck", function () {
+            let val = $(this).val().replace(/\D/g, "").slice(0, 3);
+            if (parseInt(val, 10) > 100) val = val.slice(0, -1);
+            $(this).val(val);
+        });
+
+        // Amount: digits and one dot, max 2 decimals
+        frm.fields_dict.opportunity_amount?.$input?.off("input.amtcheck").on("input.amtcheck", function () {
+            const [whole, ...rest] = $(this).val().replace(/[^0-9.]/g, "").split(".");
+            $(this).val(rest.length ? `${whole}.${rest.join("").slice(0, 2)}` : whole);
+        });
+    }
+
+    /* ---------- Clarification center (Python APIs: teceze.api.clarification) ---------- */
+    const CLARIFICATION_API = "teceze.api.clarification.";
+
+    function render_clarification_center(frm) {
+        const field = frm.fields_dict.custom_clarification_html;
+        if (!field) return;
+
+        const $wrapper = field.$wrapper;
+        if (frm.is_new()) return $wrapper.empty();
+
+        const roles = frappe.user_roles || [];
+        const needed = frm.doc.workflow_state === "Clarification Needed";
+        const can_raise = roles.includes("Clarification Raiser") && needed;
+        const can_respond = roles.includes("Responder") && needed;
+        let threads = {};
+
+        const fmt_date = v => (v ? esc(frappe.datetime.str_to_user(v)) : "");
+
+        // One dialog for raise / edit / respond
+        function message_dialog({ title, label, button, method, args = {}, value = "" }) {
+            const dialog = new frappe.ui.Dialog({
+                title: __(title),
+                fields: [{ fieldname: "message", label: __(label), fieldtype: "Small Text", reqd: 1, default: value }],
+                primary_action_label: __(button),
+                primary_action({ message }) {
+                    message = (message || "").trim();
+                    if (!message) return frappe.msgprint(__("Please enter a value."));
+
+                    dialog.disable_primary_action();
+                    frappe.call({
+                        method: CLARIFICATION_API + method,
+                        args: { opportunity: frm.doc.name, message, ...args },
+                        freeze: true,
+                        callback(r) {
+                            if (!r.exc) {
+                                dialog.hide();
+                                render_clarification_center(frm);
+                            }
+                        },
+                        always: () => dialog.enable_primary_action(),
+                    });
+                },
+            });
+            dialog.show();
+        }
+
+        const thread_of = el => threads[$(el).attr("data-name")];
+
+        $wrapper.html(`
+            <div class="clarification-center">
+                <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:18px;">
+                    <div>
+                        <h3 style="margin:0 0 5px 0">Clarifications</h3>
+                        <div class="text-muted">Clarification history and responses</div>
+                    </div>
+                    ${can_raise ? `<button type="button" class="btn btn-primary btn-sm add-clarification">
+                        <span class="fa fa-plus"></span> Raise clarification</button>` : ""}
+                </div>
+                <div class="clarification-summary" style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px"></div>
+                <div class="clarification-list">
+                    <div class="text-muted" style="padding:20px;text-align:center">Loading clarifications...</div>
+                </div>
+            </div>`);
+
+        // Handlers are namespaced so a re-render never doubles them
+        $wrapper.off(".clarification")
+            .on("click.clarification", ".add-clarification", () =>
+                message_dialog({ title: "Raise Clarification", label: "Clarification", button: "Submit", method: "create_clarification" }))
+            .on("click.clarification", ".edit-clarification", function () {
+                const item = thread_of(this);
+                if (item) message_dialog({
+                    title: "Edit Clarification", label: "Clarification", button: "Save",
+                    method: "update_clarification", args: { clarification_name: item.name }, value: item.message || "",
+                });
+            })
+            .on("click.clarification", ".reply-clarification", function () {
+                const item = thread_of(this);
+                if (item) message_dialog({
+                    title: "Respond to Clarification", label: "Response", button: "Submit Response",
+                    method: "submit_response", args: { clarification_name: item.name },
+                });
+            });
+
+        const summary_card = (label, count) => `
+            <div style="flex:1;min-width:100px;padding:12px 14px;border:1px solid var(--border-color);border-radius:10px;">
+                <div class="text-muted" style="font-size:12px">${label}</div>
+                <div style="font-size:22px;font-weight:600;margin-top:4px">${count}</div>
+            </div>`;
+
+        const thread_card = item => {
+            const answered = !!item.response;
+            const breached = !answered && item.status === "SLA Breach";
+            const [status, color] = answered ? ["Answered", "var(--green-600)"]
+                : breached ? ["SLA Breach", "var(--red-600)"]
+                : ["Waiting", "var(--orange-600)"];
+            const name = esc(item.name);
+
+            const edit_button = can_raise && !answered
+                ? `<div style="display:flex;justify-content:flex-end;margin-top:12px;">
+                       <button type="button" class="btn btn-default btn-xs edit-clarification" data-name="${name}">${__("Edit Clarification")}</button>
+                   </div>` : "";
+
+            const reply_button = can_respond && !answered
+                ? `<div style="margin-top:10px">
+                       <button type="button" class="btn btn-primary btn-xs reply-clarification" data-name="${name}">${__("Respond")}</button>
+                   </div>` : "";
+
+            const response_html = answered
+                ? `<div style="margin:16px 0 0 18px;padding:14px 16px;border-left:3px solid var(--green-500);border-radius:0 9px 9px 0;background:var(--subtle-fg);">
+                       <div style="font-weight:600;margin-bottom:8px"><span class="fa fa-reply"></span> ${__("Response")}</div>
+                       <div style="white-space:pre-wrap;overflow-wrap:anywhere">${esc(item.response.message)}</div>
+                       <div class="text-muted" style="font-size:12px;margin-top:10px">${esc(item.response.owner)} · ${fmt_date(item.response.creation)}</div>
+                   </div>`
+                : `<div style="margin:14px 0 0 18px;padding:12px;border:1px dashed var(--border-color);border-radius:8px;">
+                       <div class="text-muted">${__("Awaiting response")}</div>
+                       ${reply_button}
+                   </div>`;
+
+            return `
+                <article style="border:1px solid var(--border-color);border-radius:12px;padding:18px;margin-bottom:14px;background:var(--card-bg);">
+                    <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;">
+                        <div style="font-weight:650;font-size:14px"><span class="fa fa-commenting-o"></span> ${__("Clarification")}</div>
+                        <span style="color:${color};font-size:12px;font-weight:600;">${status}</span>
+                    </div>
+                    <div class="text-muted" style="font-size:12px;margin:8px 0 12px">
+                        ${__("Raised by")} ${esc(item.owner)} · ${fmt_date(item.creation)}
+                    </div>
+                    <div style="white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.6;">${esc(item.message)}</div>
+                    ${edit_button}
+                    ${response_html}
+                </article>`;
+        };
+
+        frappe.call({
+            method: CLARIFICATION_API + "get_threads",
+            args: { opportunity: frm.doc.name },
+            callback(r) {
+                if (r.exc) return;
+
+                const list = r.message || [];
+                threads = Object.fromEntries(list.map(item => [item.name, item]));
+
+                const answered = list.filter(i => i.response).length;
+                const breached = list.filter(i => !i.response && i.status === "SLA Breach").length;
+
+                $wrapper.find(".clarification-summary").html(
+                    summary_card(__("Total"), list.length) +
+                    summary_card(__("Waiting"), list.length - answered - breached) +
+                    summary_card(__("SLA Breach"), breached) +
+                    summary_card(__("Answered"), answered)
+                );
+
+                $wrapper.find(".clarification-list").html(list.length
+                    ? list.map(thread_card).join("")
+                    : `<div style="padding:32px 16px;text-align:center;border:1px dashed var(--border-color);border-radius:12px;">
+                           <div style="font-size:24px;margin-bottom:8px"><span class="fa fa-comments-o"></span></div>
+                           <div style="font-weight:600">${__("No clarifications yet")}</div>
+                           <div class="text-muted" style="margin-top:5px">${__("Clarifications and responses will appear here.")}</div>
+                       </div>`);
+            },
+        });
+    }
+
     /* =====================================================================
-       4. FORM EVENTS
+       4. FORM EVENTS  (one block for the Opportunity doctype)
        ===================================================================== */
 
     // shipping field : billing field
@@ -563,44 +771,18 @@ fields.forEach(df => {
 
     frappe.ui.form.on("Opportunity", {
         setup(frm) {
-            frm.set_query("custom_sub_service_vertical", () => ({
-                filters: { service_vertical: frm.doc.custom_service_vertical },
-            }));
-            frm.set_query("opportunity_from", () => ({
-                filters: { name: ["in", ["Customer", "Lead"]] },
+            frm.presales_owner_users = [];
+
+            frm.set_query("custom_sub_service_vertical", () => ({ filters: { service_vertical: frm.doc.custom_service_vertical } }));
+            frm.set_query("opportunity_from", () => ({ filters: { name: ["in", ["Customer", "Lead"]] } }));
+            frm.set_query("custom_presales_owner", () => ({
+                filters: { name: ["in", frm.presales_owner_users.length ? frm.presales_owner_users : ["__no_matching_user__"]] },
             }));
 
-            frm.custom_make_buttons = {
-                Quotation: "Quotation",
-                "Supplier Quotation": "Supplier Quotation",
-            };
+            frm.custom_make_buttons = { Quotation: "Quotation", "Supplier Quotation": "Supplier Quotation" };
             frm.email_field = "contact_email";
         },
-        toggle_not_feasible_button: function (frm) {
-            frm.remove_custom_button(__("Lost"));
 
-            const status = (frm.doc.status || "").trim().toLowerCase();
-
-            const show_custom =
-                status === "closed" || status === "not feasible";
-
-            if (!frm.is_new() && show_custom) {
-                frm.add_custom_button(__("Lost"), function () {
-                    frm.set_df_property("status", "hidden", 0);
-
-                    // Change Status field to Closed
-                    frm.set_value("status", "Closed").then(function () {
-
-                        frm.save();
-
-                    });
-                });
-            }
-        },
-        
-custom_region(frm) {
-        frm.set_value("custom_client_country", "");
-    },
         refresh(frm) {
             frm.remove_custom_button(__("Fetch Latest Exchange Rate"));
 
@@ -610,128 +792,65 @@ custom_region(frm) {
             frm.set_df_property("custom_exchange_rates", "hidden", 0);
 
             toggle_create_menu(frm);
+            toggle_lost_button(frm);
             render_pipeline(frm);
-            ns.apply_service_vertical(frm);
             render_quotation_items(frm);
+            render_clarification_center(frm);
+            ns.apply_service_vertical(frm);
+            calculate_opportunity_amount(frm);
+            lock_past_closing_date(frm);
+            restrict_inputs(frm);
 
-            frm.trigger("toggle_not_feasible_button");
-            if (!frm.is_dirty()) {
-                frm._orig_closing = frm.doc.expected_closing;
-            }
-            const closing = frm.fields_dict.expected_closing;
-            if (closing && closing.$input) {
-                const lock_past = () => {
-                    const dp = closing.datepicker;
-                    if (!dp || dp._past_locked) return;   
-                    const today = new Date();
-                    today.setHours(0, 0, 0, 0);
-                    dp.update({
-                        minDate: today,
-                        onRenderCell: (date, cellType) =>
-                            cellType === "day" && date < today ? { disabled: true } : {},
-                    });
-                    dp._past_locked = true;
-                };
-                lock_past();
-                setTimeout(lock_past, 500);
-                closing.$input.off("focus.mindate").on("focus.mindate", lock_past);
-            }
-
-            const $prob = frm.fields_dict.probability && frm.fields_dict.probability.$input;
-            if ($prob) {
-                $prob.off("input.probcheck").on("input.probcheck", function () {
-                    let val = $(this).val().replace(/[^0-9]/g, "");
-
-                    if (val.length > 3) {
-                        val = val.slice(0, 3);
-                    }
-                    if (parseInt(val, 10) > 100) {
-                        val = val.slice(0, -1);
-                    }
-                    $(this).val(val);
-                });
-            }
-            const $amt = frm.fields_dict.opportunity_amount && frm.fields_dict.opportunity_amount.$input;
-            if ($amt) {
-                $amt.off("input.amtcheck").on("input.amtcheck", function () {
-                    let val = $(this).val().replace(/[^0-9.]/g, ""); // digits and dot only
-
-                    // allow only one decimal point
-                    const parts = val.split(".");
-                    if (parts.length > 2) {
-                        val = parts[0] + "." + parts.slice(1).join("");
-                    }
-
-                    // allow only 2 digits after the decimal point
-                    if (val.includes(".")) {
-                        const [whole, decimals] = val.split(".");
-                        val = whole + "." + decimals.slice(0, 2);
-                    }
-
-                    $(this).val(val);
-                });
-            }
-
-             // Clarification UI
-    render_clarification_center(frm);
-     if (frm.is_new()) return;
-
-        if (!frm.fields_dict.custom_dashboards) {
-            // Add a dashboard using a custom HTML field.
-            return;
-        }
-
-        render_opportunity_dashboard(frm);
+            if (frm.doc.custom_service_vertical) load_presales_owners(frm);
         },
 
         // Make sure every row has its Item before the server validates it
-        async validate(frm) {
-            await ns.validate_items(frm);
-        },
+        validate: frm => ns.validate_items(frm),
 
-        // New row -> give it the Item straight away
         items_add(frm, cdt, cdn) {
             ns.fill_row(frm, locals[cdt][cdn]);
+            calculate_opportunity_amount(frm);
         },
+        items_remove: frm => calculate_opportunity_amount(frm),
 
         status: frm => toggle_create_menu(frm),
 
         currency(frm) {
+            frm.set_value({ conversion_rate: 1, custom_exchange_rates: 1 });
             calculate_base_amount(frm);
             frm.trigger("set_dynamic_field_label");
         },
-
         opportunity_amount: frm => calculate_base_amount(frm),
         custom_exchange_rates: frm => calculate_base_amount(frm),
         custom_quotation_number: frm => render_quotation_items(frm),
-        
-        custom_zip_code: function (frm) {
+
+        custom_region: frm => frm.set_value("custom_client_country", ""),
+
+        custom_zip_code(frm) {
             const val = String(frm.doc.custom_zip_code || "").replace(/[^0-9]/g, "").slice(0, 6);
-            if (val !== frm.doc.custom_zip_code) {
-                frm.set_value("custom_zip_code", val);
-            }
+            if (val !== frm.doc.custom_zip_code) frm.set_value("custom_zip_code", val);
         },
 
         async custom_client_country(frm) {
-            frm.set_value("custom_bill_country", frm.doc.custom_client_country);
+            const country = frm.doc.custom_client_country;
+            frm.set_value("custom_bill_country", country);
+            if (!country) return;
 
-            if (!frm.doc.custom_client_country) return;
-
-            const { message } = await frappe.db.get_value(
-                "Country",
-                frm.doc.custom_client_country,
-                "custom_currency"
-            );
-
-            const currency = message && message.custom_currency;
-            if (currency) {
-                await frm.set_value("currency", currency);
+            const { message } = await frappe.db.get_value("Country", country, "custom_currency");
+            if (message?.custom_currency) {
+                await frm.set_value("currency", message.custom_currency);
+                await frm.set_value({ conversion_rate: 1, custom_exchange_rates: 1 });
+                calculate_base_amount(frm);
             }
         },
 
-        custom_service_vertical(frm) {
+        async custom_service_vertical(frm) {
+            const vertical = frm.doc.custom_service_vertical;
+
             frm.set_value("custom_sub_service_vertical", null);
+            frm.set_value("custom_presales_owner", "");
             frm.sv_item = null;
+            frm.presales_owner_users = [];
 
             ["custom_item", ITEM_TABLE].forEach(table => {
                 frm.clear_table(table);
@@ -739,26 +858,22 @@ custom_region(frm) {
             });
 
             ns.apply_service_vertical(frm);
-            if (!frm.doc.custom_service_vertical) {
-                return;
-            }
-            var fieldname = "abbrevation"
-            frappe.db.get_value(
-                "Service Vertical",
-                frm.doc.custom_service_vertical,
-                fieldname,  
-                function (r) {
-                    var code = r && r[fieldname];               
-                    var series = "CRM-" + String(code).toUpperCase() + "-.YYYY.-";
-                    frm.set_df_property("naming_series", "options", series);
-                    frm.set_value("naming_series", series);
-                    frm.refresh_field("naming_series");
-                }
-            );
+
+            if (!vertical) return frm.refresh_field("custom_presales_owner");
+            load_presales_owners(frm);
+
+            // Naming series follows the vertical's abbreviation
+            const service = await get_cached_doc("Service Vertical", vertical);
+            if (!service.abbrevation) return;
+
+            const series = `CRM-${String(service.abbrevation).toUpperCase()}-.YYYY.-`;
+            frm.set_df_property("naming_series", "options", series);
+            frm.set_value("naming_series", series);
+            frm.refresh_field("naming_series");
         },
+
         async party_name(frm) {
             let owner = "";
-
             if (frm.doc.opportunity_from === "Lead" && frm.doc.party_name) {
                 const { message } = await frappe.db.get_value("Lead", frm.doc.party_name, "lead_owner");
                 owner = message?.lead_owner || "";
@@ -767,11 +882,21 @@ custom_region(frm) {
         },
 
         custom_use_billing_address(frm) {
-            frm.set_value(
-                Object.fromEntries(
-                    Object.entries(SHIPPING_FROM_BILLING).map(([to, from]) => [to, frm.doc[from]])
-                )
-            );
+            frm.set_value(Object.fromEntries(
+                Object.entries(SHIPPING_FROM_BILLING).map(([to, from]) => [to, frm.doc[from]])
+            ));
+        },
+
+        custom_assessment_date(frm) {
+            const date = frm.doc.custom_assessment_date;
+            if (date && date < frappe.datetime.get_today()) {
+                frappe.msgprint({
+                    title: __("Invalid Date"),
+                    message: __("Previous date is not allowed. Please select today or a future date."),
+                    indicator: "red",
+                });
+                frm.set_value("custom_assessment_date", "");
+            }
         },
 
         after_workflow_action(frm) {
@@ -783,506 +908,9 @@ custom_region(frm) {
         },
     });
 
+    // Item rows -> Opportunity amount
+    frappe.ui.form.on("Opportunity Item", Object.fromEntries(
+        ["amount", "rate", "qty"].map(field => [field, frm => calculate_opportunity_amount(frm)])
+    ));
 
-/* ==========================================================
-   CLARIFICATION CENTER — OPPORTUNITY
-   Uses the Python APIs in teceze.api.clarification
-   ========================================================== */
-
-function render_clarification_center(frm) {
-    const field = frm.fields_dict.custom_clarification_html;
-
-    if (!field || !frm.doc.name || frm.is_new()) {
-        if (field) field.$wrapper.empty();
-        return;
-    }
-
-    const $wrapper = field.$wrapper;
-    const roles = frappe.user_roles || [];
-    const can_raise = roles.includes("Clarification Raiser");
-    const can_respond = roles.includes("Responder");
-    const is_clarification_needed =frm.doc.workflow_state === "Clarification Needed";
-
-    // Prevent duplicate event handlers when Opportunity refreshes.
-    $wrapper.off(".clarification");
-
-    $wrapper.html(`
-        <div class="clarification-center">
-            <div style="
-                display:flex;
-                justify-content:space-between;
-                align-items:center;
-                gap:12px;
-                flex-wrap:wrap;
-                margin-bottom:18px;
-            ">
-                <div>
-                    <h3 style="margin:0 0 5px 0">
-                        Clarifications
-                    </h3>
-                    <div class="text-muted">
-                        Clarification history and responses
-                    </div>
-                </div>
-
-               ${can_raise && is_clarification_needed ? `
-                    <button type="button"
-                        class="btn btn-primary btn-sm add-clarification">
-                        <span class="fa fa-plus"></span>
-                        Raise clarification
-                    </button>
-                ` : ""}
-            </div>
-
-            <div class="clarification-summary"
-                style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px">
-            </div>
-
-            <div class="clarification-list">
-                <div class="text-muted" style="padding:20px;text-align:center">
-                    Loading clarifications...
-                </div>
-            </div>
-        </div>
-    `);
-
-    let threads_by_name = {};
-
-    // Raise a clarification.
-    $wrapper.on("click.clarification", ".add-clarification", function () {
-        const dialog = new frappe.ui.Dialog({
-            title: __("Raise Clarification"),
-            fields: [{
-                fieldname: "message",
-                label: __("Clarification"),
-                fieldtype: "Small Text",
-                reqd: 1
-            }],
-            primary_action_label: __("Submit"),
-            primary_action(values) {
-                const message = (values.message || "").trim();
-
-                if (!message) {
-                    frappe.msgprint(__("Please enter a clarification."));
-                    return;
-                }
-
-                dialog.disable_primary_action();
-
-                frappe.call({
-                    method: "teceze.api.clarification.create_clarification",
-                    args: {
-                        opportunity: frm.doc.name,
-                        message
-                    },
-                    freeze: true,
-                    freeze_message: __("Saving clarification..."),
-                    callback(r) {
-                        if (!r.exc) {
-                            dialog.hide();
-                            render_clarification_center(frm);
-                        }
-                    },
-                    error() {
-                        dialog.enable_primary_action();
-                    },
-                    always() {
-                        dialog.enable_primary_action();
-                    }
-                });
-            }
-        });
-
-        dialog.show();
-    });
-
-    // Edit an unanswered clarification.
-    $wrapper.on(
-        "click.clarification",
-        ".edit-clarification",
-        function () {
-            const item = threads_by_name[$(this).attr("data-name")];
-            if (!item) return;
-
-            const dialog = new frappe.ui.Dialog({
-                title: __("Edit Clarification"),
-                fields: [{
-                    fieldname: "message",
-                    label: __("Clarification"),
-                    fieldtype: "Small Text",
-                    default: item.message || "",
-                    reqd: 1
-                }],
-                primary_action_label: __("Save"),
-                primary_action(values) {
-                    const message = (values.message || "").trim();
-
-                    if (!message) {
-                        frappe.msgprint(__("Please enter a clarification."));
-                        return;
-                    }
-
-                    dialog.disable_primary_action();
-
-                    frappe.call({
-                        method: "teceze.api.clarification.update_clarification",
-                        args: {
-                            opportunity: frm.doc.name,
-                            clarification_name: item.name,
-                            message
-                        },
-                        freeze: true,
-                        freeze_message: __("Updating clarification..."),
-                        callback(r) {
-                            if (!r.exc) {
-                                dialog.hide();
-                                render_clarification_center(frm);
-                            }
-                        },
-                        error() {
-                            dialog.enable_primary_action();
-                        },
-                        always() {
-                            dialog.enable_primary_action();
-                        }
-                    });
-                }
-            });
-
-            dialog.show();
-        }
-    );
-
-    // Submit a response.
-    $wrapper.on(
-        "click.clarification",
-        ".reply-clarification",
-        function () {
-            const item = threads_by_name[$(this).attr("data-name")];
-            if (!item) return;
-
-            const dialog = new frappe.ui.Dialog({
-                title: __("Respond to Clarification"),
-                fields: [{
-                    fieldname: "message",
-                    label: __("Response"),
-                    fieldtype: "Small Text",
-                    reqd: 1
-                }],
-                primary_action_label: __("Submit Response"),
-                primary_action(values) {
-                    const message = (values.message || "").trim();
-
-                    if (!message) {
-                        frappe.msgprint(__("Please enter a response."));
-                        return;
-                    }
-
-                    dialog.disable_primary_action();
-
-                    frappe.call({
-                        method: "teceze.api.clarification.submit_response",
-                        args: {
-                            opportunity: frm.doc.name,
-                            clarification_name: item.name,
-                            message
-                        },
-                        freeze: true,
-                        freeze_message: __("Submitting response..."),
-                        callback(r) {
-                            if (!r.exc) {
-                                dialog.hide();
-                                render_clarification_center(frm);
-                            }
-                        },
-                        error() {
-                            dialog.enable_primary_action();
-                        },
-                        always() {
-                            dialog.enable_primary_action();
-                        }
-                    });
-                }
-            });
-
-            dialog.show();
-        }
-    );
-
-    // Load conversations from the Python backend.
-    frappe.call({
-        method: "teceze.api.clarification.get_threads",
-        args: {
-            opportunity: frm.doc.name
-        },
-        callback(r) {
-            if (r.exc) return;
-
-            const threads = r.message || [];
-            const $list = $wrapper.find(".clarification-list");
-            const $summary = $wrapper.find(".clarification-summary");
-
-            threads_by_name = {};
-
-            threads.forEach(item => {
-                threads_by_name[item.name] = item;
-            });
-
-            const answered_count = threads.filter(
-                item => !!item.response
-            ).length;
-
-            const breach_count = threads.filter(
-                item => !item.response && item.status === "SLA Breach"
-            ).length;
-
-            const waiting_count = threads.filter(
-                item => !item.response && item.status !== "SLA Breach"
-            ).length;
-
-            const summary_card = (label, count) => `
-                <div style="
-                    flex:1;
-                    min-width:100px;
-                    padding:12px 14px;
-                    border:1px solid var(--border-color);
-                    border-radius:10px;
-                ">
-                    <div class="text-muted" style="font-size:12px">
-                        ${label}
-                    </div>
-                    <div style="font-size:22px;font-weight:600;margin-top:4px">
-                        ${count}
-                    </div>
-                </div>
-            `;
-
-            $summary.html(
-                summary_card(__("Total"), threads.length) +
-                summary_card(__("Waiting"), waiting_count) +
-                summary_card(__("SLA Breach"), breach_count) +
-                summary_card(__("Answered"), answered_count)
-            );
-
-            if (!threads.length) {
-                $list.html(`
-                    <div style="
-                        padding:32px 16px;
-                        text-align:center;
-                        border:1px dashed var(--border-color);
-                        border-radius:12px;
-                    ">
-                        <div style="font-size:24px;margin-bottom:8px">
-                            <span class="fa fa-comments-o"></span>
-                        </div>
-                        <div style="font-weight:600">
-                            ${__("No clarifications yet")}
-                        </div>
-                        <div class="text-muted" style="margin-top:5px">
-                            ${__("Clarifications and responses will appear here.")}
-                        </div>
-                    </div>
-                `);
-                return;
-            }
-
-            const esc = value =>
-                frappe.utils.escape_html(String(value ?? ""));
-
-            const format_date = value => {
-                if (!value) return "";
-                return esc(frappe.datetime.str_to_user(value));
-            };
-
-            const cards = threads.map(item => {
-                const answered = !!item.response;
-                const breached =
-                    !answered && item.status === "SLA Breach";
-
-                const status = answered
-                    ? "Answered"
-                    : breached ? "SLA Breach" : "Waiting";
-
-                const status_color = answered
-                    ? "var(--green-600)"
-                    : breached
-                        ? "var(--red-600)"
-                        : "var(--orange-600)";
-
-                const edit_button = can_raise && is_clarification_needed && !answered
-                    ? `
-                        <button type="button"
-                            class="btn btn-default btn-xs edit-clarification"
-                            data-name="${esc(item.name)}">
-                            ${__("Edit Clarification")}
-                        </button>
-                    `
-                    : "";
-
-       const reply_button =
-                    can_respond &&
-                    is_clarification_needed &&
-                    !answered
-                        ? `
-                            <button type="button"
-                                class="btn btn-primary btn-xs reply-clarification"
-                                data-name="${esc(item.name)}">
-                                ${__("Respond")}
-                            </button>
-                        `
-                        : "";
-
-                const response_html = item.response
-                    ? `
-                        <div style="
-                            margin:16px 0 0 18px;
-                            padding:14px 16px;
-                            border-left:3px solid var(--green-500);
-                            border-radius:0 9px 9px 0;
-                            background:var(--subtle-fg);
-                        ">
-                            <div style="font-weight:600;margin-bottom:8px">
-                                <span class="fa fa-reply"></span>
-                                ${__("Response")}
-                            </div>
-                            <div style="white-space:pre-wrap;overflow-wrap:anywhere">
-                                ${esc(item.response.message)}
-                            </div>
-                            <div class="text-muted"
-                                style="font-size:12px;margin-top:10px">
-                                ${esc(item.response.owner)}
-                                · ${format_date(item.response.creation)}
-                            </div>
-                        </div>
-                    `
-                    : `
-                        <div style="
-                            margin:14px 0 0 18px;
-                            padding:12px;
-                            border:1px dashed var(--border-color);
-                            border-radius:8px;
-                        ">
-                            <div class="text-muted">
-                                ${__("Awaiting response")}
-                            </div>
-                                        ${can_respond && is_clarification_needed ? `
-                            <div style="margin-top:10px">
-                                ${reply_button}
-                            </div>
-                        ` : ""}
-                       </div>
-                    `;
-
-                return `
-                    <article style="
-                        border:1px solid var(--border-color);
-                        border-radius:12px;
-                        padding:18px;
-                        margin-bottom:14px;
-                        background:var(--card-bg);
-                    ">
-                        <div style="
-                            display:flex;
-                            justify-content:space-between;
-                            align-items:center;
-                            gap:12px;
-                            flex-wrap:wrap;
-                        ">
-                            <div style="font-weight:650;font-size:14px">
-                                <span class="fa fa-commenting-o"></span>
-                                ${__("Clarification")}
-                            </div>
-                            <span style="
-                                color:${status_color};
-                                font-size:12px;
-                                font-weight:600;
-                            ">
-                                ${esc(status)}
-                            </span>
-                        </div>
-
-                        <div class="text-muted"
-                            style="font-size:12px;margin:8px 0 12px">
-                            ${__("Raised by")} ${esc(item.owner)}
-                            · ${format_date(item.creation)}
-                        </div>
-
-                        <div style="
-                            white-space:pre-wrap;
-                            overflow-wrap:anywhere;
-                            line-height:1.6;
-                        ">${esc(item.message)}</div>
-
-                        ${edit_button ? `
-                            <div style="
-                                display:flex;
-                                justify-content:flex-end;
-                                margin-top:12px;
-                            ">
-                                ${edit_button}
-                            </div>
-                        ` : ""}
-
-                        ${response_html}
-                    </article>
-                `;
-            });
-
-            $list.html(cards.join(""));
-        }
-    });
-}
-function calculate_opportunity_amount(frm) {
-    let total = 0;
-
-    (frm.doc.items || []).forEach(row => {
-        total += flt(row.amount);
-    });
-
-    frm.set_value("opportunity_amount", total);
-}
-
-frappe.ui.form.on("Opportunity", {
-    refresh(frm) {
-        calculate_opportunity_amount(frm);
-    },
-
-    items_add(frm) {
-        calculate_opportunity_amount(frm);
-    },
-
-    items_remove(frm) {
-        calculate_opportunity_amount(frm);
-    },
-     custom_assessment_date(frm) {
-        const selected_date = frm.doc.custom_assessment_date;
-        const today = frappe.datetime.get_today();
-
-        if (selected_date && selected_date < today) {
-            frappe.msgprint({
-                title: __("Invalid Date"),
-                message: __("Previous date is not allowed. Please select today or a future date."),
-                indicator: "red"
-            });
-
-            frm.set_value("custom_assessment_date", "");
-        }
-    }
-});
-
-frappe.ui.form.on("Opportunity Item", {
-    amount(frm) {
-        calculate_opportunity_amount(frm);
-    },
-
-    rate(frm) {
-        calculate_opportunity_amount(frm);
-    },
-
-    qty(frm) {
-        calculate_opportunity_amount(frm);
-    }
-});
-    
 })(window.teceze);
-

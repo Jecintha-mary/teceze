@@ -26,6 +26,9 @@ frappe.pages["attendance_calendar"].on_page_load = function (wrapper) {
     let employee_holiday_list = null;
     let employee_default_shift = null;
 
+    let holiday_month_loaded = null;
+    let holiday_request_token = 0;
+
     let calendar_events_observer = null;
     let calendar_height_observer = null;
     let calendar_render_timer = null;
@@ -799,7 +802,7 @@ frappe.pages["attendance_calendar"].on_page_load = function (wrapper) {
 
             load_calendar_working_hours(emp, token, function () {
 
-                load_employee_holiday_details(emp, token, function () {
+                load_employee_holiday_details(emp, token,get_calendar_month_date(), function () {
 
                     load_attendance_requests(emp, token, function () {
 
@@ -1106,7 +1109,8 @@ frappe.pages["attendance_calendar"].on_page_load = function (wrapper) {
     // Nothing is inferred from Saturday / Sunday.
     // =========================================================
 
-    function load_employee_holiday_details(emp, token, callback) {
+    function load_employee_holiday_details(emp, token, month, callback) {
+        const request_token = ++holiday_request_token;
 
         holiday_calendar_data = {};
         employee_holiday_list = null;
@@ -1117,11 +1121,12 @@ frappe.pages["attendance_calendar"].on_page_load = function (wrapper) {
             method:
                 "teceze.api.employee_attendance.get_employee_holiday_details",
 
-            args: { employee: emp },
+            args: { employee: emp , month: month || null},
 
             callback: function (r) {
 
-                if (token !== load_token) {
+                if (token !== load_token || request_token !== holiday_request_token || employee !== emp    
+                ) {
                     return;
                 }
 
@@ -1152,8 +1157,6 @@ frappe.pages["attendance_calendar"].on_page_load = function (wrapper) {
 
                 });
 
-                console.log("Employee holiday details:", holiday_calendar_data);
-
                 if (callback) {
                     callback();
                 }
@@ -1167,11 +1170,12 @@ frappe.pages["attendance_calendar"].on_page_load = function (wrapper) {
                     error
                 );
 
-                if (token !== load_token) {
+                if (token !== load_token || request_token !== holiday_request_token || employee !== emp) {
                     return;
                 }
 
                 holiday_calendar_data = {};
+                holiday_month_loaded = null;
 
                 if (callback) {
                     callback();
@@ -1199,6 +1203,33 @@ frappe.pages["attendance_calendar"].on_page_load = function (wrapper) {
 
         return String(holiday.description || "").trim() === "WO";
 
+    }
+    function get_calendar_month_date() {
+        const fc = get_fullcalendar();
+        const current_start = fc && fc.view ? fc.view.currentStart : null;
+        const date = current_start instanceof Date
+            ? current_start
+            : new Date();
+        return (date.getFullYear() +"-" +String(date.getMonth() + 1).padStart(2, "0") +"-01");
+    }
+    function reload_holidays_for_visible_month() {
+        if (!employee || !attendance_calendar) {
+        return;
+        }
+        const emp = employee;
+        const token = load_token;
+        const month = get_calendar_month_date();
+        const month_key = month.slice(0, 7);
+        if (holiday_month_loaded === month_key) {
+        return;
+        }
+        load_employee_holiday_details(emp, token, month, function () {
+            if (token !== load_token || employee !== emp) {
+                return;
+            }
+            add_holidays_to_calendar();
+            update_attendance_overview();}
+        );
     }
 
 
@@ -1436,22 +1467,8 @@ frappe.pages["attendance_calendar"].on_page_load = function (wrapper) {
         if (!Number.isFinite(numericHours) || numericHours <= 0) {
             return "";
         }
-
-        const totalMinutes = Math.round(numericHours * 60);
-
-        if (totalMinutes <= 0) {
-            return "";
-        }
-
-        return (
-            String(Math.floor(totalMinutes / 60)).padStart(2, "0") +
-            ":" +
-            String(totalMinutes % 60).padStart(2, "0") +
-            " Hrs"
-        );
-
+        return numericHours.toFixed(2) + " Hrs";
     }
-
 
     // =========================================================
     // ADD WORKING HOURS / LEAVE TYPE TO CALENDAR EVENT
@@ -2598,6 +2615,18 @@ frappe.pages["attendance_calendar"].on_page_load = function (wrapper) {
             window.hr_attendance_calendar = attendance_calendar;
 
             enable_single_event_per_date(attendance_calendar);
+            const calendarContainer = document.getElementById("attendance-calendar");
+            $(calendarContainer)
+                .off("click.hrAttendanceHolidayMonth")
+                .on(
+                    "click.hrAttendanceHolidayMonth",
+                    ".fc-prev-button, .fc-next-button, .fc-today-button",
+                    function () {
+                        setTimeout(function () {
+                            reload_holidays_for_visible_month();
+                        }, 300);
+                    }
+                );
 
             const fc = get_fullcalendar();
 

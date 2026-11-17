@@ -11828,74 +11828,6 @@
  },
  {
   "app": "teceze",
-  "charts": [],
-  "content": "[{\"id\":\"czoUIWBL3t\",\"type\":\"header\",\"data\":{\"text\":\"<span style=\\\"font-size: 16px;\\\">Dashboard</span>\",\"col\":12}},{\"id\":\"gWdfBb7Gf4\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Active Employees\",\"col\":4}},{\"id\":\"vZ6BhVGIzc\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Inactive Employees\",\"col\":4}},{\"id\":\"JbxLQr3GGQ\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Total Engineer\",\"col\":4}},{\"id\":\"zb644sbxTq\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"BcB3sr4CU9\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"India Employees\",\"col\":4}},{\"id\":\"3tG82MNNtY\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"SriLanka Employees\",\"col\":4}},{\"id\":\"SGCzgvFHSp\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"UK Employees\",\"col\":4}},{\"id\":\"uyTB9_zk9c\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"3lx9IrFcnk\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"US Employees\",\"col\":4}},{\"id\":\"OXQSET_4ss\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"China Employees\",\"col\":4}},{\"id\":\"z-f6hMwZRZ\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Canada Employees\",\"col\":4}}]",
-  "custom_blocks": [],
-  "docstatus": 0,
-  "doctype": "Workspace",
-  "external_link": null,
-  "for_user": null,
-  "hide_custom": 0,
-  "icon": null,
-  "indicator_color": "green",
-  "is_hidden": 0,
-  "label": "Teceze",
-  "link_to": null,
-  "link_type": "DocType",
-  "links": [],
-  "modified": "2026-08-19 15:48:35.670386",
-  "module": "Teceze",
-  "name": "Teceze",
-  "number_cards": [
-   {
-    "label": "Active Employees",
-    "number_card_name": "Active Employees-1"
-   },
-   {
-    "label": "Inactive Employees",
-    "number_card_name": "Inactive Employees"
-   },
-   {
-    "label": "Total Engineer",
-    "number_card_name": "Total Engineer"
-   },
-   {
-    "label": "India Employees",
-    "number_card_name": "India Employees"
-   },
-   {
-    "label": "SriLanka Employees",
-    "number_card_name": "SriLanka Employees"
-   },
-   {
-    "label": "UK Employees",
-    "number_card_name": "UK employees"
-   },
-   {
-    "label": "US Employees",
-    "number_card_name": "US Employees"
-   },
-   {
-    "label": "China Employees",
-    "number_card_name": "China Employees"
-   },
-   {
-    "label": "Canada Employees",
-    "number_card_name": "Canada Employees"
-   }
-  ],
-  "parent_page": null,
-  "public": 1,
-  "quick_lists": [],
-  "restrict_to_domain": null,
-  "roles": [],
-  "sequence_id": 1.0,
-  "shortcuts": [],
-  "title": "Teceze",
-  "type": "Workspace"
- },
- {
-  "app": "teceze",
   "charts": [
    {
     "chart_name": "Ticket Pipeline",
@@ -13219,357 +13151,6 @@
   "sequence_id": 9.0,
   "shortcuts": [],
   "title": "Payroll",
-  "type": "Workspace"
- },
- {
-  "app": "helpdesk",
-  "charts": [],
-  "content": "[{\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h3\\\" style=\\\"\\\"><a href=\\\"/helpdesk\\\">Visit Helpdesk</a></span>\",\"col\":12}},{\"type\":\"spacer\",\"data\":{\"col\":12}},{\"type\":\"paragraph\",\"data\":{\"text\":\"<span class=\\\"h4\\\">Helpdesk Configuration<br></span>\",\"col\":12}},{\"type\":\"card\",\"data\":{\"card_name\":\"Ticket Configuration\",\"col\":4}},{\"type\":\"card\",\"data\":{\"card_name\":\"Agent Configuration\",\"col\":4}},{\"type\":\"card\",\"data\":{\"card_name\":\"Helpdesk Reports\",\"col\":4}},{\"type\":\"card\",\"data\":{\"card_name\":\"Automation\",\"col\":4}},{\"type\":\"card\",\"data\":{\"card_name\":\"Channels\",\"col\":4}}]",
-  "custom_blocks": [],
-  "docstatus": 0,
-  "doctype": "Workspace",
-  "external_link": null,
-  "for_user": "",
-  "hide_custom": 0,
-  "icon": "support",
-  "indicator_color": null,
-  "is_hidden": 0,
-  "label": "Helpdesk",
-  "link_to": null,
-  "link_type": null,
-  "links": [
-   {
-    "dependencies": null,
-    "description": null,
-    "hidden": 0,
-    "icon": null,
-    "is_query_report": 0,
-    "label": "Agent Configuration",
-    "link_count": 2,
-    "link_to": null,
-    "link_type": null,
-    "onboard": 0,
-    "only_for": null,
-    "report_ref_doctype": null,
-    "type": "Card Break"
-   },
-   {
-    "dependencies": null,
-    "description": null,
-    "hidden": 0,
-    "icon": null,
-    "is_query_report": 0,
-    "label": "Agent",
-    "link_count": 0,
-    "link_to": "HD Agent",
-    "link_type": "DocType",
-    "onboard": 0,
-    "only_for": null,
-    "report_ref_doctype": null,
-    "type": "Link"
-   },
-   {
-    "dependencies": null,
-    "description": null,
-    "hidden": 0,
-    "icon": null,
-    "is_query_report": 0,
-    "label": "Team",
-    "link_count": 0,
-    "link_to": "HD Team",
-    "link_type": "DocType",
-    "onboard": 0,
-    "only_for": null,
-    "report_ref_doctype": null,
-    "type": "Link"
-   },
-   {
-    "dependencies": null,
-    "description": null,
-    "hidden": 0,
-    "icon": null,
-    "is_query_report": 0,
-    "label": "Automation",
-    "link_count": 2,
-    "link_to": null,
-    "link_type": null,
-    "onboard": 0,
-    "only_for": null,
-    "report_ref_doctype": null,
-    "type": "Card Break"
-   },
-   {
-    "dependencies": null,
-    "description": null,
-    "hidden": 0,
-    "icon": null,
-    "is_query_report": 0,
-    "label": "Notification Settings",
-    "link_count": 0,
-    "link_to": "Notification Settings",
-    "link_type": "DocType",
-    "onboard": 0,
-    "only_for": null,
-    "report_ref_doctype": null,
-    "type": "Link"
-   },
-   {
-    "dependencies": null,
-    "description": null,
-    "hidden": 0,
-    "icon": null,
-    "is_query_report": 0,
-    "label": "Assignment Rule",
-    "link_count": 0,
-    "link_to": "Assignment Rule",
-    "link_type": "DocType",
-    "onboard": 0,
-    "only_for": null,
-    "report_ref_doctype": null,
-    "type": "Link"
-   },
-   {
-    "dependencies": null,
-    "description": null,
-    "hidden": 0,
-    "icon": null,
-    "is_query_report": 0,
-    "label": "Channels",
-    "link_count": 1,
-    "link_to": null,
-    "link_type": null,
-    "onboard": 0,
-    "only_for": null,
-    "report_ref_doctype": null,
-    "type": "Card Break"
-   },
-   {
-    "dependencies": null,
-    "description": null,
-    "hidden": 0,
-    "icon": null,
-    "is_query_report": 0,
-    "label": "Email Account",
-    "link_count": 0,
-    "link_to": "Email Account",
-    "link_type": "DocType",
-    "onboard": 0,
-    "only_for": null,
-    "report_ref_doctype": null,
-    "type": "Link"
-   },
-   {
-    "dependencies": null,
-    "description": null,
-    "hidden": 0,
-    "icon": null,
-    "is_query_report": 0,
-    "label": "Ticket Configuration",
-    "link_count": 3,
-    "link_to": null,
-    "link_type": null,
-    "onboard": 0,
-    "only_for": null,
-    "report_ref_doctype": null,
-    "type": "Card Break"
-   },
-   {
-    "dependencies": null,
-    "description": null,
-    "hidden": 0,
-    "icon": null,
-    "is_query_report": 0,
-    "label": "Ticket Type",
-    "link_count": 0,
-    "link_to": "HD Ticket Type",
-    "link_type": "DocType",
-    "onboard": 0,
-    "only_for": null,
-    "report_ref_doctype": null,
-    "type": "Link"
-   },
-   {
-    "dependencies": null,
-    "description": null,
-    "hidden": 0,
-    "icon": null,
-    "is_query_report": 0,
-    "label": "Support Policy",
-    "link_count": 0,
-    "link_to": "HD Service Level Agreement",
-    "link_type": "DocType",
-    "onboard": 0,
-    "only_for": null,
-    "report_ref_doctype": null,
-    "type": "Link"
-   },
-   {
-    "dependencies": null,
-    "description": null,
-    "hidden": 0,
-    "icon": null,
-    "is_query_report": 0,
-    "label": "General Settings",
-    "link_count": 0,
-    "link_to": "HD Settings",
-    "link_type": "DocType",
-    "onboard": 0,
-    "only_for": null,
-    "report_ref_doctype": null,
-    "type": "Link"
-   },
-   {
-    "dependencies": null,
-    "description": null,
-    "hidden": 0,
-    "icon": null,
-    "is_query_report": 0,
-    "label": "Helpdesk Reports",
-    "link_count": 2,
-    "link_to": null,
-    "link_type": null,
-    "onboard": 0,
-    "only_for": null,
-    "report_ref_doctype": null,
-    "type": "Card Break"
-   },
-   {
-    "dependencies": null,
-    "description": null,
-    "hidden": 0,
-    "icon": null,
-    "is_query_report": 1,
-    "label": "Ticket Analytics",
-    "link_count": 0,
-    "link_to": "Ticket Analytics",
-    "link_type": "Report",
-    "onboard": 0,
-    "only_for": null,
-    "report_ref_doctype": null,
-    "type": "Link"
-   },
-   {
-    "dependencies": null,
-    "description": null,
-    "hidden": 0,
-    "icon": null,
-    "is_query_report": 1,
-    "label": "Ticket Summary",
-    "link_count": 0,
-    "link_to": "Ticket Summary",
-    "link_type": "Report",
-    "onboard": 0,
-    "only_for": null,
-    "report_ref_doctype": null,
-    "type": "Link"
-   },
-   {
-    "dependencies": null,
-    "description": null,
-    "hidden": 0,
-    "icon": null,
-    "is_query_report": 0,
-    "label": "Client Management",
-    "link_count": 0,
-    "link_to": null,
-    "link_type": "DocType",
-    "onboard": 0,
-    "only_for": null,
-    "report_ref_doctype": null,
-    "type": "Card Break"
-   },
-   {
-    "dependencies": null,
-    "description": null,
-    "hidden": 0,
-    "icon": null,
-    "is_query_report": 0,
-    "label": "Client Dashboard",
-    "link_count": 0,
-    "link_to": "HD Customer",
-    "link_type": "DocType",
-    "onboard": 0,
-    "only_for": null,
-    "report_ref_doctype": null,
-    "type": "Link"
-   },
-   {
-    "dependencies": null,
-    "description": null,
-    "hidden": 0,
-    "icon": null,
-    "is_query_report": 0,
-    "label": "Client List",
-    "link_count": 0,
-    "link_to": "HD Customer",
-    "link_type": "DocType",
-    "onboard": 0,
-    "only_for": null,
-    "report_ref_doctype": null,
-    "type": "Link"
-   },
-   {
-    "dependencies": null,
-    "description": null,
-    "hidden": 0,
-    "icon": null,
-    "is_query_report": 0,
-    "label": "Client Registration",
-    "link_count": 0,
-    "link_to": "HD Customer",
-    "link_type": "DocType",
-    "onboard": 0,
-    "only_for": null,
-    "report_ref_doctype": null,
-    "type": "Link"
-   },
-   {
-    "dependencies": null,
-    "description": null,
-    "hidden": 0,
-    "icon": null,
-    "is_query_report": 0,
-    "label": "Ticket Management",
-    "link_count": 0,
-    "link_to": null,
-    "link_type": "DocType",
-    "onboard": 0,
-    "only_for": null,
-    "report_ref_doctype": null,
-    "type": "Card Break"
-   }
-  ],
-  "modified": "2026-06-24 16:38:16.868196",
-  "module": "Helpdesk",
-  "name": "Helpdesk",
-  "number_cards": [],
-  "parent_page": "",
-  "public": 1,
-  "quick_lists": [],
-  "restrict_to_domain": null,
-  "roles": [
-   {
-    "role": "System Manager"
-   }
-  ],
-  "sequence_id": 1.0,
-  "shortcuts": [
-   {
-    "color": null,
-    "doc_view": "",
-    "format": null,
-    "icon": null,
-    "kanban_board": null,
-    "label": "Ticket",
-    "link_to": "HD Ticket",
-    "report_ref_doctype": null,
-    "restrict_to_domain": null,
-    "stats_filter": null,
-    "type": "DocType",
-    "url": null
-   }
-  ],
-  "title": "Helpdesk",
   "type": "Workspace"
  },
  {
@@ -16404,6 +15985,115 @@
   "sequence_id": 0.0,
   "shortcuts": [],
   "title": "Reports",
+  "type": "Workspace"
+ },
+ {
+  "app": "teceze",
+  "charts": [],
+  "content": "[{\"id\":\"fN2UPzGxvF\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">Welcome to the Dispatch workspace</span>\",\"col\":12}},{\"id\":\"HMSBGny1y6\",\"type\":\"paragraph\",\"data\":{\"text\":\"Click on \\n\\t\\t\\t\\n\\t\\t\\t\\n\\t\\t to edit\",\"col\":12}}]",
+  "custom_blocks": [],
+  "docstatus": 0,
+  "doctype": "Workspace",
+  "external_link": null,
+  "for_user": null,
+  "hide_custom": 0,
+  "icon": null,
+  "indicator_color": "green",
+  "is_hidden": 0,
+  "label": "Dispatch",
+  "link_to": null,
+  "link_type": "DocType",
+  "links": [],
+  "modified": "2026-11-13 15:39:40.527854",
+  "module": "Dispatch Model",
+  "name": "Dispatch",
+  "number_cards": [],
+  "parent_page": null,
+  "public": 1,
+  "quick_lists": [],
+  "restrict_to_domain": null,
+  "roles": [
+   {
+    "role": "FSO"
+   },
+   {
+    "role": "Service Desk"
+   },
+   {
+    "role": "SDC"
+   }
+  ],
+  "sequence_id": 0.0,
+  "shortcuts": [],
+  "title": "Dispatch",
+  "type": "Workspace"
+ },
+ {
+  "app": "teceze",
+  "charts": [],
+  "content": "[{\"id\":\"czoUIWBL3t\",\"type\":\"header\",\"data\":{\"text\":\"<span style=\\\"font-size: 16px;\\\">Dashboard</span>\",\"col\":12}},{\"id\":\"gWdfBb7Gf4\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Active Employees\",\"col\":4}},{\"id\":\"vZ6BhVGIzc\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Inactive Employees\",\"col\":4}},{\"id\":\"JbxLQr3GGQ\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Total Engineer\",\"col\":4}},{\"id\":\"zb644sbxTq\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"BcB3sr4CU9\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"India Employees\",\"col\":4}},{\"id\":\"3tG82MNNtY\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"SriLanka Employees\",\"col\":4}},{\"id\":\"SGCzgvFHSp\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"UK Employees\",\"col\":4}},{\"id\":\"uyTB9_zk9c\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"3lx9IrFcnk\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"US Employees\",\"col\":4}},{\"id\":\"OXQSET_4ss\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"China Employees\",\"col\":4}},{\"id\":\"z-f6hMwZRZ\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Canada Employees\",\"col\":4}}]",
+  "custom_blocks": [],
+  "docstatus": 0,
+  "doctype": "Workspace",
+  "external_link": null,
+  "for_user": null,
+  "hide_custom": 0,
+  "icon": null,
+  "indicator_color": "green",
+  "is_hidden": 0,
+  "label": "Teceze",
+  "link_to": null,
+  "link_type": "DocType",
+  "links": [],
+  "modified": "2026-08-19 15:48:35.670386",
+  "module": "Teceze",
+  "name": "Teceze",
+  "number_cards": [
+   {
+    "label": "Active Employees",
+    "number_card_name": "Active Employees-1"
+   },
+   {
+    "label": "Inactive Employees",
+    "number_card_name": "Inactive Employees"
+   },
+   {
+    "label": "Total Engineer",
+    "number_card_name": "Total Engineer"
+   },
+   {
+    "label": "India Employees",
+    "number_card_name": "India Employees"
+   },
+   {
+    "label": "SriLanka Employees",
+    "number_card_name": "SriLanka Employees"
+   },
+   {
+    "label": "UK Employees",
+    "number_card_name": "UK employees"
+   },
+   {
+    "label": "US Employees",
+    "number_card_name": "US Employees"
+   },
+   {
+    "label": "China Employees",
+    "number_card_name": "China Employees"
+   },
+   {
+    "label": "Canada Employees",
+    "number_card_name": "Canada Employees"
+   }
+  ],
+  "parent_page": null,
+  "public": 1,
+  "quick_lists": [],
+  "restrict_to_domain": null,
+  "roles": [],
+  "sequence_id": 1.0,
+  "shortcuts": [],
+  "title": "Teceze",
   "type": "Workspace"
  }
 ]

@@ -15,9 +15,8 @@ function init_crm_dashboard(wrapper) {
     page.main.html(`
       <div class="crm-dash-shell">
         <div class="crm-dash-head">
-          <div><div class="crm-dash-eyebrow">COMMERCIAL PERFORMANCE</div><h1>Revenue intelligence</h1>
-          <p>Pipeline health, service vertical performance, and next actions.</p></div>
-          <div class="crm-dash-head-actions"><span class="crm-demo-chip">LIVE CRM DATA</span><button class="btn btn-default btn-sm" id="crm-refresh">↻ Refresh</button></div>
+          <h1>CRM Dashboard</h1>
+         
         </div>
         <div class="crm-filterbar">
           <div class="crm-date-presets"><button data-days="30">30 days</button><button data-days="90" class="active">90 days</button><button data-days="180">6 months</button><button data-days="365">12 months</button><button data-days="all">All time</button></div>
@@ -25,7 +24,6 @@ function init_crm_dashboard(wrapper) {
           <label>Report currency <select id="crm-currency"><option>USD</option><option>INR</option><option>EUR</option><option>GBP</option><option>AED</option><option>SGD</option></select></label>
           <button class="btn btn-primary btn-sm" id="crm-apply">Apply</button>
         </div>
-        <div class="crm-rates-panel" id="crm-rates-panel"><div><strong>Reporting currency</strong><small>All monetary values are displayed in the selected currency. USD is the default; changing the selector recalculates dashboard totals only.</small></div></div>
         <div class="crm-tabs" id="crm-main-tabs">
           <button class="active" data-tab="overview">Executive overview</button>
           <button data-tab="pipeline">Pipeline & conversion</button>
@@ -63,7 +61,6 @@ function init_crm_dashboard(wrapper) {
             <div class="crm-subpanel" data-subpanel="followups"><div class="crm-card"><div class="crm-card-head"><h3>Follow-up schedule</h3><select id="crm-followup-filter"><option value="all">All</option><option value="Overdue">Overdue</option><option value="Due today">Due today</option><option value="Upcoming">Upcoming</option></select></div><div class="crm-table-wrap" id="crm-followup-table"></div></div></div>
           </section>
         </div>
-        <div class="crm-dash-foot">TECEZE · CRM REVENUE INTELLIGENCE · Dashboard-only exchange rates never modify transaction records.</div>
       </div>
     `);
 

@@ -79,13 +79,11 @@ class Ticket(Document):
 		)
 
 	def create_fso(self):
-		# Create FSO Assignment document
-		
+		# Create FSO Assignment document	
 		fso_assignment = frappe.new_doc("FSO Engineer Alignment")
-		frappe.log_error("self.tools_required",str(self.tools_required))
 		# Map Ticket fields to FSO Assignment fields
 		fso_assignment.ticket = self.name
-		fso_assignment.category = self.categroy
+		fso_assignment.category = self.category
 		fso_assignment.activity = self.activity__details
 		fso_assignment.activity_date = self.activity_date
 		fso_assignment.activity_time = self.activity_time
@@ -98,7 +96,7 @@ class Ticket(Document):
 		tools_list = []
 		for row in self.get("tools_required", []):
 			tools_list.append(row.tool_name)
-		fso_assignment.tools_required = ", ".join(tools_list)
+		fso_assignment.tools = ", ".join(tools_list)
 		
 		# Save FSO Assignment
 		fso_assignment.insert(ignore_permissions=True)
@@ -109,16 +107,7 @@ class Ticket(Document):
 				title="FSO Assignment Created",
 				indicator="green"
 				)
-		# frappe.msgprint(
-		# f"""
-		# FSO Assignment has been created successfully.<br>
-		# <a href="/app/fso-engineer-alignment/{fso_assignment.name}" target="_blank">
-		# 	Click here to view FSO Assignment: {fso_assignment.name}
-		# </a>
-		# """,
-		# title="FSO Assignment Created",
-		# indicator="green"
-		# )
+		
 		frappe.db.set_value(
 						"Ticket",
 						self.name,

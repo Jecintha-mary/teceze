@@ -1,0 +1,40 @@
+ .lead-dashboard-root { background: #f4f7fb; padding: 20px; min-height: calc(100vh - 100px); }
+.lead-dashboard-root .ld-shell { max-width: 1600px; margin: 0 auto; color: #1d2b40; }
+.ld-topbar { display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap; margin-bottom:22px; }
+.ld-tabs,.ld-periods { display:flex; align-items:center; background:#e9eef5; padding:4px; border-radius:10px; gap:3px; }
+.ld-tabs button,.ld-periods button { border:0; background:transparent; color:#64748b; padding:9px 17px; border-radius:8px; font-size:12px; font-weight:650; cursor:pointer; }
+.ld-tabs button.active,.ld-periods button.active { background:#211b59; color:#fff; box-shadow:0 2px 6px rgba(25,35,70,.15); }
+.ld-heading { display:flex; justify-content:space-between; align-items:end; gap:12px; margin-bottom:20px; }
+.ld-heading h2 { font-size:26px; font-weight:750; letter-spacing:-.6px; margin:0 0 5px; color:#17243a; }
+.ld-heading p { color:#718096; font-size:13px; margin:0; }
+.ld-date-range { color:#8a97a9; font-size:11px; }
+.ld-kpis { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:14px; margin-bottom:16px; }
+.ld-kpi { position:relative; background:#fff; border:1px solid #e7edf4; border-radius:14px; min-height:116px; padding:18px; box-shadow:0 3px 12px rgba(28,45,75,.035); }
+.ld-kpi-primary { background:linear-gradient(115deg,#0b9f9d,#294b98); color:#fff; border:0; }
+.ld-kpi-icon { display:flex; align-items:center; justify-content:center; width:38px; height:38px; border-radius:11px; background:#e6f8f7; color:#08a8a4; font-size:16px; margin-bottom:12px; }
+.ld-kpi-primary .ld-kpi-icon { background:rgba(255,255,255,.16); color:#fff; }
+.ld-kpi-label { color:#718096; font-size:11px; font-weight:650; letter-spacing:.35px; text-transform:uppercase; }
+.ld-kpi-primary .ld-kpi-label { color:rgba(255,255,255,.86); }
+.ld-kpi-value { color:#17243a; font-size:28px; font-weight:760; letter-spacing:-.7px; line-height:1.2; margin-top:5px; }
+.ld-kpi-primary .ld-kpi-value { color:#fff; font-size:32px; }
+.ld-panel { background:#fff; border:1px solid #e7edf4; border-radius:14px; padding:18px; margin-bottom:16px; box-shadow:0 3px 12px rgba(28,45,75,.025); min-width:0; }
+.ld-panel-heading { display:flex; align-items:start; justify-content:space-between; margin-bottom:12px; }
+.ld-panel-heading h3 { font-size:15px; font-weight:700; color:#203047; margin:0 0 5px; }
+.ld-panel-heading p { font-size:11px; color:#8794a7; margin:0; }
+.ld-chart { width:100%; height:270px; }
+.ld-chart-panel .ld-chart { height:300px; }
+.ld-grid-two { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px; }
+.ld-table-panel { padding:18px 0 0; overflow:hidden; }
+.ld-table-panel .ld-panel-heading { padding:0 18px; }
+.ld-table-wrap { overflow-x:auto; }
+.ld-table { width:100%; border-collapse:collapse; min-width:640px; }
+.ld-table th { background:#f7f9fc; color:#6d7b90; font-size:10px; font-weight:700; text-align:left; padding:13px 16px; white-space:nowrap; }
+.ld-table td { color:#34445b; font-size:12px; font-weight:500; padding:14px 16px; border-top:1px solid #edf1f5; white-space:nowrap; }
+.ld-table tbody tr:hover { background:#fbfcfe; }
+.ld-table a { color:#078f9a; font-weight:650; }
+.ld-pill { display:inline-block; background:#e8f8f2; color:#07966b; padding:5px 9px; border-radius:6px; font-size:10px; font-weight:700; }
+.ld-empty { text-align:center; color:#8a97a9; padding:38px 12px; font-size:12px; }
+.ld-error { background:#fff1f1; color:#b42318; border:1px solid #ffd6d6; border-radius:10px; padding:14px; margin-top:12px; font-size:12px; }
+.lead-dashboard-root .hidden { display:none !important; }
+@media(max-width:1100px) { .ld-kpis { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+@media(max-width:760px) { .lead-dashboard-root { padding:12px; } .ld-heading { align-items:start; flex-direction:column; } .ld-grid-two { grid-template-columns:1fr; } .ld-kpis { grid-template-columns:repeat(2,minmax(0,1fr)); gap:9px; } .ld-kpi { padding:13px; min-height:105px; } .ld-kpi-value { font-size:23px; } .ld-chart { height:230px; } .ld-chart-panel .ld-chart { height:250px; } .ld-tabs button,.ld-periods button { padding:8px 10px; } }

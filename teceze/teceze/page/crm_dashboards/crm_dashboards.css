@@ -1,6 +1,5 @@
 /* CRM executive dashboard — restrained, reusable SaaS design */
 .crm-dashboards-page{background:var(--bg-color,#f6f7f9);padding:22px 24px 30px;min-height:100vh}
-.crm-dashboards-page .page-head{display:none}
 .crm-dash-shell{--crm-ink:#202a38;--crm-muted:#687587;--crm-soft:#8b96a5;--crm-border:#e2e6eb;--crm-panel:var(--card-bg,#fff);--crm-canvas:var(--bg-color,#f6f7f9);--crm-accent:#3157d5;--crm-green:#168779;color:var(--crm-ink);font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;max-width:1680px;margin:0 auto}
 .crm-dash-shell *{box-sizing:border-box}
 .crm-dash-head{display:flex;justify-content:space-between;align-items:flex-start;gap:20px;margin:2px 0 22px}

@@ -2,7 +2,82 @@ frappe.ui.form.on("Ticket", {
     
     onload(frm) {
         load_timezone_options(frm);
-    }
+    },
+    setup(frm) {
+
+        // Filter only active countries
+        frm.set_query("country", function() {
+            return {
+                filters: {
+                    custom_is_active: 1
+                }
+            };
+        });
+
+        frm.set_query("city", function() {
+
+            return {
+                filters: {
+                    country: frm.doc.country || "",
+                    is_active: 1
+                }
+            };
+
+        });
+        // Active Time Zone filter
+        frm.set_query("filter_time_zone", function() {
+            return {
+                filters: {
+                    is_active: 1
+                }
+            };
+        });
+
+        frm.set_query("act_time", function() {
+            return {
+                filters: {
+                    is_active: 1
+                }
+            };
+        });
+    },
+
+    country(frm) {
+
+        // Clear city and timezone when country changes
+        frm.set_value("city", "");
+        frm.set_value("filter_time_zone", "");
+
+    },
+    city(frm) {
+
+        if (!frm.doc.city) {
+            frm.set_value("filter_time_zone", "");
+            return;
+        }
+
+        // Fetch Time Zone from City Master
+        frappe.db.get_value(
+            "City",
+            frm.doc.city,
+            "time_zone"
+        ).then(r => {
+
+            if (r.message && r.message.time_zone) {
+
+                const timezone = r.message.time_zone;
+                console.log("timezone",timezone)
+                frm.set_value("filter_time_zone", timezone);
+
+                // Populate activity timezone if required
+                // frm.set_value("activity_time_zone", timezone);
+
+            }
+
+        });
+
+    },
+
 });
 function load_timezone_options(frm) {
     

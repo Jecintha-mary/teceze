@@ -1,6 +1,7 @@
 frappe.ui.form.on("Sales Target Assignment", {
     refresh(frm) {
         // render_target_dashboard(frm);
+
     },
 
     sales_person(frm) {
@@ -19,7 +20,45 @@ frappe.ui.form.on("Sales Target Assignment", {
         // render_target_dashboard(frm);
         // calculate_sales_targets(frm);
 
+    },
+       onload(frm) {
+
+    if (!frm.is_new()) {
+        return;
     }
+
+    // Allow Administrator and System Manager
+    if (
+        frappe.session.user === "Administrator" ||
+        frappe.user.has_role("System Manager")
+    ) {
+        frm.set_df_property("department", "read_only", 0);
+        return;
+    }
+
+    // Automatically fetch department for other users
+    frm.set_df_property("department", "read_only", 1);
+
+    if (frm.doc.department) {
+        return;
+    }
+
+    frappe.db.get_value(
+        "Employee",
+        {
+            user_id: frappe.session.user,
+            status: "Active"
+        },
+        "department"
+    ).then(r => {
+
+        if (r.message?.department) {
+            frm.set_value("department", r.message.department);
+        }
+
+    });
+
+}
 });
 var TARGET_TIMES=20
 var LEAD_TARGET=100

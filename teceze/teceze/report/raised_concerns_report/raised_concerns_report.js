@@ -22,7 +22,6 @@ frappe.query_reports["Raised Concerns Report"] = {
         },
     ],
 
-    /* Status pills inside the table */
     formatter: function (value, row, column, data, default_formatter) {
         if (column.fieldname === "status" && data && data.status) {
             const s = CONCERN_STATUS[data.status] || CONCERN_STATUS["Closed"];
@@ -44,9 +43,6 @@ frappe.query_reports["Raised Concerns Report"] = {
     },
 };
 
-/* ------------------------------------------------------------------ */
-/* One place for every status colour                                   */
-/* ------------------------------------------------------------------ */
 const CONCERN_STATUS = {
     "Open":    { accent: "#E5484D", donut: "#F0566A", pill_bg: "#FFE3E6", pill_text: "#C0182F" },
     "Replied": { accent: "#2F80ED", donut: "#4A9BF5", pill_bg: "#DCEBFF", pill_text: "#1F5FBF" },

@@ -1,0 +1,78 @@
+{
+ "actions": [],
+ "allow_bulk_edit": 1,
+ "allow_rename": 1,
+ "autoname": "PL-.####",
+ "creation": "2026-11-11 15:54:26.362183",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "employee",
+  "employee_name",
+  "credit_date",
+  "column_break_onuq",
+  "leave_allocation",
+  "credited_leaves"
+ ],
+ "fields": [
+  {
+   "fieldname": "employee",
+   "fieldtype": "Link",
+   "label": "Employee",
+   "options": "Employee"
+  },
+  {
+   "fieldname": "credit_date",
+   "fieldtype": "Date",
+   "label": "Credit Date"
+  },
+  {
+   "fieldname": "column_break_onuq",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "leave_allocation",
+   "fieldtype": "Data",
+   "label": "Leave Allocation"
+  },
+  {
+   "fieldname": "credited_leaves",
+   "fieldtype": "Data",
+   "label": "Credited Leaves"
+  },
+  {
+   "fetch_from": "employee.employee_name",
+   "fieldname": "employee_name",
+   "fieldtype": "Data",
+   "label": "Employee Name"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-11-11 16:05:23.298311",
+ "modified_by": "Administrator",
+ "module": "Teceze",
+ "name": "PL Monthly Credit Log",
+ "naming_rule": "Expression",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}

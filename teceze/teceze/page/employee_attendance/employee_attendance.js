@@ -1774,7 +1774,7 @@ frappe.pages["employee_attendance"].on_page_load = function (wrapper) {
 
 
     // =========================================================
-    // FORMAT WORKING HOURS   (4.52 -> "04:31 Hrs")
+    // FORMAT WORKING HOURS   (4.52 -> "04.52 Hrs")
     // =========================================================
 
     function formatWorkingHours(hours) {
@@ -1785,24 +1785,8 @@ frappe.pages["employee_attendance"].on_page_load = function (wrapper) {
             return "";
         }
 
-        const totalMinutes = Math.round(numericHours * 60);
-
-        if (totalMinutes <= 0) {
-            return "";
-        }
-
-        const hrs = Math.floor(totalMinutes / 60);
-        const mins = totalMinutes % 60;
-
-        return (
-            String(hrs).padStart(2, "0") +
-            ":" +
-            String(mins).padStart(2, "0") +
-            " Hrs"
-        );
-
+        return numericHours.toFixed(2) + " Hrs";
     }
-
 
     // =========================================================
     // CLEAN HOLIDAY DESCRIPTION HTML

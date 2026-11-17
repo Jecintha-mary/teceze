@@ -4,7 +4,7 @@
  "docstatus": 0,
  "doctype": "Page",
  "idx": 0,
- "modified": "2026-10-21 16:00:53.186488",
+ "modified": "2026-11-13 17:34:03.270859",
  "modified_by": "Administrator",
  "module": "Teceze",
  "name": "crm-dashboards",
@@ -12,10 +12,19 @@
  "page_name": "crm-dashboards",
  "roles": [
   {
+   "role": "System Manager"
+  },
+  {
    "role": "Sales User"
   },
   {
    "role": "Presales"
+  },
+  {
+   "role": "Presales User"
+  },
+  {
+   "role": "System Manager"
   }
  ],
  "script": null,

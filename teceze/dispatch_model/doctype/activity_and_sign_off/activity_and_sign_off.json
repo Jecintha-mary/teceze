@@ -7,6 +7,62 @@
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
+  "ticket_at_a_glance_section",
+  "ticket",
+  "activity_data_",
+  "column_break_gjae",
+  "service_level",
+  "category",
+  "spoc",
+  "activity_time",
+  "column_break_ucle",
+  "activity",
+  "duration",
+  "spoc_contact",
+  "section_break_bvcw",
+  "location",
+  "tools",
+  "scope_of_work",
+  "engineer_details_tab",
+  "fso_engineer_alignment",
+  "engineer_name",
+  "engineer_email",
+  "engineer_contact",
+  "country",
+  "column_break_fhwv",
+  "recruiter_name",
+  "fso_owner",
+  "region",
+  "section_break_mvld",
+  "rate_currency",
+  "hourly_rate",
+  "half_day_rate",
+  "column_break_tpmi",
+  "full_day_rate",
+  "fixed_visit_rate",
+  "travel_cost",
+  "section_break_nnjb",
+  "name_on_account",
+  "swift__bic__ifsc",
+  "column_break_dfag",
+  "account_number",
+  "sort_code",
+  "column_break_kgao",
+  "bank_name",
+  "iban",
+  "section_break_bsjk",
+  "bank_address",
+  "visit_schedule_tab",
+  "scheduled_date",
+  "arrival_timesite_local",
+  "notes_for_engineer",
+  "sdc_validation_and_discussion_section",
+  "validate_engineer",
+  "column_break_noux",
+  "document_review",
+  "section_break_rwpr",
+  "add_discussion_note",
+  "visit_record_tab",
   "amended_from",
   "activity_date",
   "time_in",
@@ -25,7 +81,7 @@
    "fieldtype": "Date",
    "in_list_view": 1,
    "label": "Activity Date",
-   "reqd": 1
+   "mandatory_depends_on": "eval:doc.workflow_state==\"To SDC\""
   },
   {
    "fieldname": "amended_from",
@@ -34,25 +90,25 @@
    "no_copy": 1,
    "options": "Activity And Sign-Off",
    "print_hide": 1,
-   "read_only": 1,
-   "search_index": 1
+   "read_only": 1
   },
   {
    "fieldname": "time_in",
    "fieldtype": "Datetime",
    "label": "Time In",
-   "reqd": 1
+   "mandatory_depends_on": "eval:doc.workflow_state==\"To SDC\""
   },
   {
    "fieldname": "time_out",
    "fieldtype": "Time",
    "label": "Time Out",
-   "reqd": 1
+   "mandatory_depends_on": "eval:doc.workflow_state==\"To SDC\""
   },
   {
    "fieldname": "time_on_site",
    "fieldtype": "Time",
-   "label": "Time on Site"
+   "label": "Time on Site",
+   "mandatory_depends_on": "eval:doc.workflow_state==\"To SDC\""
   },
   {
    "fieldname": "column_break_bgle",
@@ -62,20 +118,20 @@
    "fieldname": "outcome",
    "fieldtype": "Select",
    "label": "Outcome",
-   "options": "\nCompleted\nPartially Completed\nRevisit Required\nCancelled On Site",
-   "reqd": 1
+   "mandatory_depends_on": "eval:doc.workflow_state==\"To SDC\"",
+   "options": "\nCompleted\nPartially Completed\nRevisit Required\nCancelled On Site"
   },
   {
    "fieldname": "sign_off",
    "fieldtype": "Data",
    "label": "Signed off by (client)",
-   "reqd": 1
+   "mandatory_depends_on": "eval:doc.workflow_state==\"To SDC\""
   },
   {
    "fieldname": "work_performed",
    "fieldtype": "Small Text",
    "label": "Work Performed",
-   "reqd": 1
+   "mandatory_depends_on": "eval:doc.workflow_state==\"To SDC\""
   },
   {
    "fieldname": "engineer_remarks",
@@ -85,14 +141,293 @@
   {
    "fieldname": "sign_off_sheet",
    "fieldtype": "Attach",
-   "label": "Sign off Sheet"
+   "label": "Sign off Sheet",
+   "mandatory_depends_on": "eval:doc.workflow_state==\"To SDC\""
+  },
+  {
+   "fieldname": "ticket",
+   "fieldtype": "Link",
+   "label": "Ticket",
+   "options": "Ticket"
+  },
+  {
+   "fieldname": "fso_engineer_alignment",
+   "fieldtype": "Link",
+   "label": "FSO Engineer Alignment",
+   "options": "FSO Engineer Alignment"
+  },
+  {
+   "fieldname": "visit_record_tab",
+   "fieldtype": "Tab Break",
+   "label": "Visit Record"
+  },
+  {
+   "fieldname": "activity_data_",
+   "fieldtype": "Data",
+   "label": "Activity Date"
+  },
+  {
+   "fieldname": "column_break_gjae",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "service_level",
+   "fieldtype": "Data",
+   "label": "Service Level"
+  },
+  {
+   "fieldname": "category",
+   "fieldtype": "Data",
+   "label": "Category"
+  },
+  {
+   "fieldname": "spoc",
+   "fieldtype": "Data",
+   "label": "SPOC"
+  },
+  {
+   "fieldname": "activity_time",
+   "fieldtype": "Data",
+   "label": "Activity Time"
+  },
+  {
+   "fieldname": "column_break_ucle",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "activity",
+   "fieldtype": "Data",
+   "label": "Activity"
+  },
+  {
+   "fieldname": "duration",
+   "fieldtype": "Data",
+   "label": "Duration"
+  },
+  {
+   "fieldname": "spoc_contact",
+   "fieldtype": "Data",
+   "label": "SPOC Contact"
+  },
+  {
+   "fieldname": "section_break_bvcw",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "location",
+   "fieldtype": "Small Text",
+   "label": "Location"
+  },
+  {
+   "fieldname": "tools",
+   "fieldtype": "Small Text",
+   "label": "Tools"
+  },
+  {
+   "fieldname": "scope_of_work",
+   "fieldtype": "Small Text",
+   "label": "Scope of Work"
+  },
+  {
+   "fieldname": "engineer_details_tab",
+   "fieldtype": "Tab Break",
+   "label": "Engineer Details"
+  },
+  {
+   "fieldname": "engineer_name",
+   "fieldtype": "Data",
+   "label": "Engineer Name"
+  },
+  {
+   "fieldname": "engineer_email",
+   "fieldtype": "Data",
+   "label": "Engineer Email"
+  },
+  {
+   "fieldname": "engineer_contact",
+   "fieldtype": "Phone",
+   "label": "Engineer Contact"
+  },
+  {
+   "fieldname": "country",
+   "fieldtype": "Link",
+   "label": "Country",
+   "options": "Country"
+  },
+  {
+   "fieldname": "column_break_fhwv",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "recruiter_name",
+   "fieldtype": "Data",
+   "label": "Recruiter Name"
+  },
+  {
+   "fieldname": "fso_owner",
+   "fieldtype": "Data",
+   "label": "FSO Owner"
+  },
+  {
+   "fieldname": "region",
+   "fieldtype": "Link",
+   "label": "Region",
+   "options": "Region"
+  },
+  {
+   "fieldname": "section_break_mvld",
+   "fieldtype": "Section Break",
+   "label": "Engineer Rates"
+  },
+  {
+   "fieldname": "rate_currency",
+   "fieldtype": "Link",
+   "label": "Rate Currency",
+   "options": "Currency"
+  },
+  {
+   "fieldname": "hourly_rate",
+   "fieldtype": "Float",
+   "label": "Hourly Rate"
+  },
+  {
+   "fieldname": "half_day_rate",
+   "fieldtype": "Float",
+   "label": "Half Day Rate"
+  },
+  {
+   "fieldname": "column_break_tpmi",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "full_day_rate",
+   "fieldtype": "Float",
+   "label": "Full Day Rate"
+  },
+  {
+   "fieldname": "fixed_visit_rate",
+   "fieldtype": "Float",
+   "label": "Fixed Visit Rate"
+  },
+  {
+   "fieldname": "travel_cost",
+   "fieldtype": "Float",
+   "label": "Travel Cost"
+  },
+  {
+   "fieldname": "section_break_nnjb",
+   "fieldtype": "Section Break",
+   "label": "Bank Details"
+  },
+  {
+   "fieldname": "name_on_account",
+   "fieldtype": "Data",
+   "label": "Name On Account"
+  },
+  {
+   "fieldname": "swift__bic__ifsc",
+   "fieldtype": "Data",
+   "label": "SWIFT / BIC / IFSC"
+  },
+  {
+   "fieldname": "column_break_dfag",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "account_number",
+   "fieldtype": "Data",
+   "label": "Account Number"
+  },
+  {
+   "fieldname": "sort_code",
+   "fieldtype": "Data",
+   "label": "Sort Code"
+  },
+  {
+   "fieldname": "column_break_kgao",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "bank_name",
+   "fieldtype": "Data",
+   "label": "Bank Name"
+  },
+  {
+   "fieldname": "iban",
+   "fieldtype": "Data",
+   "label": "IBAN"
+  },
+  {
+   "fieldname": "section_break_bsjk",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "bank_address",
+   "fieldtype": "Small Text",
+   "label": "Bank Address"
+  },
+  {
+   "fieldname": "visit_schedule_tab",
+   "fieldtype": "Tab Break",
+   "label": "Visit Schedule"
+  },
+  {
+   "fieldname": "scheduled_date",
+   "fieldtype": "Date",
+   "label": "Scheduled Date"
+  },
+  {
+   "fieldname": "arrival_timesite_local",
+   "fieldtype": "Time",
+   "label": "Arrival Time(Site Local)"
+  },
+  {
+   "fieldname": "notes_for_engineer",
+   "fieldtype": "Small Text",
+   "label": "Notes For Engineer"
+  },
+  {
+   "fieldname": "ticket_at_a_glance_section",
+   "fieldtype": "Section Break",
+   "label": "Ticket at a Glance"
+  },
+  {
+   "fieldname": "sdc_validation_and_discussion_section",
+   "fieldtype": "Section Break",
+   "label": "SDC Validation and Discussion"
+  },
+  {
+   "default": "0",
+   "fieldname": "validate_engineer",
+   "fieldtype": "Check",
+   "label": "Work validated with the engineer"
+  },
+  {
+   "fieldname": "column_break_noux",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "document_review",
+   "fieldtype": "Check",
+   "label": "Documents and photos reviewed"
+  },
+  {
+   "fieldname": "section_break_rwpr",
+   "fieldtype": "Section Break"
+  },
+  {
+   "description": "<span style=\"color:#f97316;font-style:italic;font-weight:600\">\n    Discussion note with engineer, or reason for sending back\n</span>",
+   "fieldname": "add_discussion_note",
+   "fieldtype": "Small Text",
+   "label": "Add Discussion Note"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-11-12 15:11:06.585022",
+ "modified": "2026-11-16 18:02:29.799580",
  "modified_by": "Administrator",
  "module": "Dispatch Model",
  "name": "Activity And Sign-Off",

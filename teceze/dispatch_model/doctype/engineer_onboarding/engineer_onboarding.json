@@ -1,0 +1,154 @@
+{
+ "actions": [],
+ "allow_bulk_edit": 1,
+ "allow_rename": 1,
+ "autoname": "ENG - .####",
+ "creation": "2026-11-16 15:37:10.913863",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "engineer_name",
+  "engineer_email",
+  "engineer_contact",
+  "country",
+  "column_break_imrs",
+  "recruiter_name",
+  "fso_owner",
+  "region",
+  "bank_details_section",
+  "name_on_account",
+  "bank_name",
+  "sort_code",
+  "column_break_zbpg",
+  "account_number",
+  "swift_bic",
+  "iban",
+  "section_break_yyvr",
+  "bank_address"
+ ],
+ "fields": [
+  {
+   "fieldname": "engineer_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Engineer Name",
+   "options": "Name"
+  },
+  {
+   "fieldname": "recruiter_name",
+   "fieldtype": "Data",
+   "label": "Recruiter Name"
+  },
+  {
+   "fieldname": "engineer_email",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Engineer Email"
+  },
+  {
+   "fieldname": "fso_owner",
+   "fieldtype": "Data",
+   "label": "FSO Owner"
+  },
+  {
+   "fieldname": "engineer_contact",
+   "fieldtype": "Phone",
+   "in_list_view": 1,
+   "label": "Engineer Contact"
+  },
+  {
+   "fieldname": "region",
+   "fieldtype": "Link",
+   "label": "Region",
+   "options": "Region"
+  },
+  {
+   "fieldname": "country",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Country",
+   "options": "Country"
+  },
+  {
+   "fieldname": "bank_details_section",
+   "fieldtype": "Section Break",
+   "label": "<b style=\"color:#2490EF;font-size:15px\">Bank Details</b>"
+  },
+  {
+   "fieldname": "name_on_account",
+   "fieldtype": "Data",
+   "label": "Name On Account"
+  },
+  {
+   "fieldname": "account_number",
+   "fieldtype": "Data",
+   "label": "Account Number"
+  },
+  {
+   "fieldname": "bank_name",
+   "fieldtype": "Data",
+   "label": "Bank Name"
+  },
+  {
+   "fieldname": "swift_bic",
+   "fieldtype": "Data",
+   "label": "SWIFT / BIC / IFSC"
+  },
+  {
+   "fieldname": "sort_code",
+   "fieldtype": "Data",
+   "label": "Sort Code"
+  },
+  {
+   "fieldname": "iban",
+   "fieldtype": "Data",
+   "label": "IBAN"
+  },
+  {
+   "fieldname": "section_break_yyvr",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "bank_address",
+   "fieldtype": "Small Text",
+   "label": "Bank Address"
+  },
+  {
+   "fieldname": "column_break_imrs",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_zbpg",
+   "fieldtype": "Column Break"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-11-16 16:43:04.759428",
+ "modified_by": "Administrator",
+ "module": "Dispatch Model",
+ "name": "Engineer Onboarding",
+ "naming_rule": "Expression",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "quick_entry": 1,
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}
