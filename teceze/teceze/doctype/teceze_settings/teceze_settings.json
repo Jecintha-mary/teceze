@@ -31,8 +31,10 @@
   "custom_dress_code_policy_url",
   "mobile_apps_section",
   "client_id",
+  "workplace_etiquette",
   "column_break_hpjr",
-  "tenant_id"
+  "tenant_id",
+  "male_accomodation"
  ],
  "fields": [
   {
@@ -183,13 +185,23 @@
   {
    "fieldname": "column_break_hpjr",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "workplace_etiquette",
+   "fieldtype": "Small Text",
+   "label": "Workplace Etiquette"
+  },
+  {
+   "fieldname": "male_accomodation",
+   "fieldtype": "Small Text",
+   "label": "Male Accomodation"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-11-09 16:12:44.893603",
+ "modified": "2026-11-19 18:59:23.044451",
  "modified_by": "Administrator",
  "module": "Teceze",
  "name": "Teceze Settings",

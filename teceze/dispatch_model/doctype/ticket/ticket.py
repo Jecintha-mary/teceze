@@ -95,8 +95,21 @@ class Ticket(Document):
 		fso_assignment.scope = self.scope_of_work
 		tools_list = []
 		for row in self.get("tools_required", []):
-			tools_list.append(row.tool_name)
+			if row.tool_name == "Others":
+				if self.others:
+					tools_list.append(self.others)
+			else:
+				tools_list.append(row.tool_name)
+
 		fso_assignment.tools = ", ".join(tools_list)
+
+
+		# for row in self.get("tools_required", []):
+		# 	tools_list.append(row.tool_name)
+		# if other:
+		# 	overall value = ", ".join(tools_list) + self.others
+		# else:
+		# 	fso_assignment.tools = ", ".join(tools_list)
 		
 		# Save FSO Assignment
 		fso_assignment.insert(ignore_permissions=True)
@@ -160,3 +173,17 @@ def get_ticket_activity_log(ticket_name):
         "activities": activities
     }
 
+
+def get_ticket_permission_query(user):
+
+    if not user:
+        user = frappe.session.user
+
+    # System Manager can view all tickets
+    if "System Manager" in frappe.get_roles(user):
+        return ""
+
+    # Other users can view tickets owned by them
+    return "`tabTicket`.owner = {}".format(
+        frappe.db.escape(user)
+    )

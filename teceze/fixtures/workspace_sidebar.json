@@ -16906,6 +16906,22 @@
     "icon": null,
     "indent": 0,
     "keep_closed": 0,
+    "label": "Presales / Procurement Pipeline",
+    "link_to": "sale-pipeline",
+    "link_type": "Page",
+    "navigate_to_tab": null,
+    "route_options": null,
+    "show_arrow": 0,
+    "type": "Link",
+    "url": null
+   },
+   {
+    "child": 0,
+    "collapsible": 1,
+    "filters": null,
+    "icon": null,
+    "indent": 0,
+    "keep_closed": 0,
     "label": "Lead Dashboard",
     "link_to": "lead-dashboard",
     "link_type": "Page",
@@ -16980,7 +16996,7 @@
     "url": null
    }
   ],
-  "modified": "2026-11-16 17:25:21.022882",
+  "modified": "2026-11-18 20:42:20.358049",
   "module": "CRM",
   "module_onboarding": null,
   "name": "CRM Desk",
@@ -17202,6 +17218,22 @@
     "url": null
    },
    {
+    "child": 0,
+    "collapsible": 1,
+    "filters": null,
+    "icon": "graduation-cap",
+    "indent": 0,
+    "keep_closed": 0,
+    "label": "Engineer Onboarding",
+    "link_to": "Engineer Onboarding",
+    "link_type": "DocType",
+    "navigate_to_tab": null,
+    "route_options": null,
+    "show_arrow": 0,
+    "type": "Link",
+    "url": null
+   },
+   {
     "child": 1,
     "collapsible": 1,
     "filters": null,
@@ -17250,7 +17282,7 @@
     "url": null
    }
   ],
-  "modified": "2026-11-13 16:02:53.461844",
+  "modified": "2026-11-17 12:05:34.280320",
   "module": "Dispatch Model",
   "module_onboarding": null,
   "name": "Dispatch",

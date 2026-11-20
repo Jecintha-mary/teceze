@@ -6,3 +6,20 @@
 
 // 	},
 // });
+frappe.ui.form.on("Engineer Onboarding", {
+    setup(frm) {
+
+            frm.set_query("country", function () {
+                return {
+                    filters: {
+                        custom_region: frm.doc.region
+                    }
+                };
+            });
+        },
+
+        region(frm) {
+            frm.set_value("country", "");
+        }
+
+})

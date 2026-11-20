@@ -28,21 +28,27 @@
   "engineer_details_tab",
   "engineer_details_section",
   "engineer_name",
-  "engineer_email",
-  "engineer_contact",
-  "country",
-  "column_break_jevy",
   "recruiter_name",
-  "fso_owner",
   "region",
+  "column_break_jevy",
+  "engineer",
+  "fso_owner",
+  "country",
+  "column_break_csxe",
+  "engineer_email",
+  "fso_assign_owner",
+  "column_break_hqjr",
+  "engineer_contact",
   "section_break_acnr",
   "rate_currency",
+  "section_break_aabw",
   "hourly_rate",
-  "half_day_rate",
-  "column_break_cnzk",
-  "full_day_rate",
   "fixed_rate",
+  "column_break_nalx",
+  "half_day_rate",
   "travel_cost",
+  "column_break_yjla",
+  "full_day_rate",
   "bank_details_section",
   "name_on_account",
   "swift_bic",
@@ -59,8 +65,22 @@
   "scheduled_date",
   "arrival_time",
   "notes",
+  "tab_break_ctrl",
+  "section_break_uwud",
+  "progress_update",
+  "detail",
+  "engineer_rate_tab",
+  "column_break_hqzi",
+  "eng_cost",
+  "other_cost",
+  "column_break_zcoy",
+  "travel_cst",
+  "total_cost",
+  "section_break_vufv",
+  "note",
   "more_tab",
-  "sign_off"
+  "sign_off",
+  "payment_request"
  ],
  "fields": [
   {
@@ -86,7 +106,7 @@
    "fieldname": "engineer_name",
    "fieldtype": "Link",
    "in_list_view": 1,
-   "label": "Engineer Name",
+   "label": "Engineer",
    "mandatory_depends_on": "eval:doc.workflow_state==\"Assign FSO\"",
    "options": "Engineer Onboarding"
   },
@@ -146,10 +166,6 @@
    "label": "<b style=\"color:#2490EF;font-size:15px\">Engineer Rates</b>"
   },
   {
-   "fieldname": "column_break_cnzk",
-   "fieldtype": "Column Break"
-  },
-  {
    "fieldname": "visit_schedule_section",
    "fieldtype": "Section Break"
   },
@@ -181,7 +197,7 @@
   },
   {
    "fieldname": "ticket",
-   "fieldtype": "Link",
+   "fieldtype": "Data",
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Ticket",
@@ -229,7 +245,8 @@
    "fieldname": "tools",
    "fieldtype": "Small Text",
    "label": "Tools",
-   "options": "Tool Required Items"
+   "options": "Tool Required Items",
+   "read_only": 1
   },
   {
    "fieldname": "scope",
@@ -366,8 +383,10 @@
    "label": "<b style=\"color:#555555;font-size:15px\">Details</b>"
   },
   {
+   "depends_on": "eval:doc.workflow_state == \"Send Back to FSO\"",
    "fieldname": "more_tab",
    "fieldtype": "Tab Break",
+   "hidden": 1,
    "label": "More"
   },
   {
@@ -382,13 +401,121 @@
    "label": "Rate Currency",
    "mandatory_depends_on": "eval:doc.workflow_state==\"Assign FSO\"",
    "options": "Currency"
+  },
+  {
+   "fieldname": "fso_assign_owner",
+   "fieldtype": "Link",
+   "label": "FSO Assign Owner",
+   "options": "FSO User"
+  },
+  {
+   "depends_on": "eval:![\"Assign FSO\", \"FSO Process\", \"To SDC\"].includes(doc.workflow_state)",
+   "fieldname": "tab_break_ctrl",
+   "fieldtype": "Tab Break",
+   "label": "Progress Update"
+  },
+  {
+   "depends_on": "eval:![\"Assign FSO\", \"FSO Process\", \"To SDC\"].includes(doc.workflow_state)",
+   "fieldname": "progress_update",
+   "fieldtype": "Select",
+   "label": "Progress Update",
+   "mandatory_depends_on": "eval:doc.workflow_state==\"Send Back to FSO\"",
+   "options": "\nEngineer Briefed\nTravelling to site\nOn site\nWork in progress\nBlocked ,Waiting On Client\nWork Completed",
+   "read_only_depends_on": "eval:doc.workflow_state != \"Send Back to FSO\""
+  },
+  {
+   "depends_on": "eval:![\"Assign FSO\", \"FSO Process\", \"To SDC\"].includes(doc.workflow_state)",
+   "fieldname": "detail",
+   "fieldtype": "Small Text",
+   "label": "Details",
+   "mandatory_depends_on": "eval:doc.workflow_state==\"Send Back to FSO\"",
+   "placeholder": "Details(Optional)",
+   "read_only_depends_on": "eval:doc.workflow_state != \"Send Back to FSO\""
+  },
+  {
+   "fieldname": "section_break_uwud",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fetch_from": "engineer_name.engineer_name",
+   "fieldname": "engineer",
+   "fieldtype": "Data",
+   "label": "Engineer Name"
+  },
+  {
+   "fieldname": "column_break_csxe",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_hqjr",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_aabw",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_nalx",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_yjla",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "payment_request",
+   "fieldtype": "Data",
+   "label": "Payment Request"
+  },
+  {
+   "depends_on": "eval:![\"Assign FSO\", \"FSO Process\", \"To SDC\",\"Send Back to FSO\",\"SDC Validation\",\"Mark FSO Work Complete\",\"FSO Rejection Closure\",].includes(doc.workflow_state)",
+   "fieldname": "engineer_rate_tab",
+   "fieldtype": "Tab Break",
+   "label": "Engineer Rate"
+  },
+  {
+   "fieldname": "column_break_hqzi",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_zcoy",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "travel_cst",
+   "fieldtype": "Float",
+   "label": "Travel Cost"
+  },
+  {
+   "fieldname": "eng_cost",
+   "fieldtype": "Float",
+   "label": "Engineer Cost"
+  },
+  {
+   "fieldname": "other_cost",
+   "fieldtype": "Float",
+   "label": "Other Cost"
+  },
+  {
+   "fieldname": "total_cost",
+   "fieldtype": "Float",
+   "label": "Total Cost"
+  },
+  {
+   "fieldname": "section_break_vufv",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "note",
+   "fieldtype": "Small Text",
+   "label": "Note"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-11-16 17:40:44.824933",
+ "modified": "2026-11-19 19:02:39.249885",
  "modified_by": "Administrator",
  "module": "Dispatch Model",
  "name": "FSO Engineer Alignment",

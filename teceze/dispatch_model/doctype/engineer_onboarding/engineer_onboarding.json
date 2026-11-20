@@ -7,22 +7,27 @@
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
+  "engineer",
   "engineer_name",
+  "recruiter_name",
+  "column_break_imrs",
   "engineer_email",
+  "region",
+  "column_break_aabc",
   "engineer_contact",
   "country",
-  "column_break_imrs",
-  "recruiter_name",
+  "column_break_xygg",
   "fso_owner",
-  "region",
   "bank_details_section",
   "name_on_account",
-  "bank_name",
   "sort_code",
   "column_break_zbpg",
   "account_number",
-  "swift_bic",
   "iban",
+  "column_break_ovqs",
+  "bank_name",
+  "column_break_ddgf",
+  "swift_bic",
   "section_break_yyvr",
   "bank_address"
  ],
@@ -31,63 +36,79 @@
    "fieldname": "engineer_name",
    "fieldtype": "Data",
    "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Engineer Name",
-   "options": "Name"
+   "options": "Name",
+   "reqd": 1
   },
   {
    "fieldname": "recruiter_name",
    "fieldtype": "Data",
+   "in_list_view": 1,
    "label": "Recruiter Name"
   },
   {
    "fieldname": "engineer_email",
    "fieldtype": "Data",
    "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Engineer Email"
   },
   {
    "fieldname": "fso_owner",
-   "fieldtype": "Data",
-   "label": "FSO Owner"
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "FSO Owner",
+   "options": "FSO User",
+   "reqd": 1
   },
   {
    "fieldname": "engineer_contact",
    "fieldtype": "Phone",
    "in_list_view": 1,
-   "label": "Engineer Contact"
+   "label": "Engineer Contact",
+   "reqd": 1
   },
   {
    "fieldname": "region",
    "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Region",
-   "options": "Region"
+   "options": "Region",
+   "reqd": 1
   },
   {
    "fieldname": "country",
    "fieldtype": "Link",
    "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Country",
-   "options": "Country"
+   "options": "Country",
+   "reqd": 1
   },
   {
    "fieldname": "bank_details_section",
    "fieldtype": "Section Break",
-   "label": "<b style=\"color:#2490EF;font-size:15px\">Bank Details</b>"
+   "label": "<b style=\"color:#2490EF;font-size:15px\">Engineer Bank Details</b>"
   },
   {
    "fieldname": "name_on_account",
    "fieldtype": "Data",
-   "label": "Name On Account"
+   "label": "Name On Account",
+   "reqd": 1
   },
   {
    "fieldname": "account_number",
    "fieldtype": "Data",
-   "label": "Account Number"
+   "label": "Account Number",
+   "reqd": 1
   },
   {
    "fieldname": "bank_name",
    "fieldtype": "Data",
-   "label": "Bank Name"
+   "label": "Bank Name",
+   "reqd": 1
   },
   {
    "fieldname": "swift_bic",
@@ -120,12 +141,33 @@
   {
    "fieldname": "column_break_zbpg",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "engineer",
+   "fieldtype": "Section Break",
+   "label": "<b style=\"color:#2490EF;font-size:15px\">Engineer Details</b>"
+  },
+  {
+   "fieldname": "column_break_aabc",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_xygg",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_ovqs",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_ddgf",
+   "fieldtype": "Column Break"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-11-16 16:43:04.759428",
+ "modified": "2026-11-18 17:07:40.509076",
  "modified_by": "Administrator",
  "module": "Dispatch Model",
  "name": "Engineer Onboarding",
@@ -148,6 +190,7 @@
  "quick_entry": 1,
  "row_format": "Dynamic",
  "rows_threshold_for_grid_search": 20,
+ "search_fields": "engineer_name,region,country",
  "sort_field": "creation",
  "sort_order": "DESC",
  "states": []

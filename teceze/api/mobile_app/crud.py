@@ -1598,6 +1598,7 @@ def calculate_time_function_taken():
 @frappe.whitelist(allow_guest=False)
 @calculate_time_function_taken()
 def employee_checkin():
+    frappe.log_error("employee_checkin called",now_datetime)
 
     payload = CRUD.get_json_payload()
     data = payload.get("data", payload)
@@ -1629,12 +1630,14 @@ def employee_checkin():
             _("You are not allowed to check in for another employee."),
             frappe.PermissionError,
         )
+    frappe.log_error("funciton end",now_datetime)
 
     return desktop_employee_checkin(
         employee=employee,
         log_type=log_type,
         latitude=latitude,
         longitude=longitude,
+        source="Mobile"
     )
 
 
@@ -1727,9 +1730,78 @@ def timesheet():
 @frappe.whitelist(allow_guest=False)
 def employee():
     return CRUD.handle(
-        doctype="Employee"
+        doctype="Employee",
     )
 
+@frappe.whitelist(allow_guest=False, methods=["PUT"])
+def update_first_time():
+
+    data = frappe.request.get_json(silent=True) or {}
+
+    if not data:
+        data = frappe.local.form_dict
+
+    allowed_fields = {
+        "name",
+        "custom_first_login_time",
+        "custom_is_agree",
+        "cmd",
+        "doctype"
+    }
+
+    invalid_fields = set(data.keys()) - allowed_fields
+
+    if invalid_fields:
+        frappe.throw(
+            "Only First Login Time and Is Agree can be updated. Invalid fields: "
+            + ", ".join(invalid_fields)
+        )
+
+    employee = data.get("name")
+
+    if not employee:
+        frappe.throw("Employee ID is required.")
+
+    if not frappe.db.exists("Employee", employee):
+        frappe.throw("Employee does not exist.")
+
+    update_values = {}
+
+    # First Login Time
+    if "custom_first_login_time" in data:
+        if not frappe.get_meta("Employee").has_field("custom_first_login_time"):
+            frappe.throw("Field custom_first_login_time does not exist.")
+
+        if not data.get("custom_first_login_time"):
+            frappe.throw("First Login Time cannot be empty.")
+
+        update_values["custom_first_login_time"] = data.get(
+            "custom_first_login_time"
+        )
+
+    # Is Agree
+    if "custom_is_agree" in data:
+        if not frappe.get_meta("Employee").has_field("custom_is_agree"):
+            frappe.throw("Field custom_is_agree does not exist.")
+
+        update_values["custom_is_agree"] = data.get("custom_is_agree")
+
+    if not update_values:
+        frappe.throw("No valid fields provided for update.")
+
+    # Update directly, bypassing Employee write permissions
+    frappe.db.set_value(
+        "Employee",
+        employee,
+        update_values
+    )
+
+    return {
+        "success": True,
+        "message": "Employee fields updated successfully.",
+        "employee": employee,
+        "updated_fields": update_values
+    }
 
 def get_logged_in_employee():
 
@@ -1820,7 +1892,7 @@ def get_checkin(employee, from_time, to_time, log_type, order):
             ["log_type", "=", log_type],
             ["time", "between", [from_time, to_time]]
         ],
-        fields=["name", "log_type", "time"],
+        fields=["name", "log_type", "time","custom_desk","custom_mobile"],
         order_by=f"time {order}",
         limit_page_length=1
     )
@@ -2034,244 +2106,439 @@ def get_employee_checkin_summary(days=None, from_date=None, to_date=None):
         "data": result
 
     }
-
+"""
+Mobile check-in API - Frappe HRMS
+Put in: teceze/api/mobile_app/crud.py  (the app calls teceze.api.mobile_app.crud.*)
+ 
+  GET  get_my_checkin_status()                        read-only, safe to poll
+  POST mark_checkin(log_type, latitude, longitude)    write, locked per employee
+  auto_checkout_open_sessions()                       scheduler job (hourly)
+ 
+HOW THE STATUS IS DECIDED (one rule set, used by every function)
+  1. Take the employee's LATEST check-in event (by punch time, then creation).
+  2. No event                                 -> NOT_CHECKED_IN, timer 0.
+  3. Shift of that event's date:
+        Shift Assignment -> Employee default -> Company default
+        -> no shift at all: the full calendar day (never an error).
+     Window = shift start - "begin check-in before shift start"
+           .. shift end   + "allow check-out after shift end"
+     (overnight shift: the end is the next day).
+  4. Latest is IN and older than 24 h (AUTO_CHECKOUT_AFTER)
+                                              -> NOT_CHECKED_IN, timer 0,
+                                                 stale_session_detected = true.
+     The session is closed with an automatic OUT (hourly job, or at the
+     employee's next check-in, whichever comes first).
+  5. Latest is IN, under 24 h, but its shift is already over
+                                              -> still CHECKED_IN (timer runs),
+                                                 stale_session_detected = true
+                                                 (the app warns "not checked out").
+  6. Latest is OUT and its shift is over      -> NOT_CHECKED_IN, timer 0 (new shift).
+  7. Otherwise pair the shift's events IN -> OUT:
+        two INs in a row                      -> the latest IN wins
+        OUT without an IN                     -> ignored
+        a pair longer than 24 h               -> ignored
+     Open IN left -> CHECKED_IN; else a session this shift -> CHECKED_OUT;
+     else -> NOT_CHECKED_IN.
+  8. is_resume = this shift already has closed sessions
+        true  -> the app continues the timer from total_worked_seconds
+        false -> the app starts from 0 (current_session_seconds)
+ 
+Setup (once):
+  - hooks.py:
+        scheduler_events = {
+            "hourly": ["teceze.api.mobile_app.crud.auto_checkout_open_sessions"],
+        }
+  - Index, for speed (bench console or a patch):
+        frappe.db.add_index("Employee Checkin", ["employee", "time"])
+"""
+ 
+from datetime import timedelta
+ 
 import frappe
+from frappe import _
 from frappe.utils import (
-    now_datetime,
+    add_to_date,
+    flt,
     get_datetime,
     getdate,
-    add_days,
-    get_time,
+    now_datetime,
+    to_timedelta,
 )
-
-
-@frappe.whitelist(allow_guest=False)
-def get_my_checkin_status():
-
-    employee = get_logged_in_employee()
-    server_time = now_datetime()
-    today = getdate(server_time)
-
-    # -------------------------------------------------
-    # 1. FIND TODAY'S OR YESTERDAY'S SHIFT
-    # -------------------------------------------------
-
-    shift_data = None
-    shift_date = None
-
-    for candidate_date in [today, add_to_date(today, days=-1)]:
-
-        window = get_shift_window(employee, candidate_date)
-
-        if not window:
-            continue
-
-        if window["from_time"] <= server_time <= window["to_time"]:
-            shift_data = window
-            shift_date = getdate(candidate_date)
-            break
-
-    # Fallback to today's shift
-    if not shift_data:
-        shift_data = get_shift_window(employee, today)
-        shift_date = today
-
-    if not shift_data:
-        frappe.throw("Shift Assignment not found")
-
-    shift_name = shift_data["shift_type"]
-    shift_start = shift_data["shift_start"]
-    shift_end = shift_data["shift_end"]
-
-    from_time = shift_data["from_time"]
-    to_time = min(server_time, shift_data["to_time"])
-
-    # -------------------------------------------------
-    # 2. FETCH CHECKIN RECORDS
-    # -------------------------------------------------
-
-    checkins = frappe.get_all(
-        "Employee Checkin",
-        filters={
-            "employee": employee,
-            "time": ["between", [from_time, to_time]]
-        },
-        fields=[
-            "name",
-            "log_type",
-            "time"
-        ],
-        order_by="time asc, creation asc",
-        ignore_permissions=True,
-        limit_page_length=0
-    )
-
-    # -------------------------------------------------
-    # 3. CALCULATE PREVIOUS AND CURRENT HOURS
-    # -------------------------------------------------
-
-    previous_seconds = 0
-    current_start = None
-    first_checkin = None
-    last_checkout = None
-
-    for row in checkins:
-
-        event_time = get_datetime(row.time)
-
-        if row.log_type == "IN":
-
-            if first_checkin is None:
-                first_checkin = event_time
-
-            if current_start is None:
-                current_start = event_time
-
-        elif row.log_type == "OUT":
-
-            if current_start is not None:
-
-                previous_seconds += max(
-                    0,
-                    int((event_time - current_start).total_seconds())
-                )
-
-                current_start = None
-
-            last_checkout = event_time
-
-    # -------------------------------------------------
-    # 4. CURRENT SESSION
-    # -------------------------------------------------
-
-    is_checked_in = current_start is not None
-
-    current_session_seconds = 0
-
-    if is_checked_in:
-
-        current_session_seconds = max(
-            0,
-            int((to_time - current_start).total_seconds())
-        )
-
-    # -------------------------------------------------
-    # 5. TOTAL WORKED HOURS
-    # -------------------------------------------------
-
-    total_worked_seconds = (
-        previous_seconds + current_session_seconds
-    )
-
-    # -------------------------------------------------
-    # 6. STATUS
-    # -------------------------------------------------
-
-    if is_checked_in:
-        status = "CHECKED_IN"
-    elif last_checkout:
-        status = "CHECKED_OUT"
-    else:
-        status = "NOT_CHECKED_IN"
-
-    # -------------------------------------------------
-    # 7. RESPONSE
-    # -------------------------------------------------
-
-    return {
-        "success": True,
-        "data": {
-            "status": status,
-            "is_checked_in": is_checked_in,
-            "employee": employee,
-            "shift": shift_name,
-            "shift_date": str(shift_date),
-            "shift_start": str(shift_start),
-            "shift_end": str(shift_end),
-            "session_start": str(first_checkin) if first_checkin else None,
-            "current_session_start": str(current_start) if current_start else None,
-            "last_checkout": str(last_checkout) if last_checkout else None,
-            "previous_seconds": previous_seconds,
-            "current_session_seconds": current_session_seconds,
-            "total_worked_seconds": total_worked_seconds,
-            "elapsed_seconds": total_worked_seconds,
-            "server_time": str(server_time)
-        }
-    }
-
-from frappe.utils import get_datetime, getdate, now_datetime, add_to_date
-
-
-def get_current_checkin_status(employee, date=None):
-
-    if not date:
-        date = getdate(now_datetime())
-
-    shift_name = frappe.db.get_value(
+ 
+# ---------------------------------------------------------
+# Settings
+# ---------------------------------------------------------
+# An IN left open longer than this is checked out automatically.
+AUTO_CHECKOUT_AFTER = 24 * 3600
+ 
+# Time written on the automatic OUT:
+#   "after_24h" : exactly 24 h after the IN (the session counts 24 h of work)
+#   "shift_end" : the end of that IN's shift (+ allowed grace), never later
+#                 than 24 h - safer for payroll
+AUTO_CHECKOUT_AT = "after_24h"
+ 
+# True : the timer continues across a shift's sessions (is_resume can be true)
+# False: every session starts from 0 (is_resume is always false)
+COUNT_PREVIOUS_SESSIONS = True
+ 
+# device_id on automatic check-outs, so HR / payroll can tell them apart.
+AUTO_CHECKOUT_DEVICE = "auto-checkout"
+ 
+# How far back the hourly job looks for open sessions.
+AUTO_CHECKOUT_LOOKBACK_DAYS = 7
+ 
+ 
+# ---------------------------------------------------------
+# Data access
+# ---------------------------------------------------------
+def _employee():
+    emp = frappe.db.get_value(
         "Employee",
-        employee,
-        "default_shift"
+        {"user_id": frappe.session.user, "status": "Active"},
+        ["name", "company", "default_shift"],
+        as_dict=True,
     )
-
-    if not shift_name:
-        return "NOT_CHECKED_IN"
-
-    shift = frappe.db.get_value(
+    if not emp:
+        frappe.throw(_("No active Employee linked to this user"), frappe.PermissionError)
+    return emp
+ 
+ 
+def _employee_by_name(name):
+    return frappe.db.get_value(
+        "Employee", name, ["name", "company", "default_shift"], as_dict=True
+    )
+ 
+ 
+def _latest(employee, upto):
+    rows = frappe.get_all(
+        "Employee Checkin",
+        filters={"employee": employee, "time": ["<=", upto]},
+        fields=["name", "log_type", "time","custom_desk","custom_mobile"],
+        order_by="time desc, creation desc",  # by punch TIME, never by creation
+        limit_page_length=1,
+        ignore_permissions=True,
+    )
+    return rows[0] if rows else None
+ 
+ 
+def _rows(employee, start, end):
+    return frappe.get_all(
+        "Employee Checkin",
+        filters={"employee": employee, "time": ["between", [start, end]]},
+        fields=["log_type", "time"],
+        order_by="time asc, creation asc",
+        limit_page_length=0,
+        ignore_permissions=True,
+    )
+ 
+ 
+def _insert(emp, log_type, time, latitude=None, longitude=None, device_id=None,source_checkin=None):
+    doc = frappe.new_doc("Employee Checkin")
+    doc.employee = emp.name
+    doc.log_type = log_type
+    doc.time = time
+    meta = frappe.get_meta("Employee Checkin")
+    if device_id:
+        doc.device_id = device_id
+    # The app sends the phone's location with every punch.
+    if latitude not in (None, "") and meta.has_field("latitude"):
+        doc.latitude = flt(latitude)
+    if longitude not in (None, "") and meta.has_field("longitude"):
+        doc.longitude = flt(longitude)
+    if source_checkin:
+        doc.custom_desk = source_checkin.custom_desk
+        doc.custom_mobile = source_checkin.custom_mobile
+    else:
+        # Normal mobile check-in / checkout
+        doc.custom_desk = 0
+        doc.custom_mobile = 1
+    doc.insert(ignore_permissions=True)
+    return doc
+ 
+ 
+def _lock(emp):
+    """Lock the employee row until the transaction ends (no double punch)."""
+    frappe.db.get_value("Employee", emp.name, "name", for_update=True)
+ 
+ 
+# ---------------------------------------------------------
+# Shift
+# ---------------------------------------------------------
+def _shift_name(emp, on_date):
+    rows = frappe.get_all(
+        "Shift Assignment",
+        filters={
+            "employee": emp.name,
+            "docstatus": 1,
+            "status": "Active",
+            "start_date": ["<=", on_date],
+        },
+        or_filters=[["end_date", "is", "not set"], ["end_date", ">=", on_date]],
+        fields=["shift_type"],
+        order_by="start_date desc, creation desc",
+        limit_page_length=1,
+        ignore_permissions=True,
+    )
+    if rows:
+        return rows[0].shift_type, "Shift Assignment"
+    if emp.default_shift:
+        return emp.default_shift, "Employee Default"
+    if frappe.get_meta("Company").has_field("default_shift"):
+        name = frappe.get_cached_value("Company", emp.company, "default_shift")
+        if name:
+            return name, "Company Default"
+    return None, None
+ 
+ 
+def _window(emp, on_date):
+    """Shift start/end plus the check-in/out allowances. Falls back to the full day."""
+    midnight = get_datetime(on_date)
+    name, source = _shift_name(emp, on_date)
+ 
+    if not name:
+        end = midnight + timedelta(days=1) - timedelta(seconds=1)
+        return {
+            "shift": None, "source": None, "date": getdate(on_date),
+            "start": midnight, "end": end, "from_time": midnight, "to_time": end,
+        }
+ 
+    st = frappe.get_cached_value(
         "Shift Type",
-        shift_name,
+        name,
         [
             "start_time",
             "end_time",
             "begin_check_in_before_shift_start_time",
             "allow_check_out_after_shift_end_time",
         ],
-        as_dict=True
+        as_dict=True,
     )
-
-    if not shift:
-        return "NOT_CHECKED_IN"
-
-    # Shift start/end
-    start_datetime = get_datetime(
-        f"{date} {shift.start_time}"
+    start = midnight + to_timedelta(st.start_time)
+    end = midnight + to_timedelta(st.end_time)
+    if end <= start:  # overnight shift
+        end += timedelta(days=1)
+ 
+    return {
+        "shift": name, "source": source, "date": getdate(on_date),
+        "start": start, "end": end,
+        "from_time": add_to_date(start, minutes=-int(st.begin_check_in_before_shift_start_time or 0)),
+        "to_time": add_to_date(end, minutes=int(st.allow_check_out_after_shift_end_time or 0)),
+    }
+ 
+ 
+# ---------------------------------------------------------
+# Automatic check-out (after 24 h)
+# ---------------------------------------------------------
+def _overdue(latest, now):
+    """True when the latest punch is an IN left open longer than 24 h."""
+    return bool(
+        latest
+        and latest.log_type == "IN"
+        and (now - get_datetime(latest.time)).total_seconds() > AUTO_CHECKOUT_AFTER
     )
-
-    end_datetime = get_datetime(
-        f"{date} {shift.end_time}"
-    )
-
-    # Apply thresholds
-    start_datetime = add_to_date(
-        start_datetime,
-        minutes=-(
-            shift.begin_check_in_before_shift_start_time or 0
+ 
+ 
+def _auto_checkout_time(emp, in_time):
+    after_24h = in_time + timedelta(seconds=AUTO_CHECKOUT_AFTER)
+    if AUTO_CHECKOUT_AT == "shift_end":
+        shift_end = _window(emp, getdate(in_time))["to_time"]
+        return min(max(shift_end, in_time), after_24h)
+    return after_24h
+ 
+ 
+def _close_overdue(emp, now):
+    """Write the automatic OUT for an IN open longer than 24 h. Returns its name."""
+    latest = _latest(emp.name, now)
+    if not _overdue(latest, now):
+        return None
+    in_time = get_datetime(latest.time)
+    return _insert(
+        emp, "OUT", _auto_checkout_time(emp, in_time), device_id=AUTO_CHECKOUT_DEVICE,source_checkin=latest
+    ).name
+ 
+ 
+def auto_checkout_open_sessions():
+    """Hourly scheduler job: check out every IN left open longer than 24 h."""
+    now = now_datetime()
+    cutoff = now - timedelta(seconds=AUTO_CHECKOUT_AFTER)
+    since = cutoff - timedelta(days=AUTO_CHECKOUT_LOOKBACK_DAYS)
+    employees = set(
+        frappe.get_all(
+            "Employee Checkin",
+            filters=[["log_type", "=", "IN"], ["time", "between", [since, cutoff]]],
+            pluck="employee",
+            ignore_permissions=True,
         )
     )
-
-    end_datetime = add_to_date(
-        end_datetime,
-        minutes=(
-            shift.allow_check_out_after_shift_end_time or 0
+    for name in employees:
+        try:
+            emp = _employee_by_name(name)
+            if not emp:
+                continue
+            _lock(emp)
+            if _close_overdue(emp, now):
+                frappe.db.commit()
+        except Exception:
+            frappe.db.rollback()
+            frappe.log_error(title=f"Auto checkout failed for {name}")
+ 
+ 
+# ---------------------------------------------------------
+# Timer maths
+# ---------------------------------------------------------
+def _pair(rows, now):
+    closed, open_start, first_in, last_out = 0, None, None, None
+ 
+    for r in rows:
+        t = get_datetime(r.time)
+        if r.log_type == "IN":
+            open_start = t  # two INs in a row: the latest IN wins
+            first_in = first_in or t
+        elif open_start is not None:  # OUT that closes an open IN
+            secs = int((t - open_start).total_seconds())
+            if 0 <= secs <= AUTO_CHECKOUT_AFTER:
+                closed += secs
+                last_out = t
+            open_start = None
+        # OUT without an IN: ignored
+ 
+    running = int((now - open_start).total_seconds()) if open_start else 0
+    return closed, max(running, 0), open_start, first_in, last_out
+ 
+ 
+# ---------------------------------------------------------
+# Status (also reusable for any employee, e.g. team_members)
+# ---------------------------------------------------------
+def build_status(emp, now=None):
+    now = now or now_datetime()
+    latest = _latest(emp.name, now)
+ 
+    # 2. Never checked in
+    if not latest:
+        return _response(emp, "NOT_CHECKED_IN", now, _window(emp, getdate(now)))
+ 
+    latest_time = get_datetime(latest.time)
+ 
+    # 4. IN open longer than 24 h -> treated as checked out (auto OUT follows)
+    if _overdue(latest, now):
+        return _response(
+            emp, "NOT_CHECKED_IN", now, _window(emp, getdate(now)),
+            stale=True, stale_since=latest_time,
         )
+ 
+    window = _window(emp, getdate(latest_time))
+ 
+    # 6. Checked out and that shift is over -> new shift, empty timer
+    if latest.log_type == "OUT" and now > window["to_time"]:
+        return _response(emp, "NOT_CHECKED_IN", now, _window(emp, getdate(now)))
+ 
+    # 7. Pair this shift's events
+    from_time = window["from_time"]
+    if latest.log_type == "IN":
+        from_time = min(from_time, latest_time)  # session may start before the window
+ 
+    closed, running, open_start, first_in, last_out = _pair(
+        _rows(emp.name, from_time, now), now
     )
-
-    # Get latest check-in inside effective shift window
-    checkin = frappe.get_all(
-        "Employee Checkin",
-        filters=[
-            ["employee", "=", employee],
-            ["time", ">=", start_datetime],
-            ["time", "<=", end_datetime],
-        ],
-        fields=["log_type", "time"],
-        order_by="time desc",
-        limit_page_length=1,
+    if open_start:
+        status = "CHECKED_IN"
+    elif first_in:
+        status = "CHECKED_OUT"  # worked this shift, checked out
+    else:
+        status = "NOT_CHECKED_IN"  # e.g. only an automatic OUT in this shift
+ 
+    # 5. Still open after its shift ended -> warn (timer keeps running)
+    stale = bool(open_start and now > window["to_time"])
+ 
+    return _response(
+        emp, status, now, window,
+        closed=closed, running=running, running_since=open_start,
+        first_in=first_in, last_out=last_out,
+        stale=stale, stale_since=open_start if stale else None,
     )
-
-    if not checkin:
-        return "NOT_CHECKED_IN"
-
-    return checkin[0].log_type
+ 
+ 
+def _response(emp, status, now, window, closed=0, running=0, running_since=None,
+              first_in=None, last_out=None, stale=False, stale_since=None):
+    previous = closed if COUNT_PREVIOUS_SESSIONS else 0
+    total = previous + running
+    # 8. Continue the timer only when this shift already has closed sessions.
+    is_resume = bool(COUNT_PREVIOUS_SESSIONS and closed > 0)
+ 
+    def s(v):
+        return str(v) if v else None
+ 
+    return {
+        "success": True,
+        "data": {
+            "status": status,
+            "is_checked_in": status == "CHECKED_IN",
+            "employee": emp.name,
+            "shift": window["shift"],
+            "shift_source": window["source"],
+            "shift_date": str(window["date"]),
+            "shift_start": str(window["start"]),
+            "shift_end": str(window["end"]),
+            "first_checkin": s(first_in),
+            "last_checkin": s(running_since),
+            "running_since": s(running_since),
+            "last_checkout": s(last_out),  # sent whenever there is one
+            "closed_seconds": previous,
+            "current_session_seconds": running,
+            "total_worked_seconds": total,
+            "stale_session_detected": stale,
+            "stale_since": s(stale_since),  # the IN that wasn't checked out
+            "server_time": str(now),
+            "is_resume": is_resume,
+        },
+    }
+ 
+ 
+@frappe.whitelist(allow_guest=False)
+def get_my_checkin_status():
+    return build_status(_employee())
+ 
+ 
+# ---------------------------------------------------------
+# Punch
+# ---------------------------------------------------------
+@frappe.whitelist(allow_guest=False, methods=["POST"])
+def mark_checkin(log_type, latitude=None, longitude=None):
+    if log_type not in ("IN", "OUT"):
+        frappe.throw(_("log_type must be IN or OUT"))
+ 
+    emp = _employee()
+ 
+    # A second tap waits here, then sees the first punch and is rejected.
+    _lock(emp)
+ 
+    now = now_datetime()
+    auto_checkout = None
+ 
+    if log_type == "IN":
+        # A session left open over 24 h is closed first (if the hourly job
+        # hasn't done it yet), then the new IN starts a fresh session.
+        auto_checkout = _close_overdue(emp, now)
+        if build_status(emp, now)["data"]["is_checked_in"]:
+            frappe.throw(_("You are already checked in."))
+    else:
+        if not build_status(emp, now)["data"]["is_checked_in"]:
+            frappe.throw(_("You are not checked in."))
+ 
+    doc = _insert(emp, log_type, now, latitude, longitude)
+ 
+    return {
+        "success": True,
+        "message": _("Check In Successful") if log_type == "IN" else _("Check Out Successful"),
+        "data": {
+            "name": doc.name,
+            "log_type": log_type,
+            "time": str(now),
+            "auto_checkout_name": auto_checkout,
+        },
+        # The new state, by the same rules (the app re-reads it anyway).
+        "status": build_status(emp)["data"],
+    }
 @frappe.whitelist(allow_guest=False)
 def team_members():
 
@@ -2427,6 +2694,78 @@ def team_members():
     }
 
 
+
+def get_current_checkin_status(employee, date=None):
+
+    if not date:
+        date = getdate(now_datetime())
+
+    shift_name = frappe.db.get_value(
+        "Employee",
+        employee,
+        "default_shift"
+    )
+
+    if not shift_name:
+        return "NOT_CHECKED_IN"
+
+    shift = frappe.db.get_value(
+        "Shift Type",
+        shift_name,
+        [
+            "start_time",
+            "end_time",
+            "begin_check_in_before_shift_start_time",
+            "allow_check_out_after_shift_end_time",
+        ],
+        as_dict=True
+    )
+
+    if not shift:
+        return "NOT_CHECKED_IN"
+
+    # Shift start/end
+    start_datetime = get_datetime(
+        f"{date} {shift.start_time}"
+    )
+
+    end_datetime = get_datetime(
+        f"{date} {shift.end_time}"
+    )
+
+    # Apply thresholds
+    start_datetime = add_to_date(
+        start_datetime,
+        minutes=-(
+            shift.begin_check_in_before_shift_start_time or 0
+        )
+    )
+
+    end_datetime = add_to_date(
+        end_datetime,
+        minutes=(
+            shift.allow_check_out_after_shift_end_time or 0
+        )
+    )
+
+    # Get latest check-in inside effective shift window
+    checkin = frappe.get_all(
+        "Employee Checkin",
+        filters=[
+            ["employee", "=", employee],
+            ["time", ">=", start_datetime],
+            ["time", "<=", end_datetime],
+        ],
+        fields=["log_type", "time"],
+        order_by="time desc",
+        limit_page_length=1,
+    )
+
+    if not checkin:
+        return "NOT_CHECKED_IN"
+
+    return checkin[0].log_type
+
 @frappe.whitelist(allow_guest=False)
 def activity_type():
     return CRUD.handle(
@@ -2436,6 +2775,12 @@ def activity_type():
 def leave_type():
     return CRUD.handle(
         doctype="Leave Type",
+    )
+
+@frappe.whitelist(allow_guest=False)
+def issues():
+    return CRUD.handle(
+        doctype="Issue",
     )
 
 @frappe.whitelist(allow_guest=False)
@@ -3024,6 +3369,7 @@ def attendance_request_cancellation(name, comment):
     "success": True,
     "message": "Cancellation request sent successfully"
 }
+
 @frappe.whitelist(allow_guest=False)
 def policy_details():
     
@@ -3036,6 +3382,28 @@ def policy_details():
         "india_leave_policy_url": "custom_india_leave_policy_url",
         "dress_code_policy_url": "custom_dress_code_policy_url",
         "whistleblower_policy_url": "custom_whistleblower_policy_url",
+    }
+    settings = frappe.get_single("Teceze Settings").as_dict()
+
+    data = {
+        key: (settings.get(fieldname) or "").strip()
+        for key, fieldname in policy_fields.items()
+    }
+    return {
+        "success": True,
+        "message": "Policy details fetched successfully",
+        "data": data,
+    }
+
+
+@frappe.whitelist(allow_guest=False)
+def agree_details():
+    
+    
+    policy_fields = {
+        "work_etiquete": "workplace_etiquette",
+        "male_accomodation": "male_accomodation",
+       
     }
     settings = frappe.get_single("Teceze Settings").as_dict()
 
@@ -3513,3 +3881,27 @@ def get_attendance_list(from_date=None, to_date=None):
         "data": result
     }
 
+
+@frappe.whitelist(allow_guest=False)
+def get_weather():
+    current_logged_in_employee = get_logged_in_employee()
+    worklocation=frappe.db.get_value("Employee", current_logged_in_employee, "custom_work_location")
+    if not worklocation:
+        return {
+            "success": False,
+            "message": "Work location not found for the employee"
+        }       
+
+    locaiton_details=frappe.db.get_value("Location", worklocation, ["latitude", "longitude"], as_dict=True)
+    if not locaiton_details:
+        return {
+            "success": False,
+            "message": "Latitude and Longitude not found for the work location"
+        }   
+    return {
+        "success": True,
+        "data": {
+            "latitude": locaiton_details.latitude,
+            "longitude": locaiton_details.longitude
+        }
+    }   

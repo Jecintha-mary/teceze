@@ -690,7 +690,8 @@ def auto_checkout(
     )
 
     checkout.log_type = "OUT"
-
+    checkout.custom_desk = last_log.custom_desk
+    checkout.custom_mobile = last_log.custom_mobile
     checkout.custom_auto_checkout = 1
     checkout.time = checkout_time
 
@@ -945,7 +946,7 @@ def employee_checkin(
     employee,
     log_type,
     latitude=None,
-    longitude=None
+    longitude=None,source="Desk"
 ):
     session_settings = get_attendance_session_settings()
     # ======================================================
@@ -1169,6 +1170,8 @@ def employee_checkin(
         )
 
         checkin.log_type = "IN"
+        checkin.custom_desk = 1 if source == "Desk" else 0
+        checkin.custom_mobile = 1 if source == "Mobile" else 0
 
         checkin.time = now_datetime()
 
@@ -1349,6 +1352,8 @@ def employee_checkin(
         )
 
         checkout.log_type = "OUT"
+        checkout.custom_desk = 1 if source == "Desk" else 0
+        checkout.custom_mobile = 1 if source == "Mobile" else 0
 
         checkout.custom_auto_checkout = 0
 
@@ -2186,5 +2191,8 @@ def get_attendance_policy_urls():
 
         "whistleblower_policy_url": settings.get(
             "custom_whistleblower_policy_url"
-        ) or ""
+        ) or "",
+        "workplace_etiquette_url": settings.get(
+            "workplace_etiquette")
+            or "",
     }

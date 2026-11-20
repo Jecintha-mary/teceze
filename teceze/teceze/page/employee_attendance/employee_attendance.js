@@ -577,6 +577,10 @@ frappe.pages["employee_attendance"].on_page_load = function (wrapper) {
         {
             label: "Whistleblower Policy",
             key: "whistleblower_policy_url"
+        },
+        {
+            label: "Workplace Etiquette",
+            key: "workplace_etiquette_url"
         }
     ];
 

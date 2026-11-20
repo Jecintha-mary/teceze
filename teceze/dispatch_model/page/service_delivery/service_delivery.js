@@ -5,8 +5,30 @@
 	/* Constants                                                           */
 	/* ------------------------------------------------------------------ */
 
-	const STORE_KEY = "teceze_sdd_state_v2";
-	const TZ = "Asia/Dubai"; // company time zone for the dashboard
+	// Server method that returns the dashboard data (service_delivery.py, in this folder)
+	const API_METHOD = "teceze.dispatch_model.page.service_delivery.service_delivery.get_dashboard_data";
+	// Add ?demo=1 to the page address to preview the layout with sample data instead of live data
+	const DEMO = /[?&]demo=1(&|$)/.test(window.location.search);
+	// Coming back to the page reloads the data when it is older than this
+	const MIN_RELOAD_MS = 60000;
+	// Company time zone for the dashboard. Not fixed here: the server sends the site's time zone in
+	// meta.tz and accept() sets it. Until then (or if the server sends none) the browser's zone is used.
+	const browserTz = () => {
+		try {
+			return Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC";
+		} catch (e) {
+			return "UTC";
+		}
+	};
+	const validTz = (z) => {
+		try {
+			new Intl.DateTimeFormat("en-GB", { timeZone: z });
+			return !!z;
+		} catch (e) {
+			return false;
+		}
+	};
+	let TZ = browserTz();
 	const H = 3600e3;
 	const DAY = 24 * H;
 	const SLA_TARGET = 85; // % of measured tickets that must meet the on-site SLA
@@ -51,6 +73,7 @@
 		x: svg('<path d="M6 18 18 6M6 6l12 12"/>'),
 		info: svg('<path d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z"/>'),
 		refresh: svg('<path d="M4 4v5h.6m15.4 2A8 8 0 0 0 4.6 9m0 0H9m11 11v-5h-.6m0 0a8 8 0 0 1-15.4-2m15.4 2H15"/>'),
+		alert: svg('<path d="M12 9v2m0 4h.01M5.1 19h13.8c1.5 0 2.5-1.7 1.7-3L13.7 4c-.8-1.3-2.7-1.3-3.5 0L3.3 16c-.8 1.3.2 3 1.8 3z"/>'),
 		clock: svg('<path d="M12 8v4l3 3m6-3a9 9 0 1 1-18 0 9 9 0 0 1 18 0z"/>'),
 		chevron: svg('<path d="m19 9-7 7-7-7"/>'),
 		trend: svg('<path d="M13 7h8m0 0v8m0-8-8 8-4-4-6 6"/>'),
@@ -124,7 +147,15 @@
 	}
 	function tzAbbr(tz, ms) {
 		if (tz === "Europe/London") return tzOffset(ms || Date.now(), tz) === 0 ? "GMT" : "BST";
-		return { "Asia/Dubai": "GST", "Asia/Kolkata": "IST", "Asia/Singapore": "SGT", "Asia/Kuala_Lumpur": "MYT" }[tz] || tz;
+		const known = { "Asia/Dubai": "GST", "Asia/Kolkata": "IST", "Asia/Singapore": "SGT", "Asia/Kuala_Lumpur": "MYT" }[tz];
+		if (known) return known;
+		// any other zone (Africa/Cairo, Etc/GMT+5 ...): the zone's own offset, e.g. "GMT+2", instead of a hard-coded list
+		try {
+			const part = new Intl.DateTimeFormat("en-GB", { timeZone: tz, timeZoneName: "shortOffset" }).formatToParts(new Date(ms || Date.now())).find((x) => x.type === "timeZoneName");
+			return part ? part.value : tz;
+		} catch (e) {
+			return tz;
+		}
 	}
 	const ymdIn = (v, tz) => wall(Date.parse(v), tz).ymd;
 	/** wall time today-minus-n-days in a time zone */
@@ -221,17 +252,32 @@
 	/* Data                                                                */
 	/* ------------------------------------------------------------------ */
 
-	/** This page only reads data. Swap load() for a frappe.call to read from DocTypes. */
-	const Store = {
-		load() {
-			try {
-				const raw = localStorage.getItem(STORE_KEY);
-				if (!raw) return null;
-				const s = JSON.parse(raw);
-				return s && s.version === 2 && Array.isArray(s.tickets) && Array.isArray(s.projects) ? s : null;
-			} catch (e) {
-				return null;
+	/** The readable part of a failed server call */
+	function serverMessage(xhr) {
+		try {
+			const r = (xhr && xhr.responseJSON) || {};
+			if (r._server_messages) {
+				const m = JSON.parse(r._server_messages).map((x) => JSON.parse(x).message).filter(Boolean);
+				if (m.length) return m.join(" ").replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
 			}
+			if (r.exception) console.error("Service Delivery dashboard, server error:", r.exception);
+		} catch (e) {}
+		if (xhr && xhr.status === 403) return "You do not have permission to view this dashboard.";
+		if (xhr && xhr.status === 404) return "The dashboard data service was not found. Check that service_delivery.py is in the page folder, then run bench restart.";
+		return "The dashboard data could not be loaded. Check the server log for details.";
+	}
+
+	/** Loads the dashboard data from the server */
+	const Source = {
+		fetch() {
+			return new Promise((resolve, reject) => {
+				frappe.call({
+					method: API_METHOD,
+					silent: true,
+					callback: (r) => (r && r.message && Array.isArray(r.message.tickets) ? resolve(r.message) : reject(new Error("The server returned no dashboard data."))),
+					error: (xhr) => reject(new Error(serverMessage(xhr))),
+				});
+			});
 		},
 	};
 
@@ -379,7 +425,14 @@
 
 	class ExecDashboard {
 		constructor(mount) {
-			this.loadState();
+			this.state = { tickets: [], projects: [] };
+			this.status = "loading"; // loading | ready | empty | error
+			this.error = "";
+			this.meta = {};
+			this.isDemo = DEMO;
+			this.busy = null;
+			this.loadedAt = null;
+			this.loadedMs = 0;
 			const d = this.defaults();
 			this.ui = { f: Object.assign({}, d), draft: Object.assign({}, d), chart: "recent", q: "", stage: null, page: 1, drawer: null, pipeOpen: false, dd: null, ddQ: "", ddActive: 0 };
 			this.root = document.createElement("div");
@@ -395,6 +448,7 @@
 			this.bind();
 			this.render();
 			this.watchHeader();
+			this.load();
 		}
 
 		/* ---------- fixed header ---------- */
@@ -463,11 +517,55 @@
 			setTimeout(schedule, 300); // after the desk finishes laying out
 		}
 
-		loadState() {
-			const s = Store.load();
-			this.isDemo = !s;
-			this.state = s || buildDemo();
-			this.loadedAt = nowIso();
+		/** Fetches the data. `manual` is true when the user pressed the Synced badge. One request at a time. */
+		load(manual) {
+			if (this.busy) return this.busy;
+			this.busy = (DEMO ? Promise.resolve(buildDemo()) : Source.fetch())
+				.then((payload) => {
+					this.accept(payload);
+					if (manual && DEMO) this.toast("Showing sample data.", "ok");
+				})
+				.catch((err) => {
+					console.error("Service Delivery dashboard:", err);
+					const msg = (err && err.message) || "The dashboard data could not be loaded.";
+					if (this.status === "ready") this.toast(msg, "error"); // keep showing what is already on screen
+					else {
+						this.status = "error";
+						this.error = msg;
+					}
+				})
+				.then(() => {
+					this.busy = null;
+					if (this.ui.drawer && !this.ticket(this.ui.drawer)) this.ui.drawer = null;
+					this.render();
+				});
+			this.syncBadge();
+			return this.busy;
+		}
+		/** Takes the server payload and fills in what the dashboard derives from it */
+		accept(payload) {
+			const projects = (payload.projects || []).map((p) => Object.assign({ active: true }, p));
+			const byCode = new Map(projects.map((p) => [p.code, p]));
+			const tickets = (payload.tickets || []).filter((t) => t && t.id && t.created);
+			tickets.forEach((t) => {
+				const p = byCode.get(t.project) || { tz: t.tz || TZ, priority: t.priority, sbdCutoff: "14:00", onSiteBy: "18:00", atRiskH: 2 };
+				t.engineer = t.engineer || {};
+				t.contact = t.contact || {};
+				t.history = t.history || [];
+				t.log = t.log || [];
+				t.tz = t.tz || p.tz;
+				t.receivedTz = t.receivedTz || t.tz;
+				t.atRiskH = num(t.atRiskH) || num(p.atRiskH) || 2;
+				// a Ticket that stores its own SLA due time keeps it; otherwise it follows the project's SLA rules
+				if (!t.slaDue) t.slaDue = computeSlaDue(t.created, t.priority || p.priority, Object.assign({}, p, { tz: t.tz }));
+			});
+			this.state = { tickets, projects };
+			this.meta = payload.meta || {};
+			TZ = validTz(this.meta.tz) ? this.meta.tz : browserTz(); // the site's time zone, from the server
+			this.loadedAt = this.meta.generated || nowIso();
+			this.loadedMs = Date.now();
+			this.status = tickets.length ? "ready" : "empty";
+			this.error = "";
 		}
 		defaults() {
 			return { client: "", project: "", period: "90", group: "week", basis: "received", status: "all" };
@@ -478,11 +576,11 @@
 		ticket(id) {
 			return this.state.tickets.find((t) => t.id === id) || null;
 		}
+		/** Reload when the data is older than MIN_RELOAD_MS (used when the user returns to the page) */
 		refresh() {
 			if (this.scheduleHeader) this.scheduleHeader();
-			this.loadState();
-			if (this.ui.drawer && !this.ticket(this.ui.drawer)) this.ui.drawer = null;
-			this.render();
+			if (this.busy || (this.status === "ready" && Date.now() - this.loadedMs < MIN_RELOAD_MS)) return;
+			this.load();
 		}
 
 		/* ---------- events ---------- */
@@ -584,8 +682,12 @@
 				case "dd-pick":
 					return this.ddPick(d.key, d.value);
 				case "refresh":
-					this.refresh();
-					return this.toast(this.isDemo ? "Showing demo data. No saved tickets were found." : "Data reloaded", "ok");
+					return this.load(true);
+				case "retry":
+					this.status = "loading";
+					this.error = "";
+					this.render();
+					return this.load();
 			}
 		}
 
@@ -730,11 +832,18 @@
 		/* ---------- rendering ---------- */
 
 		render() {
+			if (this.status !== "ready") {
+				this.data = null;
+				this.view.innerHTML = `${this.renderTop()}<div class="sdd-page-wrap">${this.renderState()}</div>`;
+				this.renderDrawer();
+				return;
+			}
 			const data = this.compute();
 			this.data = data;
 			this.view.innerHTML = `${this.renderTop()}
 				<div class="sdd-page-wrap">
 					${this.renderHead(data)}
+					${this.renderNotice()}
 					${this.renderFilters(data)}
 					${this.renderKpis(data)}
 					<section class="sdd-row sdd-row--chart">${this.renderChart(data)}${this.renderRatio(data)}</section>
@@ -745,19 +854,55 @@
 			this.renderDrawer();
 		}
 
+		/** Loading, error and empty screens */
+		renderState() {
+			if (this.status === "loading") {
+				return `<div class="sdd-state" role="status"><span class="sdd-spinner" aria-hidden="true"></span><h2>Loading dispatch data</h2><p>Reading tickets, engineer alignments, sign-offs and payment requests.</p></div>`;
+			}
+			if (this.status === "error") {
+				return `<div class="sdd-state sdd-state--error" role="alert"><span class="sdd-state__icon">${ICON.alert}</span><h2>The dashboard couldn’t load</h2><p>${esc(this.error)}</p><button class="sdd-btn sdd-btn--primary" data-action="retry">Try again</button></div>`;
+			}
+			return `<div class="sdd-state"><span class="sdd-state__icon">${ICON.info}</span><h2>No tickets yet</h2><p>There are no tickets in the Dispatch module to show.</p><button class="sdd-btn" data-action="refresh">Reload</button></div>`;
+		}
+
+		/** The "data notes" banner is not shown. The server still sends meta.warnings, and check_data.py lists them. */
+		renderNotice() {
+			return "";
+		}
+
+
+		syncHtml() {
+			if (this.busy) return `<span class="sdd-spinner sdd-spinner--sm" aria-hidden="true"></span>Syncing…`;
+			return this.loadedAt ? `<span class="sdd-pulse"></span>Synced: ${fmtFull(this.loadedAt)}` : `<span class="sdd-pulse"></span>Not synced yet`;
+		}
+		/** Updates only the Synced badge, so a reload does not redraw the page under the user */
+		syncBadge() {
+			const el = this.view.querySelector(".sdd-sync");
+			if (!el) return;
+			el.disabled = !!this.busy;
+			el.classList.toggle("is-busy", !!this.busy);
+			el.innerHTML = this.syncHtml();
+		}
+		/** The badge beside the title reflects what is really on screen */
+		statusBadge() {
+			if (this.isDemo) return `<span class="sdd-badge sdd-badge--amber" title="Sample data. Remove ?demo=1 from the address to see live data.">Demo data</span>`;
+			if (this.status === "error") return `<span class="sdd-badge sdd-badge--bad">Sync failed</span>`;
+			if (this.status === "loading") return "";
+			return "";
+		}
 		renderTop() {
 			return `<header class="sdd-top${this.stuck ? " is-stuck" : ""}">
 				<div class="sdd-top__l">
 					<span class="sdd-top__icon">${ICON.box}</span>
 					<div>
 						<div class="sdd-top__title">Service Delivery Dispatch
-							${this.isDemo ? `<span class="sdd-badge sdd-badge--amber" title="No saved tickets were found in this browser">Demo data</span>` : `<span class="sdd-badge sdd-badge--ok">Live SLA sync</span>`}
+							${this.statusBadge()}
 						</div>
 					</div>
 				</div>
 				<div class="sdd-top__r">
-					<button class="sdd-sync" data-action="refresh" title="Reload the latest data"><span class="sdd-pulse"></span>Synced: ${fmtFull(this.loadedAt)}</button>
-					<button class="sdd-btn" data-action="export">${ICON.download}<span>Export report</span></button>
+					<button class="sdd-sync${this.busy ? " is-busy" : ""}" data-action="refresh" title="Reload the latest data"${this.busy ? " disabled" : ""}>${this.syncHtml()}</button>
+					${this.status === "ready" ? `<button class="sdd-btn" data-action="export">${ICON.download}<span>Export report</span></button>` : ""}
 				</div>
 			</header>`;
 		}
@@ -806,7 +951,8 @@
 				delta = `<span title="Compared with the previous ${periodLabel.replace("last ", "")}">${v >= 0 ? "+" : ""}${fixed(v)}% vs prev</span>`;
 			}
 			const risk = ts.filter((t) => slaClass(t) === "risk").sort((x, y) => Date.parse(x.slaDue) - Date.parse(y.slaDue));
-			const pay = ts.filter((t) => !t.closed && t.step >= 8);
+			// a linked payment request decides when there is one (paymentPending); otherwise the ticket stage does
+			const pay = ts.filter((t) => !t.closed && (t.paymentPending == null ? t.step >= 8 : t.paymentPending));
 			const card = (o) => `<div class="sdd-kpi sdd-kpi--${o.tone}">
 		<div class="sdd-kpi__top"><span class="sdd-kpi__l">${o.label}</span></div>
 		<div class="sdd-kpi__n">${o.value}</div>
@@ -819,7 +965,7 @@
 		${card({ tone, label: "SLA compliance", value: a.pct == null ? "–" : a.pct + "%", fl: `${a.met} met of ${a.measured}`, fr: delta })}
 		${card({ tone: "bad", label: "SLA breached", value: a.breached, fl: "Missed or overdue", fr: `<span>${a.measured ? fixed((a.breached / a.measured) * 100) + "%" : "–"}</span>` })}
 		${card({ tone: "warn", label: "SLA at risk", value: a.risk, fl: risk.length ? `${risk[0].id} at stage ${stageOf(risk[0])}` : "None due soon", fr: risk.length > 1 ? `<span>+${risk.length - 1} more</span>` : "" })}
-		${card({ tone: "purple", label: "Payments pending", value: pay.length, fl: "Stages 8 to 10", fr: `<span>${pay.filter((t) => t.step === 10).length} in finance</span>` })}
+		${card({ tone: "purple", label: "Payments pending", value: pay.length, fl: "Payment request open or stages 8 to 10", fr: `<span>${pay.filter((t) => t.step === 10).length} in finance</span>` })}
 	</section>`;
 		}
 
@@ -1001,7 +1147,7 @@
 					<label class="sdd-search">${ICON.search}<input type="search" data-ui="q" value="${esc(this.ui.q)}" placeholder="Filter tickets by ID, client, engineer…" aria-label="Filter tickets"></label>
 				</div>
 				<div class="sdd-tablewrap"><table class="sdd-table">
-					<thead><tr><th class="c-id">Ticket</th><th class="c-client">Client</th><th class="c-project">Project</th><th class="c-recv">Received</th><th class="c-act">Activity</th><th class="c c-lvl">Level</th><th class="c-due">SLA due by</th><th class="c c-sla">SLA status</th><th class="c-stage">Active stage</th><th class="c-wait">Waiting on</th><th class="c c-action"><span class="sdd-sr">Action</span></th></tr></thead>
+					<thead><tr><th class="c-id">Ticket</th><th class="c-client">Client</th><th class="c-project">Project</th><th class="c-recv">Received</th><th class="c-act">Activity</th><th class="c c-lvl">Level</th><th class="c-due">SLA due by</th><th class="c c-sla">SLA status</th><th class="c-stage">Active stage</th><th class="c-wait">Waiting on</th></tr></thead>
 					<tbody data-role="reg-body"></tbody>
 				</table></div>
 				<div class="sdd-registry__foot" data-role="reg-foot"></div>
@@ -1036,7 +1182,6 @@
 								<td class="c c-sla"><span class="sdd-spill sdd-spill--${pill[sc][0]}"><i></i>${pill[sc][1]}</span></td>
 								<td class="c-stage"><span class="sdd-stage sdd-stage--${team || "closed"}"><i></i>${s === 11 ? "Closed" : `${s}. ${STAGE_SHORT[s - 1]}`}</span></td>
 								<td class="c-wait sdd-wait sdd-wait--${team || "none"}">${team ? TEAMS[team].label : "–"}</td>
-								<td class="c c-action"><span class="sdd-view sdd-view--${sc}">View →</span></td>
 							</tr>`;
 					})
 					.join("")

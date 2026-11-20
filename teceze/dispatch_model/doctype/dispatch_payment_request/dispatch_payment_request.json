@@ -1,59 +1,70 @@
 {
  "actions": [],
  "allow_bulk_edit": 1,
- "allow_rename": 1,
- "autoname": "PAY-REQ-.####",
+ "autoname": "PRQ-.####",
  "creation": "2026-11-04 15:09:46.232008",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
+  "details",
+  "engineer_details_section",
   "engineer_name",
   "activity_date",
-  "fso_owner",
-  "recruiter_name",
   "region",
   "column_break_ohau",
-  "country",
-  "currency",
   "client_name",
+  "recruiter_name",
+  "country",
+  "column_break_pynm",
   "project_name",
-  "bank_details_tab",
+  "fso_owner",
+  "currency",
+  "section_break_vsuy",
   "account_name",
-  "acc_no",
-  "bank_name",
-  "column_break_bqfv",
   "swift_bic",
+  "column_break_bqfv",
+  "acc_no",
   "sort_code",
+  "column_break_olqf",
+  "bank_name",
   "iban",
   "section_break_dmku",
   "bank_address",
   "activity_details_tab",
   "act_src",
   "tot_amt",
-  "currency_unit",
+  "column_break_ofjd",
   "activity_details",
+  "currency_unit",
   "engineer_cost_tab",
   "section_break_ahuq",
   "engineer_cost",
   "other_cost",
-  "note",
   "column_break_gvhx",
   "travel_cost",
-  "total_cost",
   "engineer_total",
-  "billing_cost_tab",
+  "column_break_iabt",
+  "total_cost",
+  "section_break_zhkm",
+  "note",
   "section_break_arwj",
   "billing_cost",
-  "trvl_cost",
   "billing_total",
   "column_break_xzmu",
+  "trvl_cost",
   "othr_cost",
+  "column_break_mcab",
   "tot_cost",
+  "section_break_bauk",
   "sdm_note",
   "finance_team_tab",
   "section_break_wuge",
   "status",
-  "notes"
+  "transcation_id",
+  "notes",
+  "ticket",
+  "engineer",
+  "sign_off"
  ],
  "fields": [
   {
@@ -106,11 +117,6 @@
    "label": "Project Name"
   },
   {
-   "fieldname": "bank_details_tab",
-   "fieldtype": "Tab Break",
-   "label": "Bank Details"
-  },
-  {
    "fieldname": "account_name",
    "fieldtype": "Data",
    "in_list_view": 1,
@@ -139,8 +145,7 @@
    "fieldname": "swift_bic",
    "fieldtype": "Data",
    "in_list_view": 1,
-   "label": "SWIFT/BIC",
-   "reqd": 1
+   "label": "SWIFT/BIC"
   },
   {
    "fieldname": "sort_code",
@@ -164,7 +169,7 @@
   {
    "fieldname": "activity_details_tab",
    "fieldtype": "Tab Break",
-   "label": "Activity Details"
+   "label": "<b style=\"color:#555555;font-size:15px\">Activity Details</b>"
   },
   {
    "fieldname": "act_src",
@@ -190,12 +195,13 @@
   {
    "fieldname": "engineer_cost_tab",
    "fieldtype": "Tab Break",
-   "label": "Engineer Cost"
+   "label": "<b style=\"color:#555555;font-size:15px\">Cost Details</b>"
   },
   {
    "fieldname": "engineer_cost",
    "fieldtype": "Float",
-   "label": "Engineer Cost"
+   "label": "Engineer Cost",
+   "read_only": 1
   },
   {
    "fieldname": "column_break_gvhx",
@@ -204,37 +210,38 @@
   {
    "fieldname": "other_cost",
    "fieldtype": "Float",
-   "label": "Other Cost"
+   "label": "Other Cost",
+   "read_only": 1
   },
   {
    "fieldname": "note",
    "fieldtype": "Small Text",
-   "label": "Note"
+   "label": "Note",
+   "read_only": 1
   },
   {
    "fieldname": "travel_cost",
    "fieldtype": "Float",
-   "label": "Travel Cost"
+   "label": "Travel Cost",
+   "read_only": 1
   },
   {
    "fieldname": "total_cost",
    "fieldtype": "Float",
-   "label": "Total cost"
+   "label": "Total cost",
+   "read_only": 1
   },
   {
    "fieldname": "engineer_total",
    "fieldtype": "Float",
-   "label": "Engineer Total"
+   "label": "Engineer Total",
+   "read_only": 1
   },
   {
    "fieldname": "section_break_ahuq",
-   "fieldtype": "Section Break"
-  },
-  {
-   "fieldname": "billing_cost_tab",
-   "fieldtype": "Tab Break",
-   "hidden": 1,
-   "label": "Billing Cost"
+   "fieldtype": "Section Break",
+   "label": "<b style=\"color:#2490EF;font-size:15px\">Engineer Cost</b>",
+   "read_only": 1
   },
   {
    "fieldname": "billing_cost",
@@ -267,13 +274,13 @@
   },
   {
    "fieldname": "section_break_arwj",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "label": "<b style=\"color:#2490EF;font-size:15px\">Billing Cost</b>"
   },
   {
    "fieldname": "finance_team_tab",
    "fieldtype": "Tab Break",
-   "hidden": 1,
-   "label": "Finance Team"
+   "label": "<b style=\"color:#555555;font-size:15px\">Finance Team</b>"
   },
   {
    "fieldname": "section_break_wuge",
@@ -294,12 +301,75 @@
    "fieldname": "sdm_note",
    "fieldtype": "Small Text",
    "label": "SDM Note"
+  },
+  {
+   "fieldname": "section_break_vsuy",
+   "fieldtype": "Section Break",
+   "label": "<b style=\"color:#2490EF;font-size:15px\">Bank Details</b>"
+  },
+  {
+   "fieldname": "engineer_details_section",
+   "fieldtype": "Section Break",
+   "label": "<b style=\"color:#2490EF;font-size:15px\">Engineer Details</b>"
+  },
+  {
+   "fieldname": "details",
+   "fieldtype": "Tab Break",
+   "label": "<b style=\"color:#555555;font-size:15px\">Details</b>"
+  },
+  {
+   "fieldname": "column_break_pynm",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_olqf",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_ofjd",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_mcab",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_iabt",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_bauk",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "ticket",
+   "fieldtype": "Data",
+   "label": "Ticket"
+  },
+  {
+   "fieldname": "engineer",
+   "fieldtype": "Data",
+   "label": "Engineer ID"
+  },
+  {
+   "fieldname": "sign_off",
+   "fieldtype": "Data",
+   "label": "Sign Off"
+  },
+  {
+   "fieldname": "transcation_id",
+   "fieldtype": "Data",
+   "label": "Transcation Id"
+  },
+  {
+   "fieldname": "section_break_zhkm",
+   "fieldtype": "Section Break"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-11-10 17:20:56.075243",
+ "modified": "2026-11-19 19:29:06.750505",
  "modified_by": "Administrator",
  "module": "Dispatch Model",
  "name": "Dispatch Payment Request",

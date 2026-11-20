@@ -1,3 +1,31 @@
+
+// others feild validation
+
+frappe.ui.form.on("Ticket", {
+    refresh(frm) {
+        toggle_other_tools(frm);
+    },
+
+    tools_required(frm) {
+        toggle_other_tools(frm);
+    }
+});
+
+function toggle_other_tools(frm) {
+    let tools = frm.doc.tools_required || [];
+
+    let show_other = tools.some(row => {
+        return Object.values(row).includes("Others");
+    });
+
+    frm.toggle_display("others", show_other);
+    frm.set_df_property("others", "reqd", show_other);
+
+    if (!show_other) {
+        frm.set_value("others", "");
+    }
+}
+
 frappe.ui.form.on("Ticket", {
     
     onload(frm) {
@@ -37,6 +65,23 @@ frappe.ui.form.on("Ticket", {
             return {
                 filters: {
                     is_active: 1
+                }
+            };
+        });
+        frm.set_query("client_name",function() {
+
+            return {
+                filters: {
+                    disabled: 0
+                }
+            };
+
+        });
+        frm.set_query("project_name", function() {
+            return {
+                filters: {
+                    project_type: "External",
+                    custom_client : frm.doc.client_name
                 }
             };
         });

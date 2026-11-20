@@ -11,7 +11,7 @@
   "amended_from",
   "naming_series",
   "client_and_project_section",
-  "categroy",
+  "category",
   "column_break_bvws",
   "client_name",
   "column_break_fkdw",
@@ -21,23 +21,25 @@
   "ticket_details",
   "custom_ticket_owner",
   "timing_and_service_level_section",
-  "email_received_time",
+  "column_break_ppjm",
   "column_break_xlmt",
-  "country",
-  "column_break_ovjf",
-  "city",
-  "column_break_yxap",
-  "filter_time_zone",
-  "time_zone",
-  "section_break_kyey",
   "service_level",
-  "activity_date",
-  "column_break_cwcp",
+  "column_break_ovjf",
+  "time_zone",
+  "section_break_lvor",
+  "email_received_time",
+  "column_break_riaf",
+  "act_time",
+  "section_break_kyey",
+  "country",
   "activity_duration",
+  "column_break_cwcp",
+  "activity_date",
+  "city",
   "activity_time",
   "column_break_vqry",
   "period",
-  "act_time",
+  "filter_time_zone",
   "activity_time_zone",
   "site_and_scope_section",
   "location_address",
@@ -88,7 +90,7 @@
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Client Name",
-   "options": "Client",
+   "options": "Customer",
    "reqd": 1
   },
   {
@@ -119,7 +121,7 @@
    "bold": 1,
    "fieldname": "timing_and_service_level_section",
    "fieldtype": "Section Break",
-   "label": "<b style=\"color:#2490EF;font-size:15px\">Timing And Service Level</b>"
+   "label": "<b style=\"color:#2490EF;font-size:15px\">Timing, service level and activity schedule</b>"
   },
   {
    "fieldname": "email_received_time",
@@ -147,10 +149,6 @@
    "label": "Service level",
    "options": "Same business day(SBD)\nNext business day (NBD)",
    "reqd": 1
-  },
-  {
-   "fieldname": "column_break_yxap",
-   "fieldtype": "Column Break"
   },
   {
    "default": "Hour",
@@ -221,15 +219,6 @@
    "fieldtype": "Select",
    "hidden": 1,
    "label": "Activity Time Zone"
-  },
-  {
-   "fieldname": "categroy",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "in_standard_filter": 1,
-   "label": "Category",
-   "options": "Issue Catgeory",
-   "reqd": 1
   },
   {
    "fieldname": "activity_time",
@@ -307,6 +296,7 @@
    "collapsible": 1,
    "fieldname": "more_section",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "label": "<b style=\"color:#2490EF;font-size:15px\">More</b>"
   },
   {
@@ -338,13 +328,13 @@
   {
    "fieldname": "filter_time_zone",
    "fieldtype": "Link",
-   "label": "Time Zone",
+   "label": "Activity Time Zone",
    "options": "Time Zone"
   },
   {
    "fieldname": "act_time",
    "fieldtype": "Link",
-   "label": "Activity Time Zone",
+   "label": "Time Zone",
    "options": "Time Zone"
   },
   {
@@ -358,13 +348,34 @@
   {
    "fieldname": "column_break_vqry",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "category",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Category",
+   "options": "Issue Catgeory",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_ppjm",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_lvor",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_riaf",
+   "fieldtype": "Column Break"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-11-16 17:47:00.845982",
+ "modified": "2026-11-20 12:53:39.576918",
  "modified_by": "Administrator",
  "module": "Dispatch Model",
  "name": "Ticket",

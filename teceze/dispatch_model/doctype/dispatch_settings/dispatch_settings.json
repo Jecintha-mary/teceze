@@ -1,0 +1,52 @@
+{
+ "actions": [],
+ "allow_bulk_edit": 1,
+ "allow_rename": 1,
+ "autoname": "Dispatch-Settings",
+ "creation": "2026-11-20 12:47:36.495841",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "fso_team",
+  "fso_owner"
+ ],
+ "fields": [
+  {
+   "fieldname": "fso_owner",
+   "fieldtype": "Data",
+   "label": "Fso Owner"
+  },
+  {
+   "fieldname": "fso_team",
+   "fieldtype": "Data",
+   "label": "Fso Team"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "issingle": 1,
+ "links": [],
+ "modified": "2026-11-20 12:49:58.667076",
+ "modified_by": "Administrator",
+ "module": "Dispatch Model",
+ "name": "Dispatch Settings",
+ "naming_rule": "Expression",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}
