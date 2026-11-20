@@ -3,6 +3,58 @@ import frappe
 from frappe.utils import flt
 
 CLOSED_STATUSES = ("Converted", "Lost", "Closed")
+# teceze/teceze/overrides/opportunity.py
+import erpnext.crm.doctype.opportunity.opportunity as opportunity_module
+from erpnext.crm.doctype.opportunity.opportunity import Opportunity
+
+
+def _default_exchange_rate(*args, **kwargs):
+    # Never look up a rate; always use 1
+    return 1
+
+
+# opportunity.py did "from erpnext.setup.utils import get_exchange_rate",
+# so replace the name inside that module
+opportunity_module.get_exchange_rate = _default_exchange_rate
+
+
+class CustomOpportunity(Opportunity):
+    def validate(self):
+        self.conversion_rate = 1
+        super().validate()
+@frappe.whitelist()
+def get_department_presales_users(department):
+    employees = frappe.get_all(
+        "Employee",
+        filters={
+            "department": department,
+            "status": "Active",
+            "user_id": ["is", "set"]
+        },
+        fields=["user_id"],
+        limit_page_length=5000
+    )
+
+    user_ids = list(set(
+        employee.user_id
+        for employee in employees
+        if employee.user_id
+    ))
+
+    if not user_ids:
+        return []
+
+    users = frappe.get_all(
+        "User",
+        filters={
+            "name": ["in", user_ids],
+            "enabled": 1
+        },
+        fields=["name", "full_name"],
+        limit_page_length=5000
+    )
+
+    return users
 
 
 @frappe.whitelist()

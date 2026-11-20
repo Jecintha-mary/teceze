@@ -162,9 +162,7 @@ frappe.listview_settings["Lead"] = {
                 .ld-card::after {
                     content: ""; position: absolute; z-index: -1;
                     width: 120px; height: 120px; right: -40px; top: -50px;
-                    background: radial-gradient(circle,
-                        color-mix(in srgb, var(--c) 26%, transparent) 0%, transparent 70%);
-                    transition: transform .35s ease, opacity .35s ease; opacity: .8;
+                    
                 }
                 .ld-card:hover {
                     transform: translateY(-2px);
@@ -267,7 +265,6 @@ frappe.listview_settings["Lead"] = {
                     </div>
                 </div>
                 <div class="ld-grid"></div>
-                <div class="ld-error"></div>
             </div>
         `);
 

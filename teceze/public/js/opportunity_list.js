@@ -117,12 +117,10 @@ console.log("TECEZE OPPORTUNITY LIST JS LOADED");
             /* left accent strip */
             .op-card::before {
                 content: ""; position: absolute; inset: 0 auto 0 0; width: 4px;
-                background: linear-gradient(180deg, var(--c), color-mix(in srgb, var(--c) 35%, transparent));
             }
             /* soft glow */
             .op-card::after {
                 content: ""; position: absolute; z-index: -1; width: 120px; height: 120px; right: -40px; top: -50px;
-                background: radial-gradient(circle, color-mix(in srgb, var(--c) 26%, transparent) 0%, transparent 70%);
                 transition: transform .35s ease, opacity .35s ease; opacity: .8;
             }
             .op-card:hover { transform: translateY(-2px); border-color: var(--c); box-shadow: 0 10px 22px -10px color-mix(in srgb, var(--c) 45%, transparent); }
@@ -159,7 +157,6 @@ console.log("TECEZE OPPORTUNITY LIST JS LOADED");
             .op-bar { height: 4px; border-radius: 999px; margin-top: 6px; overflow: hidden; background: color-mix(in srgb, var(--c) 14%, transparent); }
             .op-bar > span {
                 display: block; height: 100%; border-radius: 999px; width: 0;
-                background: linear-gradient(90deg, var(--c), color-mix(in srgb, var(--c) 60%, #fff));
                 transition: width .9s cubic-bezier(.2,.8,.2,1);
             }
             .op-foot { font-size: 10px; color: var(--text-muted); margin-top: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }

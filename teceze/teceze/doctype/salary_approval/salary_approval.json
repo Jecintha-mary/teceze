@@ -1,0 +1,245 @@
+{
+ "actions": [
+  {
+   "action": "teceze.teceze.doctype.salary_approval.salary_approval_email.send_salary_approval",
+   "action_type": "Server Action",
+   "label": "Send Approval"
+  }
+ ],
+ "allow_bulk_edit": 1,
+ "autoname": "SA-.YYYY.-.####",
+ "creation": "2026-09-22 11:35:24.621451",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "applicant",
+  "applicant_name",
+  "status",
+  "salary_structure_tab",
+  "ctc_components_yearly_section",
+  "ctc",
+  "variable_percent",
+  "gross_salary",
+  "column_break_ikes",
+  "employer_pf_yearly",
+  "medical_yearly",
+  "yearly_variable",
+  "section_break_ogjj",
+  "monthly_gross",
+  "monthly_variable",
+  "column_break_vbqc",
+  "employer_pf",
+  "medical_insurance",
+  "section_break_zgqq",
+  "monthly_ctc",
+  "basic",
+  "travelling_allowance",
+  "column_break_lmlj",
+  "hra",
+  "fixed_allowance",
+  "food_allowance",
+  "salary_details_section",
+  "net_pay",
+  "column_break_jfvo",
+  "employee_pf"
+ ],
+ "fields": [
+  {
+   "fieldname": "applicant",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Applicant",
+   "options": "Job Applicant",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "applicant.applicant_name",
+   "fieldname": "applicant_name",
+   "fieldtype": "Data",
+   "label": "Applicant Name"
+  },
+  {
+   "fieldname": "ctc",
+   "fieldtype": "Currency",
+   "label": "CTC",
+   "reqd": 1
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "options": "Draft\nSent\nApproved\nRejected"
+  },
+  {
+   "fieldname": "salary_structure_tab",
+   "fieldtype": "Tab Break",
+   "label": "Salary Structure"
+  },
+  {
+   "fieldname": "gross_salary",
+   "fieldtype": "Currency",
+   "label": "Gross Salary",
+   "read_only": 1
+  },
+  {
+   "fieldname": "monthly_variable",
+   "fieldtype": "Currency",
+   "label": "Variable",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_ikes",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "hra",
+   "fieldtype": "Currency",
+   "label": "House Rent Allowance",
+   "read_only": 1
+  },
+  {
+   "fieldname": "travelling_allowance",
+   "fieldtype": "Currency",
+   "label": "Travelling Allowance",
+   "read_only": 1
+  },
+  {
+   "fieldname": "food_allowance",
+   "fieldtype": "Currency",
+   "label": "Food Allowance",
+   "read_only": 1
+  },
+  {
+   "fieldname": "fixed_allowance",
+   "fieldtype": "Currency",
+   "label": "Fixed Allowance",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_ogjj",
+   "fieldtype": "Section Break",
+   "label": "CTC Components Monthly"
+  },
+  {
+   "fieldname": "net_pay",
+   "fieldtype": "Currency",
+   "label": "Net Pay",
+   "read_only": 1
+  },
+  {
+   "fieldname": "ctc_components_yearly_section",
+   "fieldtype": "Section Break",
+   "label": "CTC Components Yearly"
+  },
+  {
+   "fieldname": "column_break_vbqc",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_zgqq",
+   "fieldtype": "Section Break",
+   "label": "Particulars"
+  },
+  {
+   "fieldname": "column_break_lmlj",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "salary_details_section",
+   "fieldtype": "Section Break",
+   "label": "Salary Details"
+  },
+  {
+   "fieldname": "column_break_jfvo",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "variable_percent",
+   "fieldtype": "Percent",
+   "label": "Variable %",
+   "reqd": 1
+  },
+  {
+   "fieldname": "employer_pf_yearly",
+   "fieldtype": "Currency",
+   "label": "PF Employer Contribution",
+   "read_only": 1
+  },
+  {
+   "fieldname": "medical_yearly",
+   "fieldtype": "Currency",
+   "label": "Medical Insurance",
+   "read_only": 1
+  },
+  {
+   "fieldname": "yearly_variable",
+   "fieldtype": "Currency",
+   "label": "Variable",
+   "read_only": 1
+  },
+  {
+   "fieldname": "monthly_ctc",
+   "fieldtype": "Currency",
+   "label": "Total Monthly CTC",
+   "read_only": 1
+  },
+  {
+   "fieldname": "monthly_gross",
+   "fieldtype": "Currency",
+   "label": "Base (Gross Salary)",
+   "read_only": 1
+  },
+  {
+   "fieldname": "employer_pf",
+   "fieldtype": "Currency",
+   "label": "PF Employer Contribution",
+   "read_only": 1
+  },
+  {
+   "fieldname": "medical_insurance",
+   "fieldtype": "Currency",
+   "label": "Medical Insurance",
+   "read_only": 1
+  },
+  {
+   "fieldname": "basic",
+   "fieldtype": "Currency",
+   "label": "Basic Salary",
+   "read_only": 1
+  },
+  {
+   "fieldname": "employee_pf",
+   "fieldtype": "Currency",
+   "label": "Employee PF ",
+   "read_only": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-09-24 18:02:09.315983",
+ "modified_by": "Administrator",
+ "module": "Teceze",
+ "name": "Salary Approval",
+ "naming_rule": "Expression",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}

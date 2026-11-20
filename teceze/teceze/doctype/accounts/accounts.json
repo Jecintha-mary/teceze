@@ -1,0 +1,105 @@
+{
+ "actions": [],
+ "allow_bulk_edit": 1,
+ "allow_rename": 1,
+ "creation": "2026-11-20 14:02:49.555940",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "account_name",
+  "type",
+  "webiste",
+  "phone",
+  "site",
+  "column_break_okbi",
+  "parent_account",
+  "account_owner",
+  "description",
+  "industry",
+  "no_of_employee"
+ ],
+ "fields": [
+  {
+   "fieldname": "account_name",
+   "fieldtype": "Data",
+   "label": "Account Name"
+  },
+  {
+   "fieldname": "webiste",
+   "fieldtype": "Small Text",
+   "label": "Webiste "
+  },
+  {
+   "fieldname": "description",
+   "fieldtype": "Small Text",
+   "label": "Description"
+  },
+  {
+   "fieldname": "type",
+   "fieldtype": "Select",
+   "label": "Type",
+   "options": "\nPartner\nClient\nCustomer\nVendor\nProspect"
+  },
+  {
+   "fieldname": "parent_account",
+   "fieldtype": "Data",
+   "label": "Parent Account"
+  },
+  {
+   "fieldname": "account_owner",
+   "fieldtype": "Data",
+   "label": "Account Owner"
+  },
+  {
+   "fieldname": "phone",
+   "fieldtype": "Phone",
+   "label": "Phone"
+  },
+  {
+   "fieldname": "industry",
+   "fieldtype": "Select",
+   "label": "Industry"
+  },
+  {
+   "fieldname": "site",
+   "fieldtype": "Data",
+   "label": "Site"
+  },
+  {
+   "fieldname": "no_of_employee",
+   "fieldtype": "Int",
+   "label": "No of Employee"
+  },
+  {
+   "fieldname": "column_break_okbi",
+   "fieldtype": "Column Break"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-11-20 14:17:53.900941",
+ "modified_by": "Administrator",
+ "module": "Teceze",
+ "name": "Accounts",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}

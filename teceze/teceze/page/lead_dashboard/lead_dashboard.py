@@ -95,30 +95,26 @@ def _get_selected_employee(employee):
 # ---------------------------------------------------------
 # LEADS
 # ---------------------------------------------------------
-
 def _get_leads(user_id=None):
-    """
-    Direct rule:
-        Selected Employee.user_id == Lead.lead_owner
 
-    Fetch all Leads owned by that User. Do not filter Lead.creation here:
-    a Lead created last month can still have an activity this month.
-    The API applies the selected date range separately to activities
-    and to Lead Generation counts.
-    """
-    filters = {}
-
-    if user_id:
-        filters["lead_owner"] = user_id
+    # Never return all Leads when user_id is empty.
+    if not user_id:
+        return []
 
     return frappe.get_all(
         "Lead",
-        filters=filters,
-        fields=["name", "lead_owner", "creation", "status"],
+        filters={
+            "owner": user_id
+        },
+        fields=[
+            "name",
+            "lead_owner",
+            "creation",
+            "status"
+        ],
         order_by="creation desc",
-        limit_page_length=0,
+        limit_page_length=0
     )
-
 
 # ---------------------------------------------------------
 # LEAD ACTIVITIES
@@ -402,20 +398,54 @@ def _can_view_employee_performance():
     )
 
 
-# ---------------------------------------------------------
-# MAIN DASHBOARD API
-# ---------------------------------------------------------
+def _is_dashboard_admin():
+    user = frappe.session.user
+    roles = frappe.get_roles(user)
 
+    return (
+        user == "Administrator"
+        or "System Manager" in roles
+        or "Sales Manager" in roles
+         or "Presales Manager" in roles 
+        
+    )
+
+def _get_logged_in_employee():
+    user = frappe.session.user
+
+    employees = frappe.get_all(
+        "Employee",
+        filters={
+            "user_id": user,
+            "status": "Active"
+        },
+        fields=["name", "employee_name", "user_id", "department"],
+        limit_page_length=1
+    )
+
+    if not employees:
+        frappe.throw(
+            "Your user account is not linked to an active Employee. "
+            "Please contact your Administrator."
+        )
+
+    return employees[0]
 @frappe.whitelist()
 def get_lead_dashboard_data(period="daily", employee="all"):
     if period not in ("daily", "weekly", "monthly", "quarterly"):
         frappe.throw("Invalid period")
 
     start, end = _date_window(period)
-    selected_employee = _get_selected_employee(employee)
+    # Employee selection based on logged-in user's permission
+    if _is_dashboard_admin() and employee and employee != "all":
+        # Admin / System Manager / Sales Manager can select an employee
+        selected_employee = _get_selected_employee(employee)
+    else:
+        # Normal employees can ONLY see their own data
+        selected_employee = _get_logged_in_employee()
 
-    selected_user = selected_employee.user_id if selected_employee else None
-    selected_employee_id = selected_employee.name if selected_employee else None
+    selected_user = selected_employee.user_id
+    selected_employee_id = selected_employee.name
 
     # 1. Leads: selected employee's User ID -> Lead.lead_owner.
     leads = _get_leads(user_id=selected_user)
@@ -451,7 +481,13 @@ def get_lead_dashboard_data(period="daily", employee="all"):
         daily_counts[activity_date.isoformat()] += 1
 
     # 3. Lead Generation actual: Leads created during the period.
-    lead_generation_actual = len(leads)
+    # 3. Lead Generation actual: Count only leads created
+    lead_generation_actual = sum(
+        1
+        for lead in leads
+        if lead.creation
+        and start <= getdate(lead.creation) <= end
+    )
 
     # 4. Targets: Sales Target Assignment.sales_person -> Employee.name.
     target_map = _get_targets(
@@ -468,17 +504,11 @@ def get_lead_dashboard_data(period="daily", employee="all"):
         else:
             actual = activity_counts.get(activity_type, 0)
 
-        if selected_employee_id:
-            target = target_map.get(
-                (selected_employee_id, activity_type),
-                0,
-            )
-        else:
-            target = sum(
-                value
-                for (_employee_id, target_type), value in target_map.items()
-                if target_type == activity_type
-            )
+        # Always get target for the selected employee only
+        target = target_map.get(
+            (selected_employee_id, activity_type),
+            0
+        )
 
         activity_summary.append({
             "activity_type": activity_type,
@@ -647,11 +677,11 @@ def get_lead_dashboard_data(period="daily", employee="all"):
                 },
             })
 
-    sales_amount_target = sum(
-        value
-        for (_employee_id, target_type), value in target_map.items()
-        if target_type == "Sales Amount"
+    sales_amount_target = target_map.get(
+        (selected_employee_id, "Sales Amount"),
+        0
     )
+    
 
     return {
         "period": period,

@@ -71,11 +71,14 @@ doctype_js = {
     "Compensatory Leave Request" : ["public/js/compensatory_leave_request.js"],
     "Shift Request" : ["public/js/shift_request.js"],
     "Leave Encashment" : ["public/js/leave_encashment.js"],
+    # "Job Applicant": ["public/js/job_applicant.js"],
     
 
 }
 doctype_list_js = {
-	 "Attendance Request" : ["public/js/attendance_request_list.js"]
+	 "Attendance Request" : ["public/js/attendance_request_list.js"],
+     "Lead" : ["public/js/lead_list.js"],
+     "Opportunity":["public/js/opportunity_list.js"]
 }
 
 doc_events = {
@@ -116,20 +119,27 @@ doc_events = {
 	},
     "Opportunity": {
         "validate": "teceze.api.clarification.validate_opportunity_clarifications",
+        "on_update": "teceze.teceze.overrides.opportunity.send_presales_assessment_notification"
+
     },
     "Holiday List Assignment": {
         "validate": "teceze.teceze.overrides.holiday_list_assignment.validate"
     },
     "Leave Encashment":{
         "validate": "teceze.teceze.overrides.leave_encashment.validate"
-    }
-
+    },
+    "File": {
+		"before_insert": "teceze.teceze.overrides.file_validation.validate_uploaded_file",
+	},
 
 }
 override_doctype_class = {
     "Shift Request": "teceze.teceze.overrides.shift_request.CustomShiftRequest",
-    "Leave Encashment": "teceze.teceze.overrides.leave_encashment.CustomLeaveEncashment"
+    "Leave Encashment": "teceze.teceze.overrides.leave_encashment.CustomLeaveEncashment",
+        "Opportunity": "teceze.teceze.overrides.opportunity.CustomOpportunity"
+
 }
+
 
 extend_doctype_class = {
     "Salary Slip": [
@@ -140,7 +150,9 @@ extend_doctype_class = {
     ]
 	
 }
-
+doctype_tree_js = {
+    "Lead": "public/js/lead_tree.js"
+}
 # Svg Icons
 # ------------------
 # include app icons in desk
@@ -225,13 +237,20 @@ extend_doctype_class = {
 #
 
 permission_query_conditions = {
-    "Opportunity": "teceze.teceze.overrides.sales_permissions.opportunity_query_conditions"
+    # "Opportunity": "teceze.teceze.overrides.sales_permissions.opportunity_query_conditions",
+    "Quotation": "teceze.teceze.overrides.sales_permissions.quotation_query_conditions",
+    "Lead": "teceze.teceze.overrides.sales_permissions.lead_query_conditions",
+    "Ticket": "teceze.dispatch_model.doctype.ticket.ticket.get_ticket_permission_query"
 }
+
+
 # has_permission = {
 # 	"Event": "frappe.desk.doctype.event.event.has_permission",
 # }
 has_permission = {
-    "User": "teceze.teceze.overrides.permission.user_has_permission"
+    "User": "teceze.teceze.overrides.permission.user_has_permission",
+     "Lead": "teceze.teceze.overrides.sales_permissions.lead_has_permission",
+
 }
 # Document Events
 # ---------------
@@ -291,6 +310,7 @@ scheduler_events = {
     },
 	"hourly": [
         "teceze.api.employee_attendance.auto_checkout_open_sessions",
+       "teceze.teceze.overrides.sales_permissions.Sent_Mail_notification"
     ],
     "daily": [
         "teceze.teceze.overrides.employee.credit_privilege_leave",
@@ -341,7 +361,8 @@ override_whitelisted_methods = {
 # ----------------
 # before_request = ["teceze.utils.before_request"]
 # after_request = ["teceze.utils.after_request"]
-
+# Validate attachments before Frappe processes them (see file_validation.py)
+before_request = ["teceze.teceze.overrides.file_validation.validate_upload_request"]
 # Job Events
 # ----------
 # before_job = ["teceze.utils.before_job"]
@@ -391,10 +412,10 @@ override_whitelisted_methods = {
 # ignore_translatable_strings_from = []
 
 fixtures = [
-	{
-	"doctype": "Notification",
-	"filters": [{"is_standard":0}]
-	},
+	# {
+	# "doctype": "Notification",
+	# "filters": [{"is_standard":0}]
+	# },
 	# {
 	# "doctype": "Dashboard",
 	# "filters": [{"is_standard":0}]
@@ -402,22 +423,22 @@ fixtures = [
 	# {
 	# "doctype": "Dashboard Chart",
 	# "filters": [{"is_standard":0}]
-	# },
+	# # },
    	"Custom Field",
    	"Property Setter",
-	"Workflow",
-   	"Workflow Action Master",
-   	"Workflow State",
+	# "Workflow",
+   	# "Workflow Action Master",
+   	# "Workflow State",
    	# "Role",
-   	"Workspace",
+   	# "Workspace",
 	# "Print Format",
    	"Custom DocPerm",
    	# "Report",
 	# "Number Card",
 	# "Web Form",
     # "Web Page",
-	"Desktop Icon",
-	"Workspace Sidebar",
+	# "Desktop Icon",
+	# "Workspace Sidebar",
 ]
 
 

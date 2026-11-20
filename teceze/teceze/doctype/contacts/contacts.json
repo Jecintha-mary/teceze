@@ -1,0 +1,142 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2026-11-20 14:26:53.096336",
+ "default_view": "List",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "contact_details_section",
+  "parent_account",
+  "title",
+  "full_name",
+  "email",
+  "buying_role",
+  "column_break_uvny",
+  "gender",
+  "mobile_no",
+  "phone",
+  "is_primary"
+ ],
+ "fields": [
+  {
+   "fetch_from": "contact.full_name",
+   "fieldname": "full_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Full Name"
+  },
+  {
+   "fetch_from": "contact.email_id",
+   "fieldname": "email",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Email"
+  },
+  {
+   "fieldname": "column_break_uvny",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "contact.gender",
+   "fieldname": "gender",
+   "fieldtype": "Link",
+   "label": "Gender",
+   "options": "Gender"
+  },
+  {
+   "fetch_from": "contact.mobile_no",
+   "fieldname": "mobile_no",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Mobile No.",
+   "options": "Phone"
+  },
+  {
+   "fetch_from": "contact.phone",
+   "fieldname": "phone",
+   "fieldtype": "Data",
+   "label": "Phone",
+   "options": "Phone"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_primary",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "Is Primary"
+  },
+  {
+   "fieldname": "parent_account",
+   "fieldtype": "Link",
+   "label": "Parent Account",
+   "options": "Accounts"
+  },
+  {
+   "fieldname": "contact_details_section",
+   "fieldtype": "Section Break",
+   "label": "Contact details"
+  },
+  {
+   "fieldname": "buying_role",
+   "fieldtype": "Select",
+   "label": "Buying Role",
+   "options": "\nDecission Maker\nInfluencer\nEvaluator\nGate Keeper"
+  },
+  {
+   "fieldname": "title",
+   "fieldtype": "Data",
+   "label": "Title"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-11-20 14:40:21.344951",
+ "modified_by": "Administrator",
+ "module": "Teceze",
+ "name": "Contacts",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Sales User",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Sales Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

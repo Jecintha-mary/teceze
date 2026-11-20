@@ -38,7 +38,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-11-17 10:47:04.476102",
+ "modified": "2026-11-17 12:15:07.324119",
  "modified_by": "Administrator",
  "module": "Teceze",
  "name": "Application",
@@ -56,6 +56,15 @@
    "role": "System Manager",
    "share": 1,
    "write": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Employee",
+   "share": 1
   }
  ],
  "row_format": "Dynamic",

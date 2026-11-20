@@ -144,6 +144,8 @@ def _lead_access_condition(user):
         """
 
     return "1=0"
+
+
 def lead_query_conditions(user=None):
     user = user or frappe.session.user
     roles = set(frappe.get_roles(user))
@@ -151,7 +153,7 @@ def lead_query_conditions(user=None):
     # Do not override predefined Sales User filtering
     if "Sales User" in roles:
         return None
-
+    
     if "System Manager" in roles:
         return ""
 
@@ -187,6 +189,7 @@ def lead_has_permission(doc, user=None, permission_type=None):
     # Let predefined permissions handle Sales Users
     if "Sales User" in roles:
         return True
+    
 
     if "System Manager" in roles:
         return True
@@ -220,9 +223,7 @@ def lead_has_permission(doc, user=None, permission_type=None):
 
 
 
-def Sent_Mail_notification():
-
-        
+def Sent_Mail_notification():        
     RECIPIENTS = frappe.db.sql("""
         SELECT DISTINCT u.email
         FROM `tabUser` u

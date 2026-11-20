@@ -288,7 +288,7 @@ window.teceze = window.teceze || {};
     const icon = status => `<svg viewBox="0 0 24 24">${ICONS[status] || '<circle cx="12" cy="12" r="8"/>'}</svg>`;
 
     // Must match the Status options exactly
-    const PIPELINE_STAGES = ["Open", "Presales Assessment", "Quotation", "negotiation", "Converted"];
+    const PIPELINE_STAGES = ["Open", "Presales Assessment", "Quotation", "negotiation", "Converted","Won"];
     const STATE_LABEL = { completed: "COMPLETED", active: "CURRENT" };
 
     function render_pipeline(frm) {
@@ -520,36 +520,38 @@ window.teceze = window.teceze || {};
         });
     }
 
-    /* ---------- Presales owner (users of the Service Vertical's department) ---------- */
-    async function load_presales_owners(frm) {
-        frm.presales_owner_users = [];
+async function load_presales_owners(frm) {
+    frm.presales_owner_users = [];
 
-        try {
-            const service = await get_cached_doc("Service Vertical", frm.doc.custom_service_vertical);
+    try {
+        const service = await get_cached_doc(
+            "Service Vertical",
+            frm.doc.custom_service_vertical
+        );
 
-            if (service.department) {
-                const employees = await frappe.db.get_list("Employee", {
-                    filters: { department: service.department, status: "Active", user_id: ["is", "set"] },
-                    fields: ["user_id"],
-                    limit_page_length: 5000,
-                });
-                const user_ids = [...new Set(employees.map(e => e.user_id).filter(Boolean))];
+        if (!service.department) return;
 
-                if (user_ids.length) {
-                    const users = await frappe.db.get_list("User", {
-                        filters: { name: ["in", user_ids], enabled: 1 },
-                        fields: ["name"],
-                        limit_page_length: 5000,
-                    });
-                    frm.presales_owner_users = users.map(u => u.name);
-                }
+        const response = await frappe.call({
+            method: "teceze.teceze.overrides.opportunity.get_department_presales_users",
+            args: {
+                department: service.department
             }
-        } catch (error) {
-            console.error("Presales Owner loading error:", error);
-        }
+        });
 
-        frm.refresh_field("custom_presales_owner");
+        const users = response.message || [];
+
+        frm.presales_owner_users = users.map(u => u.name);
+
+        console.log("Department:", service.department);
+        console.log("Available Presales Owners:", frm.presales_owner_users);
+
+    } catch (error) {
+        console.error("Presales Owner loading error:", error);
     }
+
+    frm.refresh_field("custom_presales_owner");
+}
+
 
     /* ---------- Field input rules ---------- */
     function lock_past_closing_date(frm) {
