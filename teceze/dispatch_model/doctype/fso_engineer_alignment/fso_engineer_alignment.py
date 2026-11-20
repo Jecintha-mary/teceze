@@ -9,7 +9,9 @@ allowed_states = [
     "To SDC",
     "Send Back to FSO",
     "Mark FSO Work Complete",
-    "FSO Rejection Closure"
+    "FSO Rejection Closure",
+    "FSO Payment",
+    "SDM Billing"
 ]
 
 class FSOEngineerAlignment(Document):
@@ -25,8 +27,7 @@ class FSOEngineerAlignment(Document):
 			},
 			update_modified=True
 		)
-		if ((self.workflow_state == "FSO Payment") and not self.payment_request):
-			self.create_payment()
+		
 		if self.workflow_state == "To SDC" and not self.sign_off:
 			self.create_sign_off()
 		new_state = self.workflow_state
@@ -93,7 +94,7 @@ class FSOEngineerAlignment(Document):
 				# Record activity in Ticket
 				ticket.add_activity(previous_state=old_state)
 		#Engineer Rate by fso
-		if self.workflow_state=="FSO Payment":
+		if self.workflow_state=="SDM Billing":
 			mandatory_fields = {
 							"eng_cost": "Engineer Cost",
 							"travel_cst": "Travel Cost",
@@ -111,6 +112,8 @@ class FSOEngineerAlignment(Document):
 			"Please fill in all mandatory fields:<br><br>• "
 			+ "<br>• ".join(missing_fields)
 		)
+		if ((self.workflow_state == "SDM Billing") and not self.payment_request):
+			self.create_payment()
 			
 		
 
@@ -145,7 +148,7 @@ class FSOEngineerAlignment(Document):
 
 		
 
-	def on_update_test(self):
+	def on_update(self):
 		old_doc = self.get_doc_before_save()
 		
 
@@ -364,13 +367,13 @@ class FSOEngineerAlignment(Document):
 						"Activity And Sign-Off",
 						self.sign_off,
 						"workflow_state",
-						"FSO Payment"
+						"SDM Billing"
 					)
 		frappe.db.set_value(
 						"Ticket",
 						self.ticket,
 						"workflow_state",
-						"FSO Payment"
+						"SDM Billing"
 					)
 		self.payment_request = payment.name
 		frappe.db.commit()

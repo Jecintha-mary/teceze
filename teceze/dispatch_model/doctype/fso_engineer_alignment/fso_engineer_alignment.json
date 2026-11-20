@@ -499,7 +499,8 @@
   {
    "fieldname": "total_cost",
    "fieldtype": "Float",
-   "label": "Total Cost"
+   "label": "Total Cost",
+   "read_only": 1
   },
   {
    "fieldname": "section_break_vufv",
@@ -515,7 +516,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-11-19 19:02:39.249885",
+ "modified": "2026-11-20 18:44:47.095618",
  "modified_by": "Administrator",
  "module": "Dispatch Model",
  "name": "FSO Engineer Alignment",

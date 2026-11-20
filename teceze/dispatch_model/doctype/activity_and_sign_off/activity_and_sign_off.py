@@ -9,7 +9,8 @@ allowed_states = [
     "Mark FSO Work Complete",
     "FSO Rejection Closure",
     "SDC Validation",
-    "Sign-off"
+    "Sign-off",
+    "FSO Payment"
 ]
 
 class ActivityAndSignOff(Document):
@@ -48,7 +49,7 @@ class ActivityAndSignOff(Document):
 			if not self.document_review:
 				frappe.throw("Documents and photos reviewed is Mandatory!")
 		if self.workflow_state in allowed_states:
-
+			frappe.log_error("call",str(allowed_states))
 			new_state = self.workflow_state
 
 			linked_docs = [
@@ -74,7 +75,7 @@ class ActivityAndSignOff(Document):
 						docname,
 						"workflow_state",
 						new_state,
-						update_modified=False
+						update_modified=True
 					)
 	def on_update(self):
 		old_doc = self.get_doc_before_save()

@@ -44,3 +44,34 @@
 //         });
 //     }
 // });
+
+
+
+frappe.ui.form.on("FSO Engineer Alignment", {
+
+    eng_cost(frm) {
+        calculate_billing_total(frm);
+        console.log("Call")
+    },
+
+    other_cost(frm) {
+        calculate_billing_total(frm);
+    },
+
+    travel_cst(frm) {
+        calculate_billing_total(frm);
+    },
+
+
+});
+function calculate_billing_total(frm) {
+
+    // 1. Get input values
+    let eng_cost = flt(frm.doc.eng_cost);
+    let other_cost = flt(frm.doc.other_cost);
+    let travel_cst = flt(frm.doc.travel_cst);
+
+    let total_cost = eng_cost + other_cost + travel_cst;
+    frm.set_value("total_cost", total_cost);
+
+}

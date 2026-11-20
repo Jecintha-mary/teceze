@@ -19,14 +19,15 @@
   {
    "fieldname": "fso_team",
    "fieldtype": "Data",
-   "label": "Fso Team"
+   "label": "Fso Team",
+   "options": "Email"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-11-20 12:49:58.667076",
+ "modified": "2026-11-20 13:22:51.953451",
  "modified_by": "Administrator",
  "module": "Dispatch Model",
  "name": "Dispatch Settings",

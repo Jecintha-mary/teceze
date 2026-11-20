@@ -2,18 +2,18 @@
  "app": "teceze",
  "charts": [],
  "content": "[{\"id\":\"fN2UPzGxvF\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">Welcome to the Dispatch workspace</span>\",\"col\":12}},{\"id\":\"HMSBGny1y6\",\"type\":\"paragraph\",\"data\":{\"text\":\"Click on \\n\\t\\t\\t\\n\\t\\t\\t\\n\\t\\t to edit\",\"col\":12}}]",
- "creation": "2026-11-12 14:49:18.063832",
+ "creation": "2026-11-20 13:15:17.714018",
  "custom_blocks": [],
  "docstatus": 0,
  "doctype": "Workspace",
  "hide_custom": 0,
- "idx": 1,
+ "idx": 0,
  "indicator_color": "green",
  "is_hidden": 0,
  "label": "Dispatch",
  "link_type": "DocType",
  "links": [],
- "modified": "2026-11-20 13:07:44.575589",
+ "modified": "2026-11-20 14:53:18.099037",
  "modified_by": "Administrator",
  "module": "Dispatch Model",
  "name": "Dispatch",
@@ -23,7 +23,16 @@
  "quick_lists": [],
  "roles": [
   {
-   "role": "Support Team"
+   "role": "Service Desk"
+  },
+  {
+   "role": "FSO"
+  },
+  {
+   "role": "SDC"
+  },
+  {
+   "role": "SDM"
   }
  ],
  "sequence_id": 0.0,

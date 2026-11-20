@@ -2,9 +2,16 @@
  {
   "docstatus": 0,
   "doctype": "Workflow Action Master",
-  "modified": "2026-09-15 11:45:41.108631",
-  "name": "Revoke",
-  "workflow_action_name": "Revoke"
+  "modified": "2026-11-17 15:32:49.669782",
+  "name": "Complete Validation",
+  "workflow_action_name": "Complete Validation"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow Action Master",
+  "modified": "2026-11-18 12:00:42.329081",
+  "name": "Request Payment",
+  "workflow_action_name": "Request Payment"
  },
  {
   "docstatus": 0,
@@ -12,13 +19,6 @@
   "modified": "2026-10-01 00:22:15.881274",
   "name": "Rejected",
   "workflow_action_name": "Rejected"
- },
- {
-  "docstatus": 0,
-  "doctype": "Workflow Action Master",
-  "modified": "2026-10-12 17:06:57.097211",
-  "name": "Create Sales Order",
-  "workflow_action_name": "Create Sales Order"
  },
  {
   "docstatus": 0,
@@ -121,13 +121,6 @@
  {
   "docstatus": 0,
   "doctype": "Workflow Action Master",
-  "modified": "2026-06-10 15:03:44.699021",
-  "name": "Approve",
-  "workflow_action_name": "Approve"
- },
- {
-  "docstatus": 0,
-  "doctype": "Workflow Action Master",
   "modified": "2026-09-30 18:20:50.735137",
   "name": "Save",
   "workflow_action_name": "Save"
@@ -142,13 +135,6 @@
  {
   "docstatus": 0,
   "doctype": "Workflow Action Master",
-  "modified": "2026-11-12 12:20:51.363016",
-  "name": "Start Process",
-  "workflow_action_name": "Start Process"
- },
- {
-  "docstatus": 0,
-  "doctype": "Workflow Action Master",
   "modified": "2026-11-12 12:20:59.113733",
   "name": "Send to SDC",
   "workflow_action_name": "Send to SDC"
@@ -156,23 +142,9 @@
  {
   "docstatus": 0,
   "doctype": "Workflow Action Master",
-  "modified": "2026-11-12 12:21:05.594416",
-  "name": "Validate",
-  "workflow_action_name": "Validate"
- },
- {
-  "docstatus": 0,
-  "doctype": "Workflow Action Master",
   "modified": "2026-11-12 12:21:54.823960",
   "name": "Complete Sign-off",
   "workflow_action_name": "Complete Sign-off"
- },
- {
-  "docstatus": 0,
-  "doctype": "Workflow Action Master",
-  "modified": "2026-11-16 15:48:29.363041",
-  "name": "Send back to FSO",
-  "workflow_action_name": "Send back to FSO"
  },
  {
   "docstatus": 0,
@@ -191,16 +163,79 @@
  {
   "docstatus": 0,
   "doctype": "Workflow Action Master",
-  "modified": "2026-06-11 13:31:29.383315",
-  "name": "Submit",
-  "workflow_action_name": "Submit"
+  "modified": "2026-11-06 15:35:15.530092",
+  "name": "Revert",
+  "workflow_action_name": "Revert"
  },
  {
   "docstatus": 0,
   "doctype": "Workflow Action Master",
-  "modified": "2026-11-06 15:35:15.530092",
-  "name": "Revert",
-  "workflow_action_name": "Revert"
+  "modified": "2026-11-12 12:22:02.282790",
+  "name": "Send to Finance",
+  "workflow_action_name": "Send to Finance"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow Action Master",
+  "modified": "2026-11-20 18:37:32.938992",
+  "name": "Start Negotiation",
+  "workflow_action_name": "Start Negotiation"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow Action Master",
+  "modified": "2026-11-20 18:37:50.332553",
+  "name": "Confirm Verbal Commitment",
+  "workflow_action_name": "Confirm Verbal Commitment"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow Action Master",
+  "modified": "2026-11-18 14:19:11.115892",
+  "name": "Send to FSO Payment Request",
+  "workflow_action_name": "Send to FSO Payment Request"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow Action Master",
+  "modified": "2026-11-18 14:27:54.511293",
+  "name": "Send to FSO Head",
+  "workflow_action_name": "Send to FSO Head"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow Action Master",
+  "modified": "2026-10-12 17:06:57.097211",
+  "name": "Create Sales Order",
+  "workflow_action_name": "Create Sales Order"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow Action Master",
+  "modified": "2026-06-10 15:03:44.699021",
+  "name": "Approve",
+  "workflow_action_name": "Approve"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow Action Master",
+  "modified": "2026-11-12 12:20:51.363016",
+  "name": "Start Process",
+  "workflow_action_name": "Start Process"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow Action Master",
+  "modified": "2026-11-16 15:48:29.363041",
+  "name": "Send back to FSO",
+  "workflow_action_name": "Send back to FSO"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow Action Master",
+  "modified": "2026-06-11 13:31:29.383315",
+  "name": "Submit",
+  "workflow_action_name": "Submit"
  },
  {
   "docstatus": 0,
@@ -219,15 +254,22 @@
  {
   "docstatus": 0,
   "doctype": "Workflow Action Master",
-  "modified": "2026-11-12 12:21:43.547618",
-  "name": "Send for Billing",
-  "workflow_action_name": "Send for Billing"
+  "modified": "2026-09-15 11:45:41.108631",
+  "name": "Revoke",
+  "workflow_action_name": "Revoke"
  },
  {
   "docstatus": 0,
   "doctype": "Workflow Action Master",
-  "modified": "2026-11-12 12:22:02.282790",
-  "name": "Send to Finance",
-  "workflow_action_name": "Send to Finance"
+  "modified": "2026-11-12 12:21:05.594416",
+  "name": "Validate",
+  "workflow_action_name": "Validate"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow Action Master",
+  "modified": "2026-11-12 12:21:43.547618",
+  "name": "Send for Billing",
+  "workflow_action_name": "Send for Billing"
  }
 ]

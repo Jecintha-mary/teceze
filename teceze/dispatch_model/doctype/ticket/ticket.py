@@ -32,11 +32,142 @@ class Ticket(Document):
 		new_state = self.workflow_state
 
 		# Continue only when workflow state changes
-		if old_state == new_state:
+		if old_state != new_state:
+			self.add_activity(previous_state=old_state)
+		old_fso = old_doc.fso_engineer
+		new_fso = self.fso_engineer
+		if new_fso and new_fso != old_fso:
+			self.send_fso_email()
+    # to send email to FSO team when ticket is assigned to them
+	def send_fso_email(self):
+		# Get FSO Team email from Dispatch Settings
+		fso_email = frappe.db.get_single_value(
+			"Dispatch Settings",
+			"fso_team"
+		)
+
+		if not fso_email:
+			frappe.log_error(
+				"FSO Team email is not configured in Dispatch Settings",
+				"FSO Email Notification"
+			)
 			return
 
+		subject = f"Ticket Assigned to FSO - {self.name}"
 
-		self.add_activity(previous_state=old_state)
+		message = frappe.render_template("""
+		{% set primary = "#12344d" %}
+		{% set tint = "#eef6f8" %}
+		{% set border = "#e2e8f0" %}
+		{% set text = "#334155" %}
+		{% set muted = "#64748b" %}
+		{% set portal = "TECEZE Portal" %}
+
+		{% set owner_name = frappe.db.get_value("User", doc.ticket_owner, "full_name") or doc.ticket_owner or "Not specified" %}
+
+		{% set rows = [
+			("Ticket ID", doc.name),
+			("Subject", doc.get("subject")),
+			("Ticket Owner", owner_name),
+			("Customer", doc.get("customer") or doc.get("custom_customer")),
+			("Site", doc.get("custom_site") or doc.get("custom_location")),
+			("Priority", doc.get("priority")),
+			("Current Stage", doc.get("workflow_state") or "Not specified"),
+			("Raised On", frappe.utils.format_datetime(doc.creation, "dd MMM yyyy, hh:mm a") if doc.creation else None)
+		] %}
+
+		<div style="font-family: Arial, Helvetica, sans-serif; background-color: #f5f7fa; padding: 30px 15px;">
+			<div style="max-width: 650px; margin: 0 auto; background-color: #ffffff; border: 1px solid {{ border }}; border-radius: 8px; overflow: hidden;">
+
+				<div style="background-color: {{ primary }}; padding: 20px 25px;">
+					<h2 style="margin: 0; color: #ffffff; font-size: 20px; font-weight: 600;">
+						Ticket Assigned to FSO
+					</h2>
+				</div>
+
+				<div style="padding: 25px; color: {{ text }}; font-size: 14px; line-height: 1.6;">
+
+					<p style="margin-top: 0;">
+						Dear <strong style="color: {{ primary }};">FSO Team</strong>,
+					</p>
+
+					<p>
+						A new support ticket,
+						<strong>{{ doc.name }}</strong>,
+						has been assigned to the FSO team for further processing.
+					</p>
+
+					<p>
+						Please review the ticket details below and take the necessary action.
+					</p>
+
+					<div style="background-color: {{ tint }}; border-left: 4px solid #168aad; padding: 10px 14px; margin-top: 22px; margin-bottom: 12px;">
+						<strong style="color: {{ primary }}; font-size: 15px;">
+							Ticket Details
+						</strong>
+					</div>
+
+					<table style="width: 100%; border-collapse: collapse; font-size: 14px; margin-bottom: 22px;">
+						{% for label, value in rows %}
+							{% if value %}
+							<tr>
+								<td width="40%" valign="top" style="padding: 10px 12px; background-color: #f8fafc; border-bottom: 1px solid {{ border }}; color: {{ muted }};">
+									<strong>{{ label }}</strong>
+								</td>
+								<td valign="top" style="padding: 10px 12px; border-bottom: 1px solid {{ border }}; color: {{ text }};">
+									{{ value }}
+								</td>
+							</tr>
+							{% endif %}
+						{% endfor %}
+					</table>
+
+					{% if doc.get("description") %}
+					<div style="background-color: #f8fafc; border: 1px solid {{ border }}; border-radius: 6px; padding: 14px 16px; margin-bottom: 22px;">
+						<strong style="color: {{ primary }}; font-size: 14px;">
+							Issue Description
+						</strong>
+						<div style="margin-top: 8px; color: {{ text }}; font-size: 13px; line-height: 1.6;">
+							{{ doc.description }}
+						</div>
+					</div>
+					{% endif %}
+
+					<div style="text-align: center; margin: 25px 0;">
+						<a href="{{ frappe.utils.get_url_to_form('Ticket', doc.name) }}"
+						   style="display: inline-block; background-color: #168aad; color: #ffffff; text-decoration: none; padding: 12px 24px; border-radius: 5px; font-size: 14px; font-weight: 600;">
+							View Ticket
+						</a>
+					</div>
+
+					<p style="margin-bottom: 0;">
+						Regards,<br>
+						<strong style="color: {{ primary }};">Teceze Support Team</strong><br>
+						<span style="color: #94a3b8; font-size: 12px;">
+							{{ portal }}
+						</span>
+					</p>
+				</div>
+
+				<div style="background-color: #f8fafc; border-top: 1px solid {{ border }}; padding: 12px 25px; text-align: center;">
+					<span style="font-size: 11px; color: #94a3b8;">
+						This is an automated notification from {{ portal }}.
+						Please do not reply to this email.
+					</span>
+				</div>
+
+			</div>
+		</div>
+		""", {"doc": self})
+
+		# Send email only to FSO Team
+		frappe.sendmail(
+			recipients=[fso_email],
+			subject=subject,
+			message=message,
+			reference_doctype=self.doctype,
+			reference_name=self.name
+		)	
 
 	def add_activity(self, previous_state=None):
 

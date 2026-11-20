@@ -75,7 +75,6 @@
   "time_in",
   "time_out",
   "column_break_bgle",
-  "outcome",
   "sign_off",
   "time_on_site",
   "section_break_onyk",
@@ -83,7 +82,9 @@
   "column_break_zoxs",
   "engineer_remarks",
   "section_break_twpl",
-  "sign_off_sheet"
+  "sign_off_sheet",
+  "column_break_tezg",
+  "outcome"
  ],
  "fields": [
   {
@@ -134,7 +135,7 @@
    "description": "By Client",
    "fieldname": "sign_off",
    "fieldtype": "Data",
-   "label": "Signed off by (client)",
+   "label": "Signed off by (Client Name)",
    "mandatory_depends_on": "eval:doc.workflow_state==\"SDC Validation\""
   },
   {
@@ -527,13 +528,17 @@
   {
    "fieldname": "section_break_twpl",
    "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_tezg",
+   "fieldtype": "Column Break"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-11-19 18:17:52.221652",
+ "modified": "2026-11-20 19:25:08.150954",
  "modified_by": "Administrator",
  "module": "Dispatch Model",
  "name": "Activity And Sign-Off",

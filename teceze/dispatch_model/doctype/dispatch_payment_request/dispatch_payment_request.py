@@ -13,7 +13,6 @@ allowed_states = [
 class DispatchPaymentRequest(Document):
 	def validate(self):
 		if self.workflow_state in allowed_states:
-			frappe.log_error("call")
 			if self.workflow_state in allowed_states:
 			
 				new_state = self.workflow_state
@@ -36,7 +35,6 @@ class DispatchPaymentRequest(Document):
 					)
 	
 					if old_state != new_state:
-						frappe.log_error("new_state",str(new_state))
 						frappe.db.set_value(
 							doctype,
 							docname,
@@ -56,9 +54,9 @@ class DispatchPaymentRequest(Document):
 				if self.workflow_state == "FSO Head Review":
 						mandatory_fields = {
 						"billing_cost": "Billing Cost",
-						"trvl_cost": "Travel Cost",
-						"tot_cost": "Total Cost",
-						"othr_cost": "Other Cost"
+						"billing_currency": "Billing Currency",
+						"total_cost": "Engineer Total Cost",
+						"ot_cost": "Other Cost"
 						}
 			
 						missing_fields = [

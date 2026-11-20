@@ -39,23 +39,25 @@
   "engineer_cost_tab",
   "section_break_ahuq",
   "engineer_cost",
-  "other_cost",
+  "total_cost",
   "column_break_gvhx",
   "travel_cost",
-  "engineer_total",
   "column_break_iabt",
-  "total_cost",
+  "other_cost",
   "section_break_zhkm",
   "note",
   "section_break_arwj",
   "billing_cost",
   "billing_total",
   "column_break_xzmu",
-  "trvl_cost",
-  "othr_cost",
+  "billing_currency",
   "column_break_mcab",
   "tot_cost",
+  "column_break_acvq",
+  "ot_cost",
   "section_break_bauk",
+  "margin",
+  "section_break_pofo",
   "sdm_note",
   "finance_team_tab",
   "section_break_wuge",
@@ -228,13 +230,7 @@
   {
    "fieldname": "total_cost",
    "fieldtype": "Float",
-   "label": "Total cost",
-   "read_only": 1
-  },
-  {
-   "fieldname": "engineer_total",
-   "fieldtype": "Float",
-   "label": "Engineer Total",
+   "label": "Engineer Total Cost",
    "read_only": 1
   },
   {
@@ -249,28 +245,19 @@
    "label": "Billing Cost"
   },
   {
-   "fieldname": "trvl_cost",
-   "fieldtype": "Float",
-   "label": "Travel Cost"
-  },
-  {
    "fieldname": "column_break_xzmu",
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "othr_cost",
-   "fieldtype": "Float",
-   "label": "Other Cost"
-  },
-  {
    "fieldname": "tot_cost",
    "fieldtype": "Float",
-   "label": "Total Cost"
+   "label": "Travel Cost (billed)"
   },
   {
    "fieldname": "billing_total",
    "fieldtype": "Float",
-   "label": "Billing Total"
+   "label": "Billing Total",
+   "read_only": 1
   },
   {
    "fieldname": "section_break_arwj",
@@ -280,6 +267,7 @@
   {
    "fieldname": "finance_team_tab",
    "fieldtype": "Tab Break",
+   "hidden": 1,
    "label": "<b style=\"color:#555555;font-size:15px\">Finance Team</b>"
   },
   {
@@ -300,7 +288,8 @@
   {
    "fieldname": "sdm_note",
    "fieldtype": "Small Text",
-   "label": "SDM Note"
+   "label": "SDM Note",
+   "reqd": 1
   },
   {
    "fieldname": "section_break_vsuy",
@@ -364,12 +353,37 @@
   {
    "fieldname": "section_break_zhkm",
    "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "billing_currency",
+   "fieldtype": "Link",
+   "label": "Billing Currency",
+   "options": "Currency"
+  },
+  {
+   "fieldname": "column_break_acvq",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "ot_cost",
+   "fieldtype": "Float",
+   "label": "Other cost (billed)"
+  },
+  {
+   "fieldname": "section_break_pofo",
+   "fieldtype": "Section Break"
+  },
+  {
+   "description": "Billing total to client",
+   "fieldname": "margin",
+   "fieldtype": "Small Text",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-11-19 19:29:06.750505",
+ "modified": "2026-11-20 19:37:54.764958",
  "modified_by": "Administrator",
  "module": "Dispatch Model",
  "name": "Dispatch Payment Request",
