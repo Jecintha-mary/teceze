@@ -7,9 +7,35 @@ from frappe.utils import (
     add_to_date,
     date_diff
 )
+from frappe.utils import getdate, today
 from frappe import _
 from teceze.api.employee_attendance import (employee_checkin as desktop_employee_checkin,)
 from teceze.api.attendance_regularization import get_existing_checkins
+from datetime import timedelta
+from frappe.utils import getdate, cint
+from frappe.utils import add_days, getdate
+
+import time
+from functools import wraps
+from datetime import timedelta
+from frappe.utils import get_datetime, now_datetime
+from frappe.utils import time_diff_in_seconds    
+from datetime import timedelta
+ 
+from frappe import _
+from frappe.utils import (
+    add_to_date,
+    flt,
+    get_datetime,
+    getdate,
+    now_datetime,
+    to_timedelta,
+)
+from frappe.model.workflow import apply_workflow, get_transitions
+from frappe.utils import getdate, add_to_date, date_diff
+from frappe.model.workflow import apply_workflow, get_transitions
+from frappe.utils.password import update_password
+
 class CRUD:
 
     MAX_PAGE_SIZE = 100
@@ -1570,11 +1596,6 @@ class CRUD:
         return data
 
 
-from frappe.utils import add_days, getdate
-
-import time
-import frappe
-from functools import wraps
 
 
 def calculate_time_function_taken():
@@ -1607,6 +1628,7 @@ def employee_checkin():
     latitude = data.get("latitude")
     longitude = data.get("longitude")
     log_type = data.get("log_type")
+    source = data.get("source")
 
     if not employee:
         frappe.throw(_("Employee ID is required."))
@@ -1650,6 +1672,12 @@ def app_policy():
     )
 
 @frappe.whitelist(allow_guest=False)
+def checkin_list():
+    return CRUD.handle(
+        doctype="Employee Checkin",
+    )
+
+@frappe.whitelist(allow_guest=False)
 def attendance():
     return CRUD.handle(
         doctype="Attendance"
@@ -1667,7 +1695,6 @@ def tasklist():
     return CRUD.handle(
         doctype="Task"
     )
-import frappe
 
 @frappe.whitelist()
 def timesheet():
@@ -1727,81 +1754,100 @@ def timesheet():
                     []
                 )
     return response
+
+
+
+
+import frappe
+from frappe.utils import get_datetime, now_datetime
+
+
 @frappe.whitelist(allow_guest=False)
 def employee():
+
+    emp = frappe.db.get_value(
+        "Employee",
+        {"user_id": frappe.session.user},
+        ["name", "custom_first_login_time", "custom_is_time_over"],
+        as_dict=True
+    )
+
+    if emp and emp.custom_first_login_time and not emp.custom_is_time_over:
+
+        first_login = get_datetime(emp.custom_first_login_time)
+        current_time = now_datetime()
+
+        expiry_time = first_login.add(hours=48) if hasattr(first_login, "add") else first_login + __import__("datetime").timedelta(hours=48)
+
+        frappe.log_error(
+            title="Employee Time Check",
+            message=f"""
+            Employee: {emp.name}
+            First Login: {first_login}
+            Current Time: {current_time}
+            Expiry Time: {expiry_time}
+            Is Expired: {current_time >= expiry_time}
+            """
+        )
+
+        if current_time >= expiry_time:
+
+            frappe.db.set_value(
+                "Employee",
+                emp.name,
+                "custom_is_time_over",
+                1,
+                update_modified=False
+            )
+
+            frappe.db.commit()
+
     return CRUD.handle(
         doctype="Employee",
     )
 
+
+
 @frappe.whitelist(allow_guest=False, methods=["PUT"])
 def update_first_time():
 
-    data = frappe.request.get_json(silent=True) or {}
-
-    if not data:
-        data = frappe.local.form_dict
-
-    allowed_fields = {
-        "name",
-        "custom_first_login_time",
-        "custom_is_agree",
-        "cmd",
-        "doctype"
-    }
-
-    invalid_fields = set(data.keys()) - allowed_fields
-
-    if invalid_fields:
-        frappe.throw(
-            "Only First Login Time and Is Agree can be updated. Invalid fields: "
-            + ", ".join(invalid_fields)
-        )
+    data = frappe.request.get_json(silent=True) or frappe.local.form_dict
 
     employee = data.get("name")
 
-    if not employee:
-        frappe.throw("Employee ID is required.")
+    if not employee or not frappe.db.exists("Employee", employee):
+        frappe.throw("Valid Employee ID is required.")
 
-    if not frappe.db.exists("Employee", employee):
-        frappe.throw("Employee does not exist.")
+    allowed_fields = {
+        "name", "custom_first_login_time", "custom_is_agree",
+        "cmd", "doctype"
+    }
 
-    update_values = {}
+    invalid_fields = set(data) - allowed_fields
+    if invalid_fields:
+        frappe.throw("Invalid fields: " + ", ".join(invalid_fields))
 
-    # First Login Time
-    if "custom_first_login_time" in data:
-        if not frappe.get_meta("Employee").has_field("custom_first_login_time"):
-            frappe.throw("Field custom_first_login_time does not exist.")
+    updates = {}
 
-        if not data.get("custom_first_login_time"):
-            frappe.throw("First Login Time cannot be empty.")
+    # Set First Login Time only if currently empty
+    if data.get("custom_first_login_time"):
+        if not frappe.db.get_value("Employee", employee, "custom_first_login_time"):
+            updates["custom_first_login_time"] = data["custom_first_login_time"]
 
-        update_values["custom_first_login_time"] = data.get(
-            "custom_first_login_time"
-        )
-
-    # Is Agree
+    # Update Is Agree independently
     if "custom_is_agree" in data:
-        if not frappe.get_meta("Employee").has_field("custom_is_agree"):
-            frappe.throw("Field custom_is_agree does not exist.")
+        updates["custom_is_agree"] = data["custom_is_agree"]
 
-        update_values["custom_is_agree"] = data.get("custom_is_agree")
-
-    if not update_values:
-        frappe.throw("No valid fields provided for update.")
-
-    # Update directly, bypassing Employee write permissions
-    frappe.db.set_value(
-        "Employee",
-        employee,
-        update_values
-    )
+    if updates:
+        frappe.db.set_value("Employee", employee, updates)
 
     return {
         "success": True,
-        "message": "Employee fields updated successfully.",
+        "message": "Employee updated successfully.",
         "employee": employee,
-        "updated_fields": update_values
+        "updated_fields": updates
     }
+
 
 def get_logged_in_employee():
 
@@ -1962,7 +2008,6 @@ def get_date_range(days=None, from_date=None, to_date=None):
 
     return from_date, to_date
 
-from frappe.utils import time_diff_in_seconds    
 
 @frappe.whitelist(allow_guest=False)
 def get_employee_checkin_summary(days=None, from_date=None, to_date=None):
@@ -2152,18 +2197,7 @@ Setup (once):
         frappe.db.add_index("Employee Checkin", ["employee", "time"])
 """
  
-from datetime import timedelta
- 
-import frappe
-from frappe import _
-from frappe.utils import (
-    add_to_date,
-    flt,
-    get_datetime,
-    getdate,
-    now_datetime,
-    to_timedelta,
-)
+
  
 # ---------------------------------------------------------
 # Settings
@@ -2499,9 +2533,8 @@ def get_my_checkin_status():
     return build_status(_employee())
  
  
-# ---------------------------------------------------------
 # Punch
-# ---------------------------------------------------------
+
 @frappe.whitelist(allow_guest=False, methods=["POST"])
 def mark_checkin(log_type, latitude=None, longitude=None):
     if log_type not in ("IN", "OUT"):
@@ -2783,6 +2816,71 @@ def issues():
         doctype="Issue",
     )
 
+
+
+@frappe.whitelist(allow_guest=False, methods=["GET", "POST", "PUT"])
+def employee_permission():
+
+    method = frappe.request.method
+
+    # GET / POST - Existing CRUD handling
+    if method in ["GET", "POST"]:
+        return CRUD.handle(
+            doctype="Employee Permission Request",
+        )
+
+    # PUT - Update / Workflow
+    data = frappe.request.get_json(silent=True) or frappe.local.form_dict
+
+    name = data.get("name")
+    action = data.get("action")
+    fields = data.get("fields") or {}
+
+    if not name:
+        frappe.throw("Document name is required")
+
+    doc = frappe.get_doc("Employee Permission Request", name)
+    doc.check_permission("write")
+
+    # Prevent direct workflow manipulation
+    restricted_fields = ["workflow_state", "docstatus", "status"]
+
+    for field in restricted_fields:
+        if field in fields:
+            frappe.throw(f"Cannot update {field} directly")
+
+    # Update normal fields
+    if fields:
+        doc.update(fields)
+
+    # Workflow action
+    if action:
+
+        transitions = get_transitions(doc)
+
+        allowed_actions = [
+            row.get("action") for row in transitions
+        ]
+
+        if action not in allowed_actions:
+            frappe.throw(
+                f"Invalid workflow action: {action}. "
+                f"Available actions: {', '.join(allowed_actions) or 'None'}"
+            )
+
+        doc = apply_workflow(doc, action)
+
+    else:
+        doc.save()
+
+    return {
+        "success": True,
+        "name": doc.name,
+        "workflow_state": doc.workflow_state,
+        "docstatus": doc.docstatus,
+        "message": f"Employee Permission Request {action or 'updated'} successfully"
+    }
+
 @frappe.whitelist(allow_guest=False)
 def leave_balance():
 
@@ -2873,13 +2971,7 @@ def leave_balance():
     }
 
 
-import frappe
-from frappe.utils import getdate, add_to_date, date_diff
 
-
-
-import frappe
-from frappe.model.workflow import apply_workflow, get_transitions
 
 @frappe.whitelist(allow_guest=False)
 def leave():
@@ -2997,7 +3089,6 @@ def leave():
 
     frappe.throw(f"Method {method} not supported")
 
-from frappe.utils.password import update_password
 
 @frappe.whitelist(allow_guest=False)
 def update_user_password(pwd):
@@ -3163,7 +3254,6 @@ def regularization_date(employee, from_date):
     }
 
 
-from frappe.utils import getdate, today
 @frappe.whitelist(allow_guest=False)
 def attendance_request():
 
@@ -3482,9 +3572,6 @@ def salary_slip_pdf(name=None):
 
 @frappe.whitelist(allow_guest=False)
 def get_attendance_list(from_date=None, to_date=None):
-
-    from datetime import timedelta
-    from frappe.utils import getdate, cint
 
     # =====================================================
     # 1. VALIDATE DATES

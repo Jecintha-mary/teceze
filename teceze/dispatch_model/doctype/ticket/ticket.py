@@ -9,7 +9,7 @@ from frappe.utils import now_datetime
 
 class Ticket(Document):
 	def validate(self):
-		if self.workflow_state == "Assign FSO" and not self.fso_engineer:
+		if self.workflow_state == "FSO Assigned" and not self.fso_engineer:
 			self.create_fso()
 	def after_insert(self):
 			frappe.msgprint(
@@ -224,6 +224,10 @@ class Ticket(Document):
 		fso_assignment.spoc = self.spoc_name
 		fso_assignment.location = self.location_address
 		fso_assignment.scope = self.scope_of_work
+		fso_assignment.sdc=self.sdc
+		fso_assignment.sdc_email=self.sdc_email
+		fso_assignment.sdm=self.sdm
+		fso_assignment.sdm_email=self.sdm_email
 		tools_list = []
 		for row in self.get("tools_required", []):
 			if row.tool_name == "Others":

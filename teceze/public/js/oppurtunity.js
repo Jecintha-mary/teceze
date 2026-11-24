@@ -804,8 +804,11 @@ async function load_presales_owners(frm) {
             restrict_inputs(frm);
 
             if (frm.doc.custom_service_vertical) load_presales_owners(frm);
+            
         },
-
+        workflow_state(frm) {
+        // update_opportunity_stage(frm);
+    },
         // Make sure every row has its Item before the server validates it
         validate: frm => ns.validate_items(frm),
 
@@ -916,3 +919,5 @@ async function load_presales_owners(frm) {
     ));
 
 })(window.teceze);
+
+

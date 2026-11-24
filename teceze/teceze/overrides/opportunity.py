@@ -18,10 +18,56 @@ def _default_exchange_rate(*args, **kwargs):
 opportunity_module.get_exchange_rate = _default_exchange_rate
 
 
+import frappe
+from erpnext.crm.doctype.opportunity.opportunity import Opportunity
+
+
+STAGE_MAP = {
+    "Draft": "Qualified",
+    "Clarification Needed": "Discovery",
+    "Presales Assessment": "Solutioning",
+    "Preparing Quotation": "Solutioning",
+    "Quotation Submitted": "Proposal Submitted",
+    "Sent Revision Request": "Proposal Submitted",
+    "Revision": "Proposal Submitted",
+    "Negotiation": "Evaluation / Negotiation",
+    "Waiting for Purchase Order": "Verbal Commit",
+    "Won": "Won",
+    "Lost": "Lost",
+    "Not Feasible": "Lost",
+}
+
+
 class CustomOpportunity(Opportunity):
+
     def validate(self):
         self.conversion_rate = 1
+        self.set_opportunity_stage()
         super().validate()
+
+    def set_opportunity_stage(self):
+        frappe.log_error(f"Workflow state: {self.workflow_state}", "CustomOpportunity")
+        stage_name = STAGE_MAP.get(self.workflow_state)
+
+        if not stage_name:
+            return
+
+        stage = frappe.db.get_value(
+            "Stages",
+            {
+                "stage_name": stage_name,
+                "parent1": "Opportunity"
+            },
+            ["name", "completion"],
+            as_dict=True
+        )
+
+        if not stage:
+            frappe.throw(f"Stage not found: {stage_name}")
+
+        self.custom_stages = stage.name
+        self.probability = stage.completion
+
 @frappe.whitelist()
 def get_department_presales_users(department):
     employees = frappe.get_all(
@@ -108,7 +154,6 @@ def get_opportunity_dashboard():
 import frappe
 
 def send_presales_assessment_notification(doc, method=None):
-    frappe.log_error('ssssssssssssssssssss')
     # Trigger only when workflow state changes
     if doc.workflow_state != "Presales Assessment":
         return

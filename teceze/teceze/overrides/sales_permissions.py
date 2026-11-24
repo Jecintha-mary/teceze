@@ -1,17 +1,17 @@
 import frappe
 from datetime import datetime, timedelta
 from html import escape
-
 def opportunity_query_conditions(user=None, doctype=None):
     user = user or frappe.session.user
-    roles = frappe.get_roles(user)
-    # System Managers can see all opportunities
-    if any(role in roles for role in ["System Manager"]):
+    roles = set(frappe.get_roles(user))
+
+    if "System Manager" in roles:
         return ""
-    # Presales Manager can see only their department's
-    # elif "Presales Manager" in roles:
-    elif any(role in roles for role in ["Presales Manager","Presales User"]):
-        user_sql = frappe.db.escape(user)
+
+    user_sql = frappe.db.escape(user)
+
+    # Presales access
+    if roles.intersection({"Presales Manager", "Presales User"}):
         department = frappe.db.get_value(
             "Employee",
             {"user_id": user, "status": "Active"},
@@ -21,6 +21,7 @@ def opportunity_query_conditions(user=None, doctype=None):
         if not department:
             return "1=0"
 
+        department_sql = frappe.db.escape(department)
 
         return f"""
             EXISTS (
@@ -34,17 +35,48 @@ def opportunity_query_conditions(user=None, doctype=None):
             )
         """
 
-    else:
-        user_sql = frappe.db.escape(user)
+    # Sales Manager access
+    if "Sales Manager" in roles:
+        employee = frappe.db.get_value(
+            "Employee",
+            {"user_id": user, "status": "Active"},
+            "name"
+        )
+
+        if not employee:
+            return "1=0"
+
+        reportees = frappe.get_all(
+            "Employee",
+            filters={
+                "reports_to": employee,
+                "status": "Active",
+                "user_id": ["is", "set"]
+            },
+            pluck="user_id"
+        )
+
+        team_users = list(set(reportees + [user]))
+        team_users_sql = ", ".join(
+            frappe.db.escape(u) for u in team_users
+        )
 
         return f"""
             (
-                `tabOpportunity`.`owner` = {user_sql}
+                `tabOpportunity`.`owner` IN ({team_users_sql})
                 OR
-                `tabOpportunity`.`opportunity_owner` = {user_sql}
+                `tabOpportunity`.`opportunity_owner` IN ({team_users_sql})
             )
         """
 
+    # Other users, including Sales User
+    return f"""
+        (
+            `tabOpportunity`.`owner` = {user_sql}
+            OR
+            `tabOpportunity`.`opportunity_owner` = {user_sql}
+        )
+    """
 def quotation_query_conditions(user=None):
     user = user or frappe.session.user
     roles = set(frappe.get_roles(user))

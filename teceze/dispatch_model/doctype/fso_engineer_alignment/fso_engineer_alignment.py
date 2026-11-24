@@ -5,19 +5,22 @@ import frappe
 from frappe.model.document import Document
 
 allowed_states = [
-    "FSO Process",
-    "To SDC",
-    "Send Back to FSO",
-    "Mark FSO Work Complete",
+    "FSO Assigned",
+    "In Progress",
+    "Pending SDC Validation",
+    "Rework Required",
     "FSO Rejection Closure",
-    "FSO Payment",
-    "SDM Billing"
+    "Pending FSO Payment",
+    "Pending SDM Billing"
 ]
 
 class FSOEngineerAlignment(Document):
 	def validate(self):
+		if self.workflow_state == "In Progress" and not self.fso_assign_owner:
+			frappe.throw("FSO Assign Owner is Mandatory!")
+
 		#mark fso work complete_feild updation to activity and sign off
-		if self.workflow_state == "Mark FSO Work Complete":	
+		if self.workflow_state == "Pending SDC Validation" and self.note_sdc:	
 			frappe.db.set_value(
 			"Activity And Sign-Off",
 			self.sign_off,
@@ -28,21 +31,15 @@ class FSOEngineerAlignment(Document):
 			update_modified=True
 		)
 		
-		if self.workflow_state == "To SDC" and not self.sign_off:
+		if self.workflow_state == "Pending SDC Validation" and not self.sign_off:
 			self.create_sign_off()
 		new_state = self.workflow_state
 		#mandatory field validation when fso process
-		if self.workflow_state == "FSO Process":
+		if self.workflow_state == "Pending SDC Validation":
 			mandatory_fields = {
 				"engineer_name": "Engineer Name",
-				"engineer_email": "Engineer Email",
-				"engineer_contact": "Engineer Contact",
-				"country": "Country",
-				"region": "Region",
 				"rate_currency": "Rate Currency",
-				"name_on_account": "Name on Account",
-				"account_number": "Account Number",
-				"bank_name": "Bank Name",
+				"bank_account": "Select Bank Account",
 				"scheduled_date": "Scheduled Date"
 			}
 			missing_fields = [
@@ -55,7 +52,7 @@ class FSOEngineerAlignment(Document):
 			"Please fill in all mandatory fields:<br><br>• "
 			+ "<br>• ".join(missing_fields)
 		)
-		if self.workflow_state=="Mark FSO Work Complete":
+		if self.workflow_state == "Pending SDC Validation" and self.note_sdc:
 			mandatory_fields = {
 							"progress_update": "Progress Update",
 							"detail": "Details",}
@@ -94,10 +91,9 @@ class FSOEngineerAlignment(Document):
 				# Record activity in Ticket
 				ticket.add_activity(previous_state=old_state)
 		#Engineer Rate by fso
-		if self.workflow_state=="SDM Billing":
+		if self.workflow_state=="Pending SDM Billing":
 			mandatory_fields = {
 							"eng_cost": "Engineer Cost",
-							"travel_cst": "Travel Cost",
 							"other_cost": "Other Cost",
 							"total_cost": "Total Cost",
 							"note": "Note",}
@@ -112,7 +108,7 @@ class FSOEngineerAlignment(Document):
 			"Please fill in all mandatory fields:<br><br>• "
 			+ "<br>• ".join(missing_fields)
 		)
-		if ((self.workflow_state == "SDM Billing") and not self.payment_request):
+		if ((self.workflow_state == "Pending SDM Billing") and not self.payment_request):
 			self.create_payment()
 			
 		
@@ -342,13 +338,19 @@ class FSOEngineerAlignment(Document):
 		payment.iban = self.iban
 		payment.bank_address = self.bank_address
 		payment.ticket = self.ticket
+		payment.client_name = frappe.db.get_value("Ticket", self.ticket, "client_name")
+		payment.project_name = frappe.db.get_value("Ticket", self.ticket, "project_name")
 		payment.engineer = self.name
 		payment.sign_off = self.sign_off
-		payment.engineer_cost=self.eng_cost
-		payment.travel_cost=self.travel_cst
-		payment.other_cost=self.other_cost
-		payment.total_cost=self.total_cost
-		payment.note=self.note
+		payment.engineer_cost = self.eng_cost
+		payment.travel_cost = self.travel_cst
+		payment.other_cost = self.other_cost
+		payment.total_cost = self.total_cost
+		payment.note = self.note
+		payment.sdc = self.sdc
+		payment.sdc_email = self.sdc_email
+		payment.sdm = self.sdm
+		payment.sdm_email = self.sdm_email
 		payment.insert(ignore_permissions=True)
 		frappe.msgprint(
 						f"""
@@ -367,13 +369,13 @@ class FSOEngineerAlignment(Document):
 						"Activity And Sign-Off",
 						self.sign_off,
 						"workflow_state",
-						"SDM Billing"
+						"Pending SDM Billing"
 					)
 		frappe.db.set_value(
 						"Ticket",
 						self.ticket,
 						"workflow_state",
-						"SDM Billing"
+						"Pending SDM Billing"
 					)
 		self.payment_request = payment.name
 		frappe.db.commit()
@@ -417,6 +419,10 @@ class FSOEngineerAlignment(Document):
 		sign_off.bank_name = self.bank_name
 		sign_off.iban = self.iban
 		sign_off.bank_address = self.bank_address
+		sign_off.sdc=self.sdc
+		sign_off.sdc_email=self.sdc_email
+		sign_off.sdm=self.sdm
+		sign_off.sdm_email=self.sdm_email
 		#Visit Schedule
 		sign_off.scheduled_date = self.scheduled_date
 		sign_off.arrival_timesite_local = self.arrival_time
@@ -426,9 +432,9 @@ class FSOEngineerAlignment(Document):
 		sign_off.insert(ignore_permissions=True)
 		frappe.msgprint(
 						f"""
-						Activity And Sign-Off has been assigned successfully.
+						Engineer has been assigned successfully.
 						""",
-						title="Activity And Sign-Off Assigned",
+						title="Engineer Assigned",
 						indicator="green"
 						)
 				
@@ -441,4 +447,19 @@ class FSOEngineerAlignment(Document):
 					)
 		self.sign_off = sign_off.name
 		frappe.db.commit()
-		
+
+
+
+def get_engineer_permission_query(user):
+
+    if not user:
+        user = frappe.session.user
+
+    # System Manager can view all tickets
+    if any(role in frappe.get_roles(user) for role in ["System Manager", "FSO Owner"]):
+        return ""
+
+    # Other users can view tickets owned by them
+    return "`tabFSO Engineer Alignment`.fso_assign_owner = {}".format(
+        frappe.db.escape(user)
+    )

@@ -3,14 +3,24 @@
  "creation": "2026-11-19 16:10:51.709703",
  "docstatus": 0,
  "doctype": "Page",
- "idx": 0,
- "modified": "2026-11-19 16:10:58.715492",
+ "idx": 1,
+ "modified": "2026-11-20 15:22:14.409848",
  "modified_by": "Administrator",
  "module": "Teceze",
  "name": "client-hierarchy",
  "owner": "Administrator",
  "page_name": "client-hierarchy",
- "roles": [],
+ "roles": [
+  {
+   "role": "System Manager"
+  },
+  {
+   "role": "Sales User"
+  },
+  {
+   "role": "Sales Manager"
+  }
+ ],
  "script": null,
  "standard": "Yes",
  "style": null,
