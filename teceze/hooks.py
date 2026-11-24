@@ -131,7 +131,6 @@ doc_events = {
     "File": {
 		"before_insert": "teceze.teceze.overrides.file_validation.validate_uploaded_file",
 	},
-
 }
 override_doctype_class = {
     "Shift Request": "teceze.teceze.overrides.shift_request.CustomShiftRequest",
@@ -237,10 +236,11 @@ doctype_tree_js = {
 #
 
 permission_query_conditions = {
-    # "Opportunity": "teceze.teceze.overrides.sales_permissions.opportunity_query_conditions",
+    "Opportunity": "teceze.teceze.overrides.sales_permissions.opportunity_query_conditions",
     "Quotation": "teceze.teceze.overrides.sales_permissions.quotation_query_conditions",
     "Lead": "teceze.teceze.overrides.sales_permissions.lead_query_conditions",
-    "Ticket": "teceze.dispatch_model.doctype.ticket.ticket.get_ticket_permission_query"
+    "Ticket": "teceze.dispatch_model.doctype.ticket.ticket.get_ticket_permission_query",
+    "FSO Engineer Alignment": "teceze.dispatch_model.doctype.fso_engineer_alignment.fso_engineer_alignment.get_engineer_permission_query"
 }
 
 
@@ -426,9 +426,9 @@ fixtures = [
 	# # },
    	"Custom Field",
    	"Property Setter",
-	# "Workflow",
-   	# "Workflow Action Master",
-   	# "Workflow State",
+	"Workflow",
+   	"Workflow Action Master",
+   	"Workflow State",
    	# "Role",
    	# "Workspace",
 	# "Print Format",
