@@ -11,33 +11,18 @@ class Ticket(Document):
 	def validate(self):
 		if self.workflow_state == "FSO Assigned" and not self.fso_engineer:
 			self.create_fso()
+			self.send_fso_email()
+
 	def after_insert(self):
 			frappe.msgprint(
 			"Ticket created successfully. Kindly assign this ticket to the FSO Team.",
 			title="Ticket Created",
 			indicator="green"
 			)
-			#Create the FSO
+
 			# Create the first activity when Ticket is created
 			self.add_activity(previous_state=None)
 
-	def on_update(self):
-		# Get the previous saved document
-		old_doc = self.get_doc_before_save()
-
-		if not old_doc:
-			return
-
-		old_state = old_doc.workflow_state
-		new_state = self.workflow_state
-
-		# Continue only when workflow state changes
-		if old_state != new_state:
-			self.add_activity(previous_state=old_state)
-		old_fso = old_doc.fso_engineer
-		new_fso = self.fso_engineer
-		if new_fso and new_fso != old_fso:
-			self.send_fso_email()
     # to send email to FSO team when ticket is assigned to them
 	def send_fso_email(self):
 		# Get FSO Team email from Dispatch Settings
@@ -49,7 +34,7 @@ class Ticket(Document):
 		if not fso_email:
 			frappe.log_error(
 				"FSO Team email is not configured in Dispatch Settings",
-				"FSO Email Notification"
+				"FSO Assigned Email Notification"
 			)
 			return
 
@@ -238,13 +223,6 @@ class Ticket(Document):
 
 		fso_assignment.tools = ", ".join(tools_list)
 
-
-		# for row in self.get("tools_required", []):
-		# 	tools_list.append(row.tool_name)
-		# if other:
-		# 	overall value = ", ".join(tools_list) + self.others
-		# else:
-		# 	fso_assignment.tools = ", ".join(tools_list)
 		
 		# Save FSO Assignment
 		fso_assignment.insert(ignore_permissions=True)

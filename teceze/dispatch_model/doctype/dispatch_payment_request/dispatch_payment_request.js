@@ -37,7 +37,7 @@ function calculate_billing_total(frm) {
         : 0;
 
     // 4. Get currency
-    let currency = frm.doc.currency || "AED";
+    let currency = frm.doc.billing_currency || "AED";
 
     // 5. Set margin color
     let margin_color = margin_value > 0 ? "#198754" :

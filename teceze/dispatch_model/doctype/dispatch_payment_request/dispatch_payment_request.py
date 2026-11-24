@@ -5,9 +5,9 @@ import frappe
 from frappe.model.document import Document
 
 allowed_states = [
-    "Send to FSO Head",
-    "FSO Head Review",
-    "Finance",
+    "Pending SDM Billing",
+    "Pending FSO Head Approval",
+    "Pending Finance",
     "Completed"
 ]
 class DispatchPaymentRequest(Document):
@@ -51,23 +51,37 @@ class DispatchPaymentRequest(Document):
 						""".format(doctype=doctype), (new_state, frappe.session.user, docname))
 						frappe.db.commit()
 		#billing Cost
-				if self.workflow_state == "FSO Head Review":
-						mandatory_fields = {
-						"billing_cost": "Billing Cost",
-						"billing_currency": "Billing Currency",
-						"total_cost": "Engineer Total Cost",
-						"ot_cost": "Other Cost"
-						}
-			
-						missing_fields = [
-							label
-							for field, label in mandatory_fields.items()
-							if not self.get(field)
-						]
-			
-						if missing_fields:
-							frappe.throw(
-								"Please fill in all mandatory fields:<br><br>• "
-								+ "<br>• ".join(missing_fields)
-							)
+		if self.workflow_state == "Pending FSO Head Approval":
+			mandatory_fields = {
+			"billing_cost": "Billing Cost",
+			"billing_currency": "Billing Currency",
+			"sdm_note":"SDM Note"
+
+			}
+
+			missing_fields = [
+				label
+				for field, label in mandatory_fields.items()
+				if not self.get(field)
+			]
+
+			if missing_fields:
+				frappe.throw(
+					"Please fill in all mandatory fields:<br><br>• "
+					+ "<br>• ".join(missing_fields)
+				)
 	
+
+def get_payment_permission_query(user):
+
+    if not user:
+        user = frappe.session.user
+
+    # System Manager can view all tickets
+    if any(role in frappe.get_roles(user) for role in ["System Manager","FSO Head"]):
+        return ""
+
+    # Other users can view tickets owned by them
+    return "`tabDispatch Payment Request`.sdm_email = {}".format(
+        frappe.db.escape(user)
+    )

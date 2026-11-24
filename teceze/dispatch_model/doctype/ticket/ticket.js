@@ -1,36 +1,5 @@
-
-// others feild validation
-
-frappe.ui.form.on("Ticket", {
-    refresh(frm) {
-        toggle_other_tools(frm);
-    },
-
-    tools_required(frm) {
-        toggle_other_tools(frm);
-    }
-});
-
-function toggle_other_tools(frm) {
-    let tools = frm.doc.tools_required || [];
-
-    let show_other = tools.some(row => {
-        return Object.values(row).includes("Others");
-    });
-
-    frm.toggle_display("others", show_other);
-    frm.set_df_property("others", "reqd", show_other);
-
-    if (!show_other) {
-        frm.set_value("others", "");
-    }
-}
-
 frappe.ui.form.on("Ticket", {
     
-    onload(frm) {
-        load_timezone_options(frm);
-    },
     setup(frm) {
 
         // Filter only active countries
@@ -81,12 +50,17 @@ frappe.ui.form.on("Ticket", {
             return {
                 filters: {
                     project_type: "External",
-                    custom_client : frm.doc.client_name
+                    custom_client : frm.doc.client_name,
+                    status: ["not in", ["Completed", "Cancelled"]]
                 }
             };
         });
     },
-
+    client_name(frm) {
+        if(!frm.doc.client_name){
+            frm.set_value("project_name", "");
+        }
+    },
     country(frm) {
 
         // Clear city and timezone when country changes
@@ -111,165 +85,32 @@ frappe.ui.form.on("Ticket", {
             if (r.message && r.message.time_zone) {
 
                 const timezone = r.message.time_zone;
-                console.log("timezone",timezone)
                 frm.set_value("filter_time_zone", timezone);
 
-                // Populate activity timezone if required
-                // frm.set_value("activity_time_zone", timezone);
 
             }
 
         });
 
     },
-
-});
-function load_timezone_options(frm) {
-    
-frappe.call({
-    method: "frappe.core.doctype.user.user.get_timezones",
-
-    callback(r) {
-        if (!r.message?.timezones) return;
-
-        const timezones = r.message.timezones;
-        const timezone_map = {};
-
-        const options = [];
-
-        timezones.forEach(tz => {
-            try {
-                const now = new Date();
-
-                const offset = new Intl.DateTimeFormat("en-US", {
-                    timeZone: tz,
-                    timeZoneName: "longOffset"
-                }).formatToParts(now)
-                    .find(p => p.type === "timeZoneName")
-                    ?.value.replace("GMT", "UTC");
-
-                let label;
-
-                if (tz === "Asia/Kolkata") {
-                    label = "IST (UTC+05:30)";
-                } else {
-                    const abbreviation = new Intl.DateTimeFormat("en-US", {
-                        timeZone: tz,
-                        timeZoneName: "short"
-                    }).formatToParts(now)
-                        .find(p => p.type === "timeZoneName")?.value;
-
-                    label = `${abbreviation} (${offset})`;
-                }
-
-                timezone_map[label] = tz;
-                options.push(label);
-
-            } catch (e) {
-                console.log("Timezone error:", tz);
-            }
-        });
-
-        const unique_options = [...new Set(options)].sort();
-
-        // Ensure IST is available
-        if (!unique_options.includes("IST (UTC+05:30)")) {
-            unique_options.push("IST (UTC+05:30)");
-        }
-
-        frm.set_df_property("time_zone", "options", unique_options.join("\n"));
-        frm.set_df_property("activity_time_zone", "options", unique_options.join("\n"));
-
-        // Default logged-in user's timezone
-        if (frm.is_new() && !frm.doc.time_zone) {
-            frappe.call({
-                method: "frappe.client.get_value",
-                args: {
-                    doctype: "User",
-                    filters: {
-                        name: frappe.session.user
-                    },
-                    fieldname: "time_zone"
-                },
-                callback(res) {
-                    const user_timezone = res.message?.time_zone;
-
-                    if (user_timezone) {
-                        const user_label = Object.keys(timezone_map)
-                            .find(label => timezone_map[label] === user_timezone);
-
-                        if (user_label) {
-                            frm.set_value("time_zone", user_label);
-                            frm.set_value("activity_time_zone", user_label);
-                        }
-                    }
-                }
-            });
-        }
-    }
-});
-
-}
-
-
-function load_timezone_options_test(frm) {
-    frappe.call({
-        method: "frappe.core.doctype.user.user.get_timezones",
-        callback(r) {
-            if (!r.message?.timezones) return;
-
-            const timezones = r.message.timezones.sort();
-
-            frm.set_df_property(
-                "time_zone",
-                "options",
-                timezones.join("\n")
-            );
-            frm.set_df_property(
-                "activity_time_zone",
-                "options",
-                timezones.join("\n")
-            );
-
-            
-            // Set logged-in user's timezone as default
-            if (frm.is_new() && !frm.doc.time_zone) {
-                frappe.call({
-                    method: "frappe.client.get_value",
-                    args: {
-                        doctype: "User",
-                        filters: {
-                            name: frappe.session.user
-                        },
-                        fieldname: "time_zone"
-                    },
-                    callback(res) {
-                        const user_timezone = res.message?.time_zone;
-
-                        if (user_timezone) {
-                            frm.set_value("time_zone", user_timezone);
-                            frm.set_value("activity_time_zone",user_timezone);
-
-                        }
-                        
-                    }
-                });
-            }
-        }
-    });
-}
-frappe.ui.form.on("Ticket", {
     refresh(frm) {
+        toggle_other_tools(frm);
         if (!frm.is_new()) {
             render_activity_log(frm);
         }
+    },
+
+    tools_required(frm) {
+        toggle_other_tools(frm);
     },
     onload_post_render(frm) {
         if (!frm.is_new()) {
             render_activity_log(frm);
         }
     }
+
 });
+
 function render_activity_log(frm) {
     const wrapper = frm.fields_dict.activity_log_html?.$wrapper;
     if (!wrapper) return;
@@ -354,4 +195,20 @@ function render_activity_log(frm) {
             `);
         }
     });
+}
+
+
+function toggle_other_tools(frm) {
+    let tools = frm.doc.tools_required || [];
+
+    let show_other = tools.some(row => {
+        return Object.values(row).includes("Others");
+    });
+
+    frm.toggle_display("others", show_other);
+    frm.set_df_property("others", "reqd", show_other);
+
+    if (!show_other) {
+        frm.set_value("others", "");
+    }
 }

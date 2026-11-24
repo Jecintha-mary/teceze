@@ -4,23 +4,33 @@
 import frappe
 from frappe.model.document import Document
 allowed_states = [
-    "To SDC",
-    "Send Back to FSO",
-    "Mark FSO Work Complete",
-    "FSO Rejection Closure",
-    "SDC Validation",
-    "Sign-off",
-    "FSO Payment"
+    "Pending SDC Validation",
+    "Rework Required",
+    "Pending Sign-off",
+    "Pending FSO Payment",
+    "Pending SDM Billing",
+    "Pending FSO Head Approval",
+    "Pending Finance"
 ]
 
 class ActivityAndSignOff(Document):
 	def validate(self):
-		if self.workflow_state == "Sign-off":
+		if self.workflow_state == "Pending FSO Payment":
+			self.update_visit_details()
+		if self.workflow_state == "Rework Required":
+			frappe.db.set_value(
+									"FSO Engineer Alignment",
+									self.fso_engineer_alignment,
+									"note_sdc",
+									self.add_discussion_note
+								)
+			frappe.db.commit()
+		#if self.workflow_state == "Pending Sign-off":
+		if self.workflow_state == "Pending FSO Payment":
 			mandatory_fields = {
 			"activity_date": "Activity Date",
 			"time_in": "Time In",
 			"time_out": "Time Out",
-			#"time_on_site": "Time on Site",
 			"work_performed": "Work Performed",
 			"outcome": "Outcome",
 			"sign_off": "Signed Off By (Client)",
@@ -40,16 +50,15 @@ class ActivityAndSignOff(Document):
 				)
 		
 
-		if self.workflow_state == "Send Back to FSO" and not self.add_discussion_note:
+		if self.workflow_state == "Rework Required" and not self.add_discussion_note:
 			frappe.throw("Add Discussion Notes for FSO – Required Corrections")
 
-		if self.workflow_state == "SDC Validation":
+		if self.workflow_state == "Pending Sign-off":
 			if not self.validate_engineer:
 				frappe.throw("Work validated with the engineer is Mandatory!")
 			if not self.document_review:
 				frappe.throw("Documents and photos reviewed is Mandatory!")
 		if self.workflow_state in allowed_states:
-			frappe.log_error("call",str(allowed_states))
 			new_state = self.workflow_state
 
 			linked_docs = [
@@ -77,6 +86,22 @@ class ActivityAndSignOff(Document):
 						new_state,
 						update_modified=True
 					)
+	def update_visit_details(self):
+		frappe.db.set_value(
+		"FSO Engineer Alignment",
+			self.fso_engineer_alignment,
+			{
+				"time_in": self.time_in,
+				"time_out": self.time_out,
+				"sign_off_by_client": self.sign_off,
+				"working_hours": self.working_hours,
+				"work_performed": self.work_performed,
+				"engineer_remarks": self.engineer_remarks,
+				"sign_off_sheet": self.sign_off_sheet,
+				"outcome": self.outcome
+			},
+			update_modified=True
+			)
 	def on_update(self):
 		old_doc = self.get_doc_before_save()
 
@@ -91,7 +116,7 @@ class ActivityAndSignOff(Document):
 				return
 
 			alignment = frappe.get_doc(
-				"FSO Engineer Alignment",
+				"Rework Required",
 				self.fso_engineer_alignment
 			)
 
@@ -416,4 +441,16 @@ class ActivityAndSignOff(Document):
 			)
 			
 							
-				
+def get_sign_off_permission_query(user):
+
+    if not user:
+        user = frappe.session.user
+
+    # System Manager can view all tickets
+    if any(role in frappe.get_roles(user) for role in ["System Manager"]):
+        return ""
+
+    # Other users can view tickets owned by them
+    return "`tabActivity And Sign-Off`.sdc_email = {}".format(
+        frappe.db.escape(user)
+    )

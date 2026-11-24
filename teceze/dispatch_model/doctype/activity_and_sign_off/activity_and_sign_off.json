@@ -21,6 +21,12 @@
   "column_break_bwbk",
   "activity_time",
   "spoc_contact",
+  "section_break_fdtg",
+  "sdc",
+  "sdc_email",
+  "column_break_icjl",
+  "sdm",
+  "sdm_email",
   "section_break_bvcw",
   "location",
   "tools",
@@ -39,11 +45,12 @@
   "region",
   "section_break_mvld",
   "rate_currency",
-  "hourly_rate",
   "half_day_rate",
   "column_break_tpmi",
-  "full_day_rate",
+  "hourly_rate",
   "fixed_visit_rate",
+  "column_break_dlzb",
+  "full_day_rate",
   "travel_cost",
   "section_break_nnjb",
   "name_on_account",
@@ -76,7 +83,7 @@
   "time_out",
   "column_break_bgle",
   "sign_off",
-  "time_on_site",
+  "working_hours",
   "section_break_onyk",
   "work_performed",
   "column_break_zoxs",
@@ -92,7 +99,7 @@
    "fieldtype": "Date",
    "in_list_view": 1,
    "label": "Activity Date",
-   "mandatory_depends_on": "eval:doc.workflow_state==\"SDC Validation\""
+   "mandatory_depends_on": "eval:doc.workflow_state==\"Pending Sign-off\""
   },
   {
    "fieldname": "amended_from",
@@ -105,20 +112,15 @@
   },
   {
    "fieldname": "time_in",
-   "fieldtype": "Datetime",
+   "fieldtype": "Time",
    "label": "Time In",
-   "mandatory_depends_on": "eval:doc.workflow_state==\"SDC Validation\""
+   "mandatory_depends_on": "eval:doc.workflow_state==\"Pending Sign-off\""
   },
   {
    "fieldname": "time_out",
    "fieldtype": "Time",
    "label": "Time Out",
-   "mandatory_depends_on": "eval:doc.workflow_state==\"SDC Validation\""
-  },
-  {
-   "fieldname": "time_on_site",
-   "fieldtype": "Time",
-   "label": "Time on Site"
+   "mandatory_depends_on": "eval:doc.workflow_state==\"Pending Sign-off\""
   },
   {
    "fieldname": "column_break_bgle",
@@ -128,26 +130,26 @@
    "fieldname": "outcome",
    "fieldtype": "Select",
    "label": "Outcome",
-   "mandatory_depends_on": "eval:doc.workflow_state==\"SDC Validation\"",
+   "mandatory_depends_on": "eval:doc.workflow_state==\"Pending Sign-off\"",
    "options": "\nCompleted\nPartially Completed\nRevisit Required\nCancelled On Site"
   },
   {
-   "description": "By Client",
    "fieldname": "sign_off",
    "fieldtype": "Data",
    "label": "Signed off by (Client Name)",
-   "mandatory_depends_on": "eval:doc.workflow_state==\"SDC Validation\""
+   "mandatory_depends_on": "eval:doc.workflow_state==\"Pending Sign-off\""
   },
   {
    "fieldname": "work_performed",
    "fieldtype": "Small Text",
    "label": "Work Performed",
-   "mandatory_depends_on": "eval:doc.workflow_state==\"SDC Validation\""
+   "mandatory_depends_on": "eval:doc.workflow_state==\"Pending Sign-off\""
   },
   {
    "fieldname": "engineer_remarks",
    "fieldtype": "Small Text",
-   "label": "Engineer Remarks"
+   "label": "Engineer Remarks",
+   "mandatory_depends_on": "eval:doc.workflow_state==\"Pending Sign-off\""
   },
   {
    "fieldname": "sign_off_sheet",
@@ -171,7 +173,7 @@
    "read_only": 1
   },
   {
-   "depends_on": "eval:doc.workflow_state !== \"To SDC\" && doc.workflow_state !== \"Mark FSO Work Complete\" && doc.workflow_state !== \"Send Back to FSO\"",
+   "depends_on": "eval:![\"Pending SDC Validation\",\"Rework Required\"].includes(doc.workflow_state)",
    "fieldname": "visit_record_tab",
    "fieldtype": "Tab Break",
    "label": "<b style=\"color:#555555;font-size:15px\">Visit Record</b>"
@@ -459,7 +461,8 @@
    "fieldname": "validate_engineer",
    "fieldtype": "Check",
    "label": "Work validated with the engineer",
-   "mandatory_depends_on": "eval:doc.workflow_state==\"To SDC\""
+   "mandatory_depends_on": "eval:doc.workflow_state==\"Pending SDC Validation\"",
+   "read_only_depends_on": "eval:![\"Pending SDC Validation\",\"Rework Required\"].includes(doc.workflow_state)"
   },
   {
    "fieldname": "column_break_noux",
@@ -470,7 +473,8 @@
    "fieldname": "document_review",
    "fieldtype": "Check",
    "label": "Documents and photos reviewed",
-   "mandatory_depends_on": "eval:doc.workflow_state==\"To SDC\""
+   "mandatory_depends_on": "eval:doc.workflow_state==\"Pending SDC Validation\"",
+   "read_only_depends_on": "eval:![\"Pending SDC Validation\",\"Rework Required\"].includes(doc.workflow_state)"
   },
   {
    "fieldname": "section_break_rwpr",
@@ -480,7 +484,8 @@
    "description": "<span style=\"color:#f97316;font-style:italic;font-weight:600\">\n    Discussion note with engineer, or reason for sending back\n</span>",
    "fieldname": "add_discussion_note",
    "fieldtype": "Small Text",
-   "label": "Add Discussion Note"
+   "label": "Add Discussion Note",
+   "read_only_depends_on": "eval:![\"Pending SDC Validation\",\"Rework Required\"].includes(doc.workflow_state)"
   },
   {
    "fieldname": "column_break_bwbk",
@@ -532,13 +537,51 @@
   {
    "fieldname": "column_break_tezg",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "working_hours",
+   "fieldtype": "Float",
+   "label": "Total Working Hours",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_dlzb",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_fdtg",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "sdc",
+   "fieldtype": "Data",
+   "label": "SDC"
+  },
+  {
+   "fieldname": "sdc_email",
+   "fieldtype": "Data",
+   "label": "SDC Email"
+  },
+  {
+   "fieldname": "column_break_icjl",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "sdm",
+   "fieldtype": "Data",
+   "label": "SDM"
+  },
+  {
+   "fieldname": "sdm_email",
+   "fieldtype": "Data",
+   "label": "SDM Email"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-11-20 19:25:08.150954",
+ "modified": "2026-11-24 17:07:44.527520",
  "modified_by": "Administrator",
  "module": "Dispatch Model",
  "name": "Activity And Sign-Off",

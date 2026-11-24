@@ -17,6 +17,14 @@
   "client_name",
   "column_break_fkdw",
   "project_name",
+  "section_break_gtun",
+  "sdc",
+  "column_break_cvmx",
+  "sdc_email",
+  "section_break_ohdb",
+  "sdm",
+  "column_break_aofl",
+  "sdm_email",
   "section_break_xsgu",
   "activity__details",
   "ticket_details",
@@ -52,6 +60,8 @@
   "spoc_email_id",
   "column_break_wezh",
   "contact",
+  "section_break_igcw",
+  "attachment",
   "more_section",
   "fso_engineer",
   "activity_log_tab",
@@ -97,6 +107,7 @@
    "fieldtype": "Column Break"
   },
   {
+   "depends_on": "eval:doc.client_name",
    "fieldname": "project_name",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -361,13 +372,62 @@
    "label": "Ticket Owner",
    "options": "User",
    "read_only": 1
+  },
+  {
+   "fieldname": "section_break_gtun",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fetch_from": "project_name.custom_sdc",
+   "fieldname": "sdc",
+   "fieldtype": "Data",
+   "label": "SDC"
+  },
+  {
+   "fieldname": "column_break_cvmx",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "project_name.custom_sdc_email",
+   "fieldname": "sdc_email",
+   "fieldtype": "Data",
+   "label": "SDC Email"
+  },
+  {
+   "fieldname": "section_break_ohdb",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fetch_from": "project_name.custom_sdm",
+   "fieldname": "sdm",
+   "fieldtype": "Data",
+   "label": "SDM"
+  },
+  {
+   "fieldname": "column_break_aofl",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "project_name.custom_sdm_email",
+   "fieldname": "sdm_email",
+   "fieldtype": "Data",
+   "label": "SDM Email"
+  },
+  {
+   "fieldname": "section_break_igcw",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "attachment",
+   "fieldtype": "Attach",
+   "label": "Attachment"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-11-20 19:08:32.343539",
+ "modified": "2026-11-24 19:38:38.835118",
  "modified_by": "Administrator",
  "module": "Dispatch Model",
  "name": "Ticket",

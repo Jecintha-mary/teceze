@@ -64,6 +64,10 @@
 	const STAGE_NOTE = ["Intake verified", "Triage and categorise", "Route allocation", "SLA clock stop", "Handover to SDC", "Technical audit", "Client acceptance", "Engineer settlement", "Margin review", "AP posting", "Lifecycle finalised"];
 	const DONE_LABELS = ["Ticket raised", "Review complete", "Assigned to FSO queue", "FSO work complete", "Moved to SDC queue", "Validation complete", "Sign-off sheet attached", "Payment request sent", "Billing approved", "Engineer paid"];
 	const CLOCK_STOP_STAGE = 4;
+	/** Short axis labels for the stage histogram (Tickets by workflow stage card) */
+	const STAGE_AXIS = ["Raised", "SD review", "Assign FSO", "FSO proc", "To SDC", "SDC val", "Sign-off", "Payment", "Billing", "Finance", "Closed"];
+	/** Small tag under each axis label */
+	const STAGE_TAG = { client: "Client", sd: "Desk", fso: "FSO", sdc: "SDC", sdm: "SDM", accounts: "Accounts" };
 
 	const svg = (d, w) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="${w || 2}" stroke-linecap="round" stroke-linejoin="round">${d}</svg>`;
 	const ICON = {
@@ -261,7 +265,7 @@
 				if (m.length) return m.join(" ").replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
 			}
 			if (r.exception) console.error("Service Delivery dashboard, server error:", r.exception);
-		} catch (e) {}
+		} catch (e) { }
 		if (xhr && xhr.status === 403) return "You do not have permission to view this dashboard.";
 		if (xhr && xhr.status === 404) return "The dashboard data service was not found. Check that service_delivery.py is in the page folder, then run bench restart.";
 		return "The dashboard data could not be loaded. Check the server log for details.";
@@ -1080,47 +1084,94 @@
 			const open = counts.slice(0, 10).reduce((x, y) => x + y, 0);
 			const closed = counts[10];
 			const sel = this.ui.stage;
-			const row = (s) => {
+
+			/* y-axis: 4 even steps, the step is picked from the busiest stage (18 tickets gives 0, 5, 10, 15, 20) */
+			const peak = Math.max(1, ...counts);
+			const step = [1, 2, 5, 10, 20, 50, 100, 200, 500, 1000].find((s) => s * 4 >= peak) || Math.ceil(peak / 4);
+			const axisMax = step * 4;
+			const grid = [4, 3, 2, 1, 0]
+				.map((i) => `<div class="sdd-wf__grid${i === 0 ? " is-base" : ""}" style="top:${((4 - i) / 4) * 100}%"><span>${i * step}</span></div>`)
+				.join("");
+
+			const pctOf = (c) => {
+				const p = total ? (c / total) * 100 : 0;
+				return !total ? "–" : c && p < 1 ? "<1%" : Math.round(p) + "%";
+			};
+			const teamOf = (s) => s.team || "closed";
+
+			const bar = (s) => {
 				const n = s.n;
 				const c = counts[n - 1];
 				const on = sel === n;
-				const p = total ? (c / total) * 100 : 0;
-				const shown = !total ? "–" : c && p < 1 ? "<1%" : Math.round(p) + "%";
-				const sub = (s.team ? TEAMS[s.team].label : "Archived") + (n === CLOCK_STOP_STAGE ? " · SLA clock stop" : "");
-				const tip = `${STAGE_SHORT[n - 1]}: ${c} ${c === 1 ? "ticket" : "tickets"}${total ? `, ${shown} of the ${total} in view` : ""}. Select to filter the registry.`;
-				const arc = c ? `<circle class="sdd-ring__fg" cx="20" cy="20" r="16.5" pathLength="100" stroke-dasharray="${Math.max(p, 3).toFixed(2)} 100"/>` : "";
-				return `<button type="button" class="sdd-st sdd-st--${s.team || "closed"}${on ? " is-active" : ""}${c ? "" : " is-zero"}" data-action="stage-filter" data-stage="${n}" aria-pressed="${on}" title="${esc(tip)}">
-					<span class="sdd-st__n">${n === 11 ? ICON.check : n}</span>
-					<span class="sdd-st__t"><b>${esc(s.bar || s.title)}</b><span>${esc(sub)}</span></span>
-					<span class="sdd-st__r">
-						<b class="sdd-st__c">${c}</b>
-						<span class="sdd-ring" aria-hidden="true"><svg viewBox="0 0 40 40"><circle class="sdd-ring__bg" cx="20" cy="20" r="16.5"/>${arc}</svg><span class="sdd-ring__v${shown.length > 3 ? " is-long" : ""}">${shown}</span></span>
-					</span>
+				const tip = `${s.title}: ${c} ${c === 1 ? "ticket" : "tickets"}${total ? `, ${pctOf(c)} of the ${total} in view` : ""}${n === CLOCK_STOP_STAGE ? " · SLA clock stop" : ""}. Select to filter the registry.`;
+				const h = c ? `style="height:${((c / axisMax) * 100).toFixed(2)}%"` : "";
+				return `<button type="button" class="sdd-wf__col sdd-wf-t--${teamOf(s)}${on ? " is-selected" : ""}${c ? "" : " is-zero"}" data-action="stage-filter" data-stage="${n}" aria-pressed="${on}" aria-label="${esc(tip)}" title="${esc(tip)}">
+					<span class="sdd-wf__val">${c}</span>
+					<span class="sdd-wf__bar" ${h}></span>
 				</button>`;
 			};
+
+			const label = (s) => {
+				const n = s.n;
+				const c = counts[n - 1];
+				return `<div class="sdd-wf__lbl sdd-wf-t--${teamOf(s)}${c ? "" : " is-zero"}">
+					<span class="sdd-wf__num">${n === 11 ? ICON.check : n}</span>
+					<span class="sdd-wf__name" title="${esc(s.title)}">${esc(STAGE_AXIS[n - 1])}</span>
+					<span class="sdd-wf__tag">${s.team ? STAGE_TAG[s.team] : "Archived"}</span>
+					<span class="sdd-wf__pct">${pctOf(c)}</span>
+				</div>`;
+			};
+
+			const legend = [
+				["sd", "Service Desk"],
+				["accounts", "FSO / Finance"],
+				["sdm", "SDM"],
+				["sdc", "SDC"],
+				["closed", "Closed"],
+			]
+				.map(([k, t]) => `<span class="sdd-wf__key"><i class="sdd-wf__sw sdd-wf__sw--${k}"></i>${t}</span>`)
+				.join("");
+
 			const filter = sel
-				? `<div class="sdd-stc__filter">
+				? `<div class="sdd-wf__filter">
 						<span>Filtered by:</span>
-						<button type="button" class="sdd-stc__chip" data-action="clear-stage" title="Remove the stage filter">${esc(STAGE_SHORT[sel - 1])}${ICON.x}</button>
-						<button type="button" class="sdd-stc__all" data-action="clear-stage">${ICON.refresh}<span>All stages</span></button>
+						<span class="sdd-wf__chip"><span>${sel === 11 ? "Closed" : `Stage ${sel}: ${esc(STAGE_SHORT[sel - 1])}`}</span><button type="button" data-action="clear-stage" title="Clear filter">${ICON.x}</button></span>
 					</div>`
 				: "";
-			return `<section class="sdd-card sdd-stc">
-				<div class="sdd-stc__head">
-					<div>
-						<div class="sdd-stc__title"><h3>Tickets by workflow stage</h3><span class="sdd-badge sdd-badge--slate sdd-badge--pill">${total} ${total === 1 ? "ticket" : "tickets"}</span></div>
+
+			return `<section class="sdd-card sdd-wf">
+				<header class="sdd-wf__head">
+					<div class="sdd-wf__titlebox">
+						<div class="sdd-wf__title">
+							<h3>Tickets by workflow stage</h3>
+							<span class="sdd-wf__badge">${total} ${total === 1 ? "ticket" : "tickets"}</span>
+							<span class="sdd-wf__badge sdd-wf__badge--live"><i></i>Pipeline Live</span>
+						</div>
 						<p>Where each ticket in view sits today. Select a stage to filter the registry.</p>
 					</div>
-					${filter}
+					<div class="sdd-wf__actions">
+						${filter}
+						<button type="button" class="sdd-wf__all" data-action="clear-stage">${ICON.refresh}<span>All stages</span></button>
+					</div>
+				</header>
+				<div class="sdd-wf__body">
+					<div class="sdd-wf__top">
+						<div class="sdd-wf__legend">${legend}</div>
+					</div>
+					<div class="sdd-wf__scroll">
+						<div class="sdd-wf__chart">
+							<div class="sdd-wf__plot">
+								<div class="sdd-wf__grids">${grid}</div>
+								<div class="sdd-wf__cols">${STAGES.map(bar).join("")}</div>
+							</div>
+							<div class="sdd-wf__lbls">${STAGES.map(label).join("")}</div>
+						</div>
+					</div>
 				</div>
-				<div class="sdd-stc__body">
-					<div class="sdd-stc__col">${STAGES.slice(0, 6).map(row).join("")}</div>
-					<div class="sdd-stc__col">${STAGES.slice(6, 10).map(row).join("")}<div class="sdd-stc__sep"></div>${row(STAGES[10])}</div>
-				</div>
-				<div class="sdd-stc__foot">
-					<span><i class="sdd-stc__dot sdd-stc__dot--open"></i><b>${open} in flight</b> across stages 1 to 10</span>
-					<span><i class="sdd-stc__dot sdd-stc__dot--closed"></i><b>${closed} closed</b>${total ? ` <em>(${Math.round((closed / total) * 100)}%)</em>` : ""}</span>
-				</div>
+				<footer class="sdd-wf__foot">
+					<span><i class="sdd-wf__dot sdd-wf__dot--open"></i><b>${open} in flight</b> across stages 1 to 10</span>
+					<span><i class="sdd-wf__dot sdd-wf__dot--closed"></i><b>${closed} closed</b>${total ? ` <em>(${Math.round((closed / total) * 100)}%)</em>` : ""}</span>
+				</footer>
 			</section>`;
 		}
 

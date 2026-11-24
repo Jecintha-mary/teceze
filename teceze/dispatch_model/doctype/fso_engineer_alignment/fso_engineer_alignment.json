@@ -8,6 +8,7 @@
  "engine": "InnoDB",
  "field_order": [
   "details",
+  "fso_assign_owner",
   "section_break_pbfs",
   "amended_from",
   "ticket",
@@ -21,6 +22,12 @@
   "activity",
   "duration",
   "spoc_contact",
+  "section_break_yfhy",
+  "sdc",
+  "sdc_email",
+  "column_break_nmbz",
+  "sdm",
+  "sdm_email",
   "section_break_onxp",
   "location",
   "tools",
@@ -36,7 +43,6 @@
   "country",
   "column_break_csxe",
   "engineer_email",
-  "fso_assign_owner",
   "column_break_hqjr",
   "engineer_contact",
   "section_break_acnr",
@@ -49,6 +55,8 @@
   "travel_cost",
   "column_break_yjla",
   "full_day_rate",
+  "section_break_lkhn",
+  "bank_account",
   "bank_details_section",
   "name_on_account",
   "swift_bic",
@@ -67,8 +75,23 @@
   "notes",
   "tab_break_ctrl",
   "section_break_uwud",
+  "note_sdc",
   "progress_update",
   "detail",
+  "visit_record_tab",
+  "time_in",
+  "time_out",
+  "column_break_bkpf",
+  "sign_off_by_client",
+  "working_hours",
+  "section_break_mhva",
+  "work_performed",
+  "column_break_lavg",
+  "engineer_remarks",
+  "section_break_clon",
+  "sign_off_sheet",
+  "column_break_ymlx",
+  "outcome",
   "engineer_rate_tab",
   "column_break_hqzi",
   "eng_cost",
@@ -100,15 +123,17 @@
   },
   {
    "fieldname": "engineer_details_section",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "read_only_depends_on": "eval:doc.workflow_state != \"In Progress\""
   },
   {
    "fieldname": "engineer_name",
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Engineer",
-   "mandatory_depends_on": "eval:doc.workflow_state==\"Assign FSO\"",
-   "options": "Engineer Onboarding"
+   "mandatory_depends_on": "eval:doc.workflow_state==\"In Progress\"",
+   "options": "Engineer Onboarding",
+   "read_only_depends_on": "eval:![\"FSO Assigned\",\"In Progress\",\"Rework Required\"].includes(doc.workflow_state)"
   },
   {
    "fetch_from": "engineer_name.engineer_email",
@@ -161,6 +186,7 @@
    "label": "FSO Owner"
   },
   {
+   "depends_on": "eval:doc.workflow_state != \"FSO Assigned\"",
    "fieldname": "section_break_acnr",
    "fieldtype": "Section Break",
    "label": "<b style=\"color:#2490EF;font-size:15px\">Engineer Rates</b>"
@@ -173,27 +199,34 @@
    "fieldname": "scheduled_date",
    "fieldtype": "Date",
    "label": "Scheduled Date",
-   "mandatory_depends_on": "eval:doc.workflow_state==\"Assign FSO\""
+   "mandatory_depends_on": "eval:doc.workflow_state==\"In Progress\"",
+   "read_only_depends_on": "eval:doc.workflow_state != \"In Progress\""
   },
   {
    "fieldname": "arrival_time",
    "fieldtype": "Time",
-   "label": "Arrival Time(Site Local)"
+   "label": "Arrival Time(Site Local)",
+   "read_only_depends_on": "eval:doc.workflow_state != \"In Progress\""
   },
   {
    "fieldname": "notes",
    "fieldtype": "Small Text",
-   "label": "Notes For Engineer"
+   "label": "Notes For Engineer",
+   "read_only_depends_on": "eval:doc.workflow_state != \"In Progress\""
   },
   {
+   "depends_on": "eval:![\"FSO Assigned\"].includes(doc.workflow_state)\r\n",
    "fieldname": "engineer_details_tab",
    "fieldtype": "Tab Break",
-   "label": "<b style=\"color:#555555;font-size:15px\">Engineer Details</b>"
+   "label": "<b style=\"color:#555555;font-size:15px\">Engineer Details</b>",
+   "read_only_depends_on": "eval:doc.workflow_state != \"In Progress\""
   },
   {
+   "depends_on": "eval:![\"FSO Assigned\"].includes(doc.workflow_state)\r\n",
    "fieldname": "tab_break_dgnr",
    "fieldtype": "Tab Break",
-   "label": "<b style=\"color:#555555;font-size:15px\">Visit Schedule</b>"
+   "label": "<b style=\"color:#555555;font-size:15px\">Visit Schedule</b>",
+   "read_only_depends_on": "eval:doc.workflow_state != \"In Progress\""
   },
   {
    "fieldname": "ticket",
@@ -268,53 +301,53 @@
    "read_only": 1
   },
   {
-   "fetch_from": "engineer_name.name_on_account",
    "fieldname": "name_on_account",
    "fieldtype": "Data",
    "label": "Name On Account",
-   "mandatory_depends_on": "eval:doc.workflow_state==\"Assign FSO\""
+   "mandatory_depends_on": "eval:doc.workflow_state==\"Assign FSO\"",
+   "read_only": 1
   },
   {
-   "fetch_from": "engineer_name.account_number",
    "fieldname": "account_number",
    "fieldtype": "Data",
    "label": "Account Number",
-   "mandatory_depends_on": "eval:doc.workflow_state==\"Assign FSO\""
+   "mandatory_depends_on": "eval:doc.workflow_state==\"Assign FSO\"",
+   "read_only": 1
   },
   {
-   "fetch_from": "engineer_name.bank_name",
    "fieldname": "bank_name",
    "fieldtype": "Data",
    "label": "Bank Name",
-   "mandatory_depends_on": "eval:doc.workflow_state==\"Assign FSO\""
+   "mandatory_depends_on": "eval:doc.workflow_state==\"Assign FSO\"",
+   "read_only": 1
   },
   {
    "fieldname": "column_break_joqg",
    "fieldtype": "Column Break"
   },
   {
-   "fetch_from": "engineer_name.swift_bic",
    "fieldname": "swift_bic",
    "fieldtype": "Data",
-   "label": "SWIFT / BIC / IFSC"
+   "label": "SWIFT / BIC / IFSC",
+   "read_only": 1
   },
   {
-   "fetch_from": "engineer_name.sort_code",
    "fieldname": "sort_code",
    "fieldtype": "Data",
-   "label": "Sort Code"
+   "label": "Sort Code",
+   "read_only": 1
   },
   {
-   "fetch_from": "engineer_name.iban",
    "fieldname": "iban",
    "fieldtype": "Data",
-   "label": "IBAN"
+   "label": "IBAN",
+   "read_only": 1
   },
   {
-   "fetch_from": "engineer_name.bank_address",
    "fieldname": "bank_address",
    "fieldtype": "Small Text",
-   "label": "Bank Address"
+   "label": "Bank Address",
+   "read_only": 1
   },
   {
    "fieldname": "hourly_rate",
@@ -350,13 +383,18 @@
    "read_only": 1
   },
   {
+   "depends_on": "eval:doc.workflow_state != \"FSO Assigned\"",
    "fieldname": "bank_details_section",
    "fieldtype": "Section Break",
-   "label": "<b style=\"color:#2490EF;font-size:15px\">Bank Details</b>"
+   "label": "<b style=\"color:#2490EF;font-size:15px\">Bank Details</b>",
+   "read_only": 1,
+   "read_only_depends_on": "eval:doc.workflow_state != \"In Progress\""
   },
   {
+   "depends_on": "eval:doc.workflow_state == \"In Progress\"",
    "fieldname": "section_break_ubsi",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "read_only_depends_on": "eval:doc.workflow_state != \"In Progress\""
   },
   {
    "fieldname": "activity_time",
@@ -399,38 +437,42 @@
    "fieldname": "rate_currency",
    "fieldtype": "Link",
    "label": "Rate Currency",
-   "mandatory_depends_on": "eval:doc.workflow_state==\"Assign FSO\"",
-   "options": "Currency"
+   "mandatory_depends_on": "eval:doc.workflow_state==\"In Progress\"",
+   "options": "Currency",
+   "read_only_depends_on": "eval:doc.workflow_state != \"In Progress\""
   },
   {
    "fieldname": "fso_assign_owner",
    "fieldtype": "Link",
+   "in_list_view": 1,
    "label": "FSO Assign Owner",
-   "options": "FSO User"
+   "mandatory_depends_on": "eval:doc.workflow_state == \"FSO Assigned\"",
+   "options": "FSO User",
+   "read_only_depends_on": "eval:doc.workflow_state != \"FSO Assigned\""
   },
   {
-   "depends_on": "eval:![\"Assign FSO\", \"FSO Process\", \"To SDC\"].includes(doc.workflow_state)",
+   "depends_on": "eval:(doc.note_sdc) && (![\"FSO Assigned\", \"In Progress\"].includes(doc.workflow_state))",
    "fieldname": "tab_break_ctrl",
    "fieldtype": "Tab Break",
    "label": "Progress Update"
   },
   {
-   "depends_on": "eval:![\"Assign FSO\", \"FSO Process\", \"To SDC\"].includes(doc.workflow_state)",
+   "depends_on": "eval:(doc.note_sdc) && (![\"FSO Assigned\", \"In Progress\"].includes(doc.workflow_state))",
    "fieldname": "progress_update",
    "fieldtype": "Select",
    "label": "Progress Update",
-   "mandatory_depends_on": "eval:doc.workflow_state==\"Send Back to FSO\"",
+   "mandatory_depends_on": "eval:doc.workflow_state == \"Rework Required\"",
    "options": "\nEngineer Briefed\nTravelling to site\nOn site\nWork in progress\nBlocked ,Waiting On Client\nWork Completed",
-   "read_only_depends_on": "eval:doc.workflow_state != \"Send Back to FSO\""
+   "read_only_depends_on": "eval:![\"Rework Required\"].includes(doc.workflow_state)\r\n"
   },
   {
-   "depends_on": "eval:![\"Assign FSO\", \"FSO Process\", \"To SDC\"].includes(doc.workflow_state)",
+   "depends_on": "eval:(doc.note_sdc) && (![\"FSO Assigned\", \"In Progress\"].includes(doc.workflow_state))",
    "fieldname": "detail",
    "fieldtype": "Small Text",
    "label": "Details",
-   "mandatory_depends_on": "eval:doc.workflow_state==\"Send Back to FSO\"",
+   "mandatory_depends_on": "eval:doc.workflow_state == \"Rework Required\"",
    "placeholder": "Details(Optional)",
-   "read_only_depends_on": "eval:doc.workflow_state != \"Send Back to FSO\""
+   "read_only_depends_on": "eval:![\"Rework Required\"].includes(doc.workflow_state)\r\n"
   },
   {
    "fieldname": "section_break_uwud",
@@ -451,8 +493,10 @@
    "fieldtype": "Column Break"
   },
   {
+   "depends_on": "eval:doc.workflow_state == \"In Progress\"",
    "fieldname": "section_break_aabw",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "read_only_depends_on": "eval:doc.workflow_state != \"In Progress\""
   },
   {
    "fieldname": "column_break_nalx",
@@ -468,7 +512,7 @@
    "label": "Payment Request"
   },
   {
-   "depends_on": "eval:![\"Assign FSO\", \"FSO Process\", \"To SDC\",\"Send Back to FSO\",\"SDC Validation\",\"Mark FSO Work Complete\",\"FSO Rejection Closure\",].includes(doc.workflow_state)",
+   "depends_on": "eval:[\"Pending FSO Payment\", \"Pending SDM Billing\", \"Pending FSO Head Approval\",\"Pending Finance\",\"Completed\"].includes(doc.workflow_state)",
    "fieldname": "engineer_rate_tab",
    "fieldtype": "Tab Break",
    "label": "Engineer Rate"
@@ -489,7 +533,8 @@
   {
    "fieldname": "eng_cost",
    "fieldtype": "Float",
-   "label": "Engineer Cost"
+   "label": "Engineer Cost",
+   "mandatory_depends_on": "eval:doc.workflow_state==\"Pending FSO Payment\""
   },
   {
    "fieldname": "other_cost",
@@ -509,14 +554,147 @@
   {
    "fieldname": "note",
    "fieldtype": "Small Text",
-   "label": "Note"
+   "label": "Note",
+   "mandatory_depends_on": "eval:doc.workflow_state==\"Pending FSO Payment\""
+  },
+  {
+   "depends_on": "eval:doc.workflow_state != \"FSO Assigned\"",
+   "fieldname": "section_break_lkhn",
+   "fieldtype": "Section Break",
+   "read_only_depends_on": "eval:doc.workflow_state != \"In Progress\""
+  },
+  {
+   "depends_on": "eval:doc.engineer_name && doc.workflow_state != \"FSO Assigned\"",
+   "fieldname": "bank_account",
+   "fieldtype": "Select",
+   "label": "Select Bank Account",
+   "mandatory_depends_on": "eval:doc.workflow_state==\"In Progress\"",
+   "read_only_depends_on": "eval:doc.workflow_state != \"In Progress\""
+  },
+  {
+   "fieldname": "note_sdc",
+   "fieldtype": "Small Text",
+   "label": "Discussion Note by SDC",
+   "read_only": 1
+  },
+  {
+   "fieldname": "visit_record_tab",
+   "fieldtype": "Tab Break",
+   "label": "Visit Record"
+  },
+  {
+   "depends_on": "eval:[\"Pending FSO Payment\",\"Pending SDM Billing\",\"Pending FSO Head Approval\",\"Pending Finance\",\"Completed\"].includes(doc.workflow_state)",
+   "fieldname": "time_in",
+   "fieldtype": "Time",
+   "label": "Time In",
+   "read_only_depends_on": "eval:[\"Pending FSO Payment\",\"Pending SDM Billing\",\"Pending FSO Head Approval\",\"Pending Finance\",\"Completed\"].includes(doc.workflow_state)"
+  },
+  {
+   "depends_on": "eval:[\"Pending FSO Payment\",\"Pending SDM Billing\",\"Pending FSO Head Approval\",\"Pending Finance\",\"Completed\"].includes(doc.workflow_state)",
+   "fieldname": "time_out",
+   "fieldtype": "Time",
+   "label": "Time Out",
+   "read_only_depends_on": "eval:[\"Pending FSO Payment\",\"Pending SDM Billing\",\"Pending FSO Head Approval\",\"Pending Finance\",\"Completed\"].includes(doc.workflow_state)"
+  },
+  {
+   "fieldname": "column_break_bkpf",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:[\"Pending FSO Payment\",\"Pending SDM Billing\",\"Pending FSO Head Approval\",\"Pending Finance\",\"Completed\"].includes(doc.workflow_state)",
+   "fieldname": "sign_off_by_client",
+   "fieldtype": "Data",
+   "label": "Signed off by (Client Name)",
+   "read_only_depends_on": "eval:[\"Pending FSO Payment\",\"Pending SDM Billing\",\"Pending FSO Head Approval\",\"Pending Finance\",\"Completed\"].includes(doc.workflow_state)"
+  },
+  {
+   "depends_on": "eval:[\"Pending FSO Payment\",\"Pending SDM Billing\",\"Pending FSO Head Approval\",\"Pending Finance\",\"Completed\"].includes(doc.workflow_state)",
+   "fieldname": "working_hours",
+   "fieldtype": "Float",
+   "label": "Total Working Hours",
+   "read_only_depends_on": "eval:[\"Pending FSO Payment\",\"Pending SDM Billing\",\"Pending FSO Head Approval\",\"Pending Finance\",\"Completed\"].includes(doc.workflow_state)"
+  },
+  {
+   "fieldname": "section_break_mhva",
+   "fieldtype": "Section Break"
+  },
+  {
+   "depends_on": "eval:[\"Pending FSO Payment\",\"Pending SDM Billing\",\"Pending FSO Head Approval\",\"Pending Finance\",\"Completed\"].includes(doc.workflow_state)",
+   "fieldname": "work_performed",
+   "fieldtype": "Small Text",
+   "label": "Work Performed",
+   "read_only_depends_on": "eval:[\"Pending FSO Payment\",\"Pending SDM Billing\",\"Pending FSO Head Approval\",\"Pending Finance\",\"Completed\"].includes(doc.workflow_state)"
+  },
+  {
+   "fieldname": "column_break_lavg",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:[\"Pending FSO Payment\",\"Pending SDM Billing\",\"Pending FSO Head Approval\",\"Pending Finance\",\"Completed\"].includes(doc.workflow_state)",
+   "fieldname": "engineer_remarks",
+   "fieldtype": "Small Text",
+   "label": "Engineer Remarks",
+   "read_only_depends_on": "eval:[\"Pending FSO Payment\",\"Pending SDM Billing\",\"Pending FSO Head Approval\",\"Pending Finance\",\"Completed\"].includes(doc.workflow_state)"
+  },
+  {
+   "fieldname": "section_break_clon",
+   "fieldtype": "Section Break"
+  },
+  {
+   "depends_on": "eval:[\"Pending FSO Payment\",\"Pending SDM Billing\",\"Pending FSO Head Approval\",\"Pending Finance\",\"Completed\"].includes(doc.workflow_state)",
+   "fieldname": "sign_off_sheet",
+   "fieldtype": "Attach",
+   "label": "Sign off Sheet",
+   "read_only_depends_on": "eval:[\"Pending FSO Payment\",\"Pending SDM Billing\",\"Pending FSO Head Approval\",\"Pending Finance\",\"Completed\"].includes(doc.workflow_state)"
+  },
+  {
+   "fieldname": "column_break_ymlx",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:[\"Pending FSO Payment\",\"Pending SDM Billing\",\"Pending FSO Head Approval\",\"Pending Finance\",\"Completed\"].includes(doc.workflow_state)",
+   "fieldname": "outcome",
+   "fieldtype": "Select",
+   "label": "Outcome",
+   "options": "\nCompleted\nPartially Completed\nRevisit Required\nCancelled On Site",
+   "read_only_depends_on": "eval:[\"Pending FSO Payment\",\"Pending SDM Billing\",\"Pending FSO Head Approval\",\"Pending Finance\",\"Completed\"].includes(doc.workflow_state)"
+  },
+  {
+   "fieldname": "section_break_yfhy",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "sdc",
+   "fieldtype": "Data",
+   "label": "SDC"
+  },
+  {
+   "fieldname": "sdc_email",
+   "fieldtype": "Data",
+   "label": "SDC Email",
+   "options": "Email"
+  },
+  {
+   "fieldname": "column_break_nmbz",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "sdm",
+   "fieldtype": "Data",
+   "label": "SDM"
+  },
+  {
+   "fieldname": "sdm_email",
+   "fieldtype": "Data",
+   "label": "SDM Email",
+   "options": "Email"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-11-20 18:44:47.095618",
+ "modified": "2026-11-24 19:32:45.753030",
  "modified_by": "Administrator",
  "module": "Dispatch Model",
  "name": "FSO Engineer Alignment",

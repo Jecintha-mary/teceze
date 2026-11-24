@@ -13,7 +13,7 @@
  "label": "Dispatch",
  "link_type": "DocType",
  "links": [],
- "modified": "2026-11-20 14:53:18.099037",
+ "modified": "2026-11-24 18:15:00.324530",
  "modified_by": "Administrator",
  "module": "Dispatch Model",
  "name": "Dispatch",
@@ -33,6 +33,9 @@
   },
   {
    "role": "SDM"
+  },
+  {
+   "role": "FSO Head"
   }
  ],
  "sequence_id": 0.0,

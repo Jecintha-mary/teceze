@@ -16,6 +16,8 @@ allowed_states = [
 
 class FSOEngineerAlignment(Document):
 	def validate(self):
+		if self.workflow_state == "In Progress":
+			self.send_mail_for_assign_user()
 		if self.workflow_state == "In Progress" and not self.fso_assign_owner:
 			frappe.throw("FSO Assign Owner is Mandatory!")
 
@@ -66,9 +68,7 @@ class FSOEngineerAlignment(Document):
 						"Please fill in all mandatory fields:<br><br>• "
 						+ "<br>• ".join(missing_fields))
 
-		# ---------------------------------------------------------
 		# UPDATE TICKET WORKFLOW STATE
-		# ---------------------------------------------------------
 
 		if self.ticket and new_state in allowed_states:
 
@@ -94,7 +94,6 @@ class FSOEngineerAlignment(Document):
 		if self.workflow_state=="Pending SDM Billing":
 			mandatory_fields = {
 							"eng_cost": "Engineer Cost",
-							"other_cost": "Other Cost",
 							"total_cost": "Total Cost",
 							"note": "Note",}
 							
@@ -113,9 +112,7 @@ class FSOEngineerAlignment(Document):
 			
 		
 
-		# ---------------------------------------------------------
 		# UPDATE ACTIVITY AND SIGN-OFF WORKFLOW STATE
-		# ---------------------------------------------------------
 
 		if self.name:
 
@@ -143,8 +140,11 @@ class FSOEngineerAlignment(Document):
 					)
 
 		
-
-	def on_update(self):
+	def send_mail_for_assign_user(self):
+		if not self.fso_assign_owner:
+			return  
+		
+	def on_update_test(self):
 		old_doc = self.get_doc_before_save()
 		
 
@@ -240,7 +240,7 @@ class FSOEngineerAlignment(Document):
 								</td>
 								<td style="padding: 10px 12px;
 									border-bottom: 1px solid #e2e8f0;">
-									{self.recruiter_name or ''}
+									{self.name or ''}
 								</td>
 							</tr>
 
@@ -365,6 +365,20 @@ class FSOEngineerAlignment(Document):
 				"payment_request",
 				payment.name
 			)
+		if self.sign_off:
+			frappe.db.set_value(
+						"Activity And Sign-Off",
+						self.sign_off,
+						"workflow_state",
+						"Pending SDM Billing"
+					)
+		if self.ticket:
+			frappe.db.set_value(
+						"Ticket",
+						self.ticket,
+						"workflow_state",
+						"Pending SDM Billing"
+					)	
 		frappe.db.set_value(
 						"Activity And Sign-Off",
 						self.sign_off,
