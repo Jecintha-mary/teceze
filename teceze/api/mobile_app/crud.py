@@ -10,6 +10,8 @@ from frappe.utils import (
 from frappe.utils import getdate, today
 from frappe import _
 from teceze.api.employee_attendance import (employee_checkin as desktop_employee_checkin,)
+from teceze.api.employee_attendance import validate_employee_location 
+
 from teceze.api.attendance_regularization import get_existing_checkins
 from datetime import timedelta
 from frappe.utils import getdate, cint
@@ -1628,7 +1630,6 @@ def employee_checkin():
     latitude = data.get("latitude")
     longitude = data.get("longitude")
     log_type = data.get("log_type")
-    source = data.get("source")
 
     if not employee:
         frappe.throw(_("Employee ID is required."))
@@ -2533,33 +2534,75 @@ def get_my_checkin_status():
     return build_status(_employee())
  
  
-# Punch
-
 @frappe.whitelist(allow_guest=False, methods=["POST"])
 def mark_checkin(log_type, latitude=None, longitude=None):
+
     if log_type not in ("IN", "OUT"):
         frappe.throw(_("log_type must be IN or OUT"))
- 
+
     emp = _employee()
- 
-    # A second tap waits here, then sees the first punch and is rejected.
+
+
+
+
+    # Lock employee to prevent duplicate punches
     _lock(emp)
- 
+        # Validate employee GPS location before punching
+    location_validation = validate_employee_location(
+        emp.name,
+        latitude,
+        longitude
+    )
+    if not location_validation.get("success"):
+        frappe.throw(
+            location_validation.get(
+                "message",
+                _("You are outside the allowed attendance location.")
+            )
+        )
+    distance = location_validation["distance"]
+
+
     now = now_datetime()
     auto_checkout = None
- 
+
     if log_type == "IN":
-        # A session left open over 24 h is closed first (if the hourly job
-        # hasn't done it yet), then the new IN starts a fresh session.
+
         auto_checkout = _close_overdue(emp, now)
+
         if build_status(emp, now)["data"]["is_checked_in"]:
             frappe.throw(_("You are already checked in."))
+
     else:
+
         if not build_status(emp, now)["data"]["is_checked_in"]:
             frappe.throw(_("You are not checked in."))
- 
-    doc = _insert(emp, log_type, now, latitude, longitude)
- 
+
+    # Create check-in / check-out
+    doc = _insert(
+        emp,
+        log_type,
+        now,
+        latitude,
+        longitude,
+        source_checkin="mobile"
+    )
+
+    # Save additional location information
+    if frappe.get_meta("Employee Checkin").has_field("custom_distance"):
+        doc.db_set(
+            "custom_distance",
+            distance,
+            update_modified=False
+        )
+
+    if frappe.get_meta("Employee Checkin").has_field("custom_work_location"):
+        doc.db_set(
+            "custom_work_location",
+            location_validation["location"],
+            update_modified=False
+        )
+
     return {
         "success": True,
         "message": _("Check In Successful") if log_type == "IN" else _("Check Out Successful"),
@@ -2568,10 +2611,12 @@ def mark_checkin(log_type, latitude=None, longitude=None):
             "log_type": log_type,
             "time": str(now),
             "auto_checkout_name": auto_checkout,
+            "distance": distance,
+            "work_location": location_validation["location"]
         },
-        # The new state, by the same rules (the app re-reads it anyway).
-        "status": build_status(emp)["data"],
+        "status": build_status(emp)["data"]
     }
+
 @frappe.whitelist(allow_guest=False)
 def team_members():
 
