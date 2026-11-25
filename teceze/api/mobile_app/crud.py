@@ -2542,17 +2542,16 @@ def mark_checkin(log_type, latitude=None, longitude=None):
 
     emp = _employee()
 
-
-
-
     # Lock employee to prevent duplicate punches
     _lock(emp)
-        # Validate employee GPS location before punching
+
+    # Validate employee GPS location
     location_validation = validate_employee_location(
         emp.name,
         latitude,
         longitude
     )
+
     if not location_validation.get("success"):
         frappe.throw(
             location_validation.get(
@@ -2560,22 +2559,29 @@ def mark_checkin(log_type, latitude=None, longitude=None):
                 _("You are outside the allowed attendance location.")
             )
         )
-    distance = location_validation["distance"]
 
+    distance = location_validation["distance"]
 
     now = now_datetime()
     auto_checkout = None
 
+    # Get current attendance status
+    current_status = build_status(emp, now)["data"]["is_checked_in"]
+
     if log_type == "IN":
 
+        # Close an overdue session if one exists
         auto_checkout = _close_overdue(emp, now)
 
-        if build_status(emp, now)["data"]["is_checked_in"]:
+        # Recheck after automatic checkout
+        current_status = build_status(emp, now)["data"]["is_checked_in"]
+
+        if current_status:
             frappe.throw(_("You are already checked in."))
 
-    else:
+    elif log_type == "OUT":
 
-        if not build_status(emp, now)["data"]["is_checked_in"]:
+        if not current_status:
             frappe.throw(_("You are not checked in."))
 
     # Create check-in / check-out
@@ -2584,11 +2590,10 @@ def mark_checkin(log_type, latitude=None, longitude=None):
         log_type,
         now,
         latitude,
-        longitude,
-        source_checkin="mobile"
+        longitude
     )
 
-    # Save additional location information
+    # Save distance
     if frappe.get_meta("Employee Checkin").has_field("custom_distance"):
         doc.db_set(
             "custom_distance",
@@ -2596,6 +2601,7 @@ def mark_checkin(log_type, latitude=None, longitude=None):
             update_modified=False
         )
 
+    # Save work location
     if frappe.get_meta("Employee Checkin").has_field("custom_work_location"):
         doc.db_set(
             "custom_work_location",
