@@ -1,0 +1,129 @@
+{
+ "actions": [],
+ "allow_bulk_edit": 1,
+ "allow_rename": 1,
+ "autoname": "HR-OFF-REQ-.YYYY.-.#####",
+ "creation": "2026-11-25 18:03:25.933918",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "site_address",
+  "nature_of_contract",
+  "willing_to_go_onsite",
+  "role",
+  "contract_duration",
+  "salary",
+  "visa",
+  "start_date",
+  "payroll_status",
+  "payment_terms",
+  "emergency_contact",
+  "taxation",
+  "status",
+  "job_applicant"
+ ],
+ "fields": [
+  {
+   "fieldname": "site_address",
+   "fieldtype": "Data",
+   "label": "Site Address"
+  },
+  {
+   "fieldname": "nature_of_contract",
+   "fieldtype": "Select",
+   "label": "Nature Of Contract",
+   "options": "\nLong Term\nShort Term"
+  },
+  {
+   "fieldname": "willing_to_go_onsite",
+   "fieldtype": "Select",
+   "label": "Willing to go Onsite",
+   "options": "\nYes\nNo"
+  },
+  {
+   "fieldname": "role",
+   "fieldtype": "Data",
+   "label": "Roles/Designation"
+  },
+  {
+   "fieldname": "contract_duration",
+   "fieldtype": "Data",
+   "label": "Contract Duration"
+  },
+  {
+   "fieldname": "salary",
+   "fieldtype": "Data",
+   "label": "Salary"
+  },
+  {
+   "fieldname": "visa",
+   "fieldtype": "Data",
+   "label": "Visa & Validity"
+  },
+  {
+   "fieldname": "start_date",
+   "fieldtype": "Data",
+   "label": "Start Date"
+  },
+  {
+   "fieldname": "payroll_status",
+   "fieldtype": "Data",
+   "label": "Payroll Status"
+  },
+  {
+   "fieldname": "payment_terms",
+   "fieldtype": "Data",
+   "label": "Payment Terms"
+  },
+  {
+   "fieldname": "emergency_contact",
+   "fieldtype": "Data",
+   "label": "Emergency Contact"
+  },
+  {
+   "fieldname": "taxation",
+   "fieldtype": "Data",
+   "label": "Taxation"
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "options": "\nOffer Request\nPending Approval"
+  },
+  {
+   "fieldname": "job_applicant",
+   "fieldtype": "Link",
+   "label": "Job Applicant",
+   "options": "Job Applicant"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-11-25 18:10:18.490107",
+ "modified_by": "Administrator",
+ "module": "Teceze",
+ "name": "Offer Request",
+ "naming_rule": "By script",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}
