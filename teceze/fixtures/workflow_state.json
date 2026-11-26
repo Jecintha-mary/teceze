@@ -39,15 +39,6 @@
   "docstatus": 0,
   "doctype": "Workflow State",
   "icon": "",
-  "modified": "2026-10-05 17:27:56.437619",
-  "name": "Open",
-  "style": "Warning",
-  "workflow_state_name": "Open"
- },
- {
-  "docstatus": 0,
-  "doctype": "Workflow State",
-  "icon": "",
   "modified": "2026-10-12 12:27:00.932441",
   "name": "Purchase Order",
   "style": "Primary",
@@ -75,15 +66,6 @@
   "docstatus": 0,
   "doctype": "Workflow State",
   "icon": "",
-  "modified": "2026-09-02 12:01:57.977085",
-  "name": "Cancelled",
-  "style": "Danger",
-  "workflow_state_name": "Cancelled"
- },
- {
-  "docstatus": 0,
-  "doctype": "Workflow State",
-  "icon": "",
   "modified": "2026-10-05 17:29:01.546407",
   "name": "Quotation",
   "style": "Primary",
@@ -97,15 +79,6 @@
   "name": "Clarification",
   "style": "Info",
   "workflow_state_name": "Clarification"
- },
- {
-  "docstatus": 0,
-  "doctype": "Workflow State",
-  "icon": "remove",
-  "modified": "2026-06-10 15:03:44.689733",
-  "name": "Rejected",
-  "style": "Danger",
-  "workflow_state_name": "Rejected"
  },
  {
   "docstatus": 0,
@@ -146,15 +119,6 @@
  {
   "docstatus": 0,
   "doctype": "Workflow State",
-  "icon": "",
-  "modified": "2026-08-27 11:31:25.885108",
-  "name": "Pending Approval",
-  "style": "Warning",
-  "workflow_state_name": "Pending Approval"
- },
- {
-  "docstatus": 0,
-  "doctype": "Workflow State",
   "icon": "ok-sign",
   "modified": "2026-06-10 15:03:44.688523",
   "name": "Approved",
@@ -187,15 +151,6 @@
   "name": "Won",
   "style": "Success",
   "workflow_state_name": "Won"
- },
- {
-  "docstatus": 0,
-  "doctype": "Workflow State",
-  "icon": "",
-  "modified": "2026-11-13 14:33:14.175473",
-  "name": "Raised",
-  "style": "Success",
-  "workflow_state_name": "Raised"
  },
  {
   "docstatus": 0,
@@ -246,6 +201,114 @@
   "docstatus": 0,
   "doctype": "Workflow State",
   "icon": "",
+  "modified": "2026-11-25 13:00:17.518820",
+  "name": "Approve",
+  "style": "",
+  "workflow_state_name": "Approve"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2026-11-25 22:30:32.107256",
+  "name": "Declined",
+  "style": "",
+  "workflow_state_name": "Declined"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2026-11-25 22:31:12.939093",
+  "name": "On Hold",
+  "style": "",
+  "workflow_state_name": "On Hold"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2026-11-25 22:32:19.291643",
+  "name": "In Active",
+  "style": "",
+  "workflow_state_name": "In Active"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2026-11-25 22:34:49.023733",
+  "name": "Mark as Filled",
+  "style": "",
+  "workflow_state_name": "Mark as Filled"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2026-11-25 22:35:14.810746",
+  "name": "Cancel",
+  "style": "",
+  "workflow_state_name": "Cancel"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2026-11-25 22:35:41.905497",
+  "name": "Decline",
+  "style": "",
+  "workflow_state_name": "Decline"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2026-11-25 22:36:31.103849",
+  "name": "Put On Hold",
+  "style": "",
+  "workflow_state_name": "Put On Hold"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2026-11-25 23:39:30.707442",
+  "name": "L1 Interview Selected",
+  "style": "",
+  "workflow_state_name": "L1 Interview Selected"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2026-10-05 17:27:56.437619",
+  "name": "Open",
+  "style": "Warning",
+  "workflow_state_name": "Open"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2026-09-02 12:01:57.977085",
+  "name": "Cancelled",
+  "style": "Danger",
+  "workflow_state_name": "Cancelled"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2026-08-27 11:31:25.885108",
+  "name": "Pending Approval",
+  "style": "Warning",
+  "workflow_state_name": "Pending Approval"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
   "modified": "2026-10-12 12:26:23.824280",
   "name": "Revision",
   "style": "Primary",
@@ -273,19 +336,37 @@
   "docstatus": 0,
   "doctype": "Workflow State",
   "icon": "",
-  "modified": "2026-09-22 14:39:15.196554",
-  "name": "Presales Assessment",
-  "style": "Primary",
-  "workflow_state_name": "Presales Assessment"
+  "modified": "2026-11-20 17:55:44.184676",
+  "name": "Proposal Submitted",
+  "style": "",
+  "workflow_state_name": "Proposal Submitted"
  },
  {
   "docstatus": 0,
   "doctype": "Workflow State",
   "icon": "",
-  "modified": "2026-11-20 17:55:44.184676",
-  "name": "Proposal Submitted",
+  "modified": "2026-11-25 22:29:36.908134",
+  "name": "Filled",
   "style": "",
-  "workflow_state_name": "Proposal Submitted"
+  "workflow_state_name": "Filled"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2026-11-25 23:34:20.391985",
+  "name": "Interview Scheduled",
+  "style": "",
+  "workflow_state_name": "Interview Scheduled"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2026-11-26 00:31:32.271413",
+  "name": "Selected",
+  "style": "",
+  "workflow_state_name": "Selected"
  },
  {
   "docstatus": 0,
@@ -299,11 +380,11 @@
  {
   "docstatus": 0,
   "doctype": "Workflow State",
-  "icon": "",
-  "modified": "2026-06-11 14:37:59.665242",
-  "name": "Completed",
-  "style": "Success",
-  "workflow_state_name": "Completed"
+  "icon": "remove",
+  "modified": "2026-06-10 15:03:44.689733",
+  "name": "Rejected",
+  "style": "Danger",
+  "workflow_state_name": "Rejected"
  },
  {
   "docstatus": 0,
@@ -327,10 +408,19 @@
   "docstatus": 0,
   "doctype": "Workflow State",
   "icon": "",
-  "modified": "2026-11-13 14:34:18.560977",
-  "name": "SDC Validation",
-  "style": "Primary",
-  "workflow_state_name": "SDC Validation"
+  "modified": "2026-11-25 23:32:30.573942",
+  "name": "Associated",
+  "style": "",
+  "workflow_state_name": "Associated"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2026-11-25 23:37:19.773369",
+  "name": "L1 Interview Scheduled",
+  "style": "",
+  "workflow_state_name": "L1 Interview Scheduled"
  },
  {
   "docstatus": 0,
@@ -363,6 +453,24 @@
   "docstatus": 0,
   "doctype": "Workflow State",
   "icon": "",
+  "modified": "2026-11-13 14:34:18.560977",
+  "name": "SDC Validation",
+  "style": "Primary",
+  "workflow_state_name": "SDC Validation"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2026-09-22 14:39:15.196554",
+  "name": "Presales Assessment",
+  "style": "Primary",
+  "workflow_state_name": "Presales Assessment"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
   "modified": "2026-11-11 18:14:44.367092",
   "name": "Finance",
   "style": "Success",
@@ -376,6 +484,42 @@
   "name": "Assign FSO",
   "style": "Warning",
   "workflow_state_name": "Assign FSO"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2026-11-13 14:33:14.175473",
+  "name": "Raised",
+  "style": "Success",
+  "workflow_state_name": "Raised"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2026-11-23 15:01:38.549462",
+  "name": "In Progress",
+  "style": "Warning",
+  "workflow_state_name": "In Progress"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2026-11-24 14:33:01.488758",
+  "name": "Pending Finance",
+  "style": "Primary",
+  "workflow_state_name": "Pending Finance"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2026-06-11 14:37:59.665242",
+  "name": "Completed",
+  "style": "Success",
+  "workflow_state_name": "Completed"
  },
  {
   "docstatus": 0,
@@ -399,6 +543,33 @@
   "docstatus": 0,
   "doctype": "Workflow State",
   "icon": "",
+  "modified": "2026-11-24 14:32:01.719845",
+  "name": "Pending SDM Billing",
+  "style": "Warning",
+  "workflow_state_name": "Pending SDM Billing"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2026-11-23 16:07:03.682954",
+  "name": "Pending Sign-off",
+  "style": "Primary",
+  "workflow_state_name": "Pending Sign-off"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2026-11-23 16:13:06.936420",
+  "name": "Pending FSO Payment",
+  "style": "Warning",
+  "workflow_state_name": "Pending FSO Payment"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
   "modified": "2026-11-11 18:13:44.908867",
   "name": "FSO Payment",
   "style": "Info",
@@ -417,10 +588,10 @@
   "docstatus": 0,
   "doctype": "Workflow State",
   "icon": "",
-  "modified": "2026-11-11 18:11:25.402287",
-  "name": "FSO Process",
-  "style": "Info",
-  "workflow_state_name": "FSO Process"
+  "modified": "2026-11-23 14:31:37.542908",
+  "name": "FSO Assigned",
+  "style": "Warning",
+  "workflow_state_name": "FSO Assigned"
  },
  {
   "docstatus": 0,
@@ -435,9 +606,45 @@
   "docstatus": 0,
   "doctype": "Workflow State",
   "icon": "",
+  "modified": "2026-11-24 14:32:38.069569",
+  "name": "Pending FSO Head Approval",
+  "style": "Warning",
+  "workflow_state_name": "Pending FSO Head Approval"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2026-11-11 18:11:25.402287",
+  "name": "FSO Process",
+  "style": "Info",
+  "workflow_state_name": "FSO Process"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
   "modified": "2026-11-13 14:32:49.468727",
   "name": "To SDC",
   "style": "Warning",
   "workflow_state_name": "To SDC"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2026-11-23 18:14:16.166446",
+  "name": "Rework Required",
+  "style": "Danger",
+  "workflow_state_name": "Rework Required"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2026-11-23 15:36:44.624277",
+  "name": "Pending SDC Validation",
+  "style": "Primary",
+  "workflow_state_name": "Pending SDC Validation"
  }
 ]

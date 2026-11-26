@@ -16004,7 +16004,7 @@
   "link_to": null,
   "link_type": "DocType",
   "links": [],
-  "modified": "2026-11-20 13:07:44.575589",
+  "modified": "2026-11-24 18:15:00.324530",
   "module": "Dispatch Model",
   "name": "Dispatch",
   "number_cards": [],
@@ -16014,7 +16014,19 @@
   "restrict_to_domain": null,
   "roles": [
    {
-    "role": "Support Team"
+    "role": "Service Desk"
+   },
+   {
+    "role": "FSO"
+   },
+   {
+    "role": "SDC"
+   },
+   {
+    "role": "SDM"
+   },
+   {
+    "role": "FSO Head"
    }
   ],
   "sequence_id": 0.0,
@@ -16088,6 +16100,85 @@
   "sequence_id": 1.0,
   "shortcuts": [],
   "title": "Teceze",
+  "type": "Workspace"
+ },
+ {
+  "app": "teceze",
+  "charts": [],
+  "content": "[]",
+  "custom_blocks": [],
+  "docstatus": 0,
+  "doctype": "Workspace",
+  "external_link": null,
+  "for_user": null,
+  "hide_custom": 0,
+  "icon": null,
+  "indicator_color": "green",
+  "is_hidden": 0,
+  "label": "Engineer Portal",
+  "link_to": null,
+  "link_type": "DocType",
+  "links": [],
+  "modified": "2026-11-24 14:39:33.380038",
+  "module": "Teceze",
+  "name": "Engineer Portal",
+  "number_cards": [],
+  "parent_page": null,
+  "public": 1,
+  "quick_lists": [],
+  "restrict_to_domain": null,
+  "roles": [
+   {
+    "role": "FSO Engineer"
+   }
+  ],
+  "sequence_id": 0.0,
+  "shortcuts": [],
+  "title": "Engineer Portal",
+  "type": "Workspace"
+ },
+ {
+  "app": null,
+  "charts": [],
+  "content": "[]",
+  "custom_blocks": [],
+  "docstatus": 0,
+  "doctype": "Workspace",
+  "external_link": null,
+  "for_user": null,
+  "hide_custom": 0,
+  "icon": null,
+  "indicator_color": "green",
+  "is_hidden": 0,
+  "label": "Recruit",
+  "link_to": null,
+  "link_type": "DocType",
+  "links": [],
+  "modified": "2026-11-25 13:24:13.673616",
+  "module": null,
+  "name": "Recruit",
+  "number_cards": [],
+  "parent_page": null,
+  "public": 1,
+  "quick_lists": [],
+  "restrict_to_domain": null,
+  "roles": [
+   {
+    "role": "Recruiter"
+   },
+   {
+    "role": "Interviewer"
+   },
+   {
+    "role": "Department Head"
+   },
+   {
+    "role": "Department Manager"
+   }
+  ],
+  "sequence_id": 0.0,
+  "shortcuts": [],
+  "title": "Recruit",
   "type": "Workspace"
  }
 ]

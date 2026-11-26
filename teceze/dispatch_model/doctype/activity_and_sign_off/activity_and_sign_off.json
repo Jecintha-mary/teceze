@@ -154,7 +154,8 @@
   {
    "fieldname": "sign_off_sheet",
    "fieldtype": "Attach",
-   "label": "Sign off Sheet"
+   "label": "Sign off Sheet",
+   "mandatory_depends_on": "eval:doc.workflow_state==\"Pending Sign-off\""
   },
   {
    "fieldname": "ticket",
@@ -550,17 +551,20 @@
   },
   {
    "fieldname": "section_break_fdtg",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "hidden": 1
   },
   {
    "fieldname": "sdc",
    "fieldtype": "Data",
-   "label": "SDC"
+   "label": "SDC",
+   "read_only": 1
   },
   {
    "fieldname": "sdc_email",
    "fieldtype": "Data",
-   "label": "SDC Email"
+   "label": "SDC Email",
+   "read_only": 1
   },
   {
    "fieldname": "column_break_icjl",
@@ -569,19 +573,21 @@
   {
    "fieldname": "sdm",
    "fieldtype": "Data",
-   "label": "SDM"
+   "label": "SDM",
+   "read_only": 1
   },
   {
    "fieldname": "sdm_email",
    "fieldtype": "Data",
-   "label": "SDM Email"
+   "label": "SDM Email",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-11-24 17:07:44.527520",
+ "modified": "2026-11-26 11:24:38.043828",
  "modified_by": "Administrator",
  "module": "Dispatch Model",
  "name": "Activity And Sign-Off",

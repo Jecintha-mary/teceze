@@ -89,7 +89,7 @@ class FSOEngineerAlignment(Document):
 				ticket.workflow_state = new_state
 
 				# Record activity in Ticket
-				ticket.add_activity(previous_state=old_state)
+				#ticket.add_activity(previous_state=old_state)
 		#Engineer Rate by fso
 		if self.workflow_state=="Pending SDM Billing":
 			mandatory_fields = {
@@ -138,23 +138,15 @@ class FSOEngineerAlignment(Document):
 						"workflow_state",
 						new_state
 					)
+	def on_update(self):
+		sync_ticket(self, self.workflow_state)
 
 		
 	def send_mail_for_assign_user(self):
 		if not self.fso_assign_owner:
-			return  
-		
-	def on_update_test(self):
-		old_doc = self.get_doc_before_save()
-		
-
-		old_owner = old_doc.fso_assign_owner if old_doc else None
-		new_owner = self.fso_assign_owner
-
-		# Send email only when an FSO is newly assigned or changed
-		if new_owner and new_owner != old_owner:
-
-			subject = f"New FSO Engineer Alignment Assigned - {self.name}"
+			return 
+		else:
+			subject = f" FSO - New Ticket Has Been Assigned - {self.name}"
 
 			message = f"""
 			<div style="font-family: Arial, Helvetica, sans-serif;
@@ -176,11 +168,12 @@ class FSOEngineerAlignment(Document):
 					<div style="padding: 25px; color: #334155;
 								font-size: 14px; line-height: 1.6;">
 
-						<p>Dear FSO Owner,</p>
+						<p>Dear FSO ,</p>
 
 						<p>
-							A new FSO Engineer Alignment has been assigned to you.
-							Please review the details below and take the necessary action.
+							The ticket <strong>{self.name}</strong> has been assigned to you.
+                            Please click the <strong>View Alignment</strong> button below
+                            to open the record and begin working on it.
 						</p>
 
 						<!-- Details Heading -->
@@ -208,41 +201,6 @@ class FSOEngineerAlignment(Document):
 								</td>
 							</tr>
 
-							<tr>
-								<td style="padding: 10px 12px;
-									background-color: #f8fafc;
-									border-bottom: 1px solid #e2e8f0;">
-									<strong>Engineer Name</strong>
-								</td>
-								<td style="padding: 10px 12px;
-									border-bottom: 1px solid #e2e8f0;">
-									{self.engineer_name or ''}
-								</td>
-							</tr>
-
-							<tr>
-								<td style="padding: 10px 12px;
-									background-color: #f8fafc;
-									border-bottom: 1px solid #e2e8f0;">
-									<strong>Country</strong>
-								</td>
-								<td style="padding: 10px 12px;
-									border-bottom: 1px solid #e2e8f0;">
-									{self.country or ''}
-								</td>
-							</tr>
-
-							<tr>
-								<td style="padding: 10px 12px;
-									background-color: #f8fafc;
-									border-bottom: 1px solid #e2e8f0;">
-									<strong>Recruiter Name</strong>
-								</td>
-								<td style="padding: 10px 12px;
-									border-bottom: 1px solid #e2e8f0;">
-									{self.name or ''}
-								</td>
-							</tr>
 
 							<tr>
 								<td style="padding: 10px 12px;
@@ -252,21 +210,11 @@ class FSOEngineerAlignment(Document):
 								</td>
 								<td style="padding: 10px 12px;
 									border-bottom: 1px solid #e2e8f0;">
-									{self.fso_owner or ''}
+									{self.fso_assign_owner or ''}
 								</td>
 							</tr>
 
-							<tr>
-								<td style="padding: 10px 12px;
-									background-color: #f8fafc;
-									border-bottom: 1px solid #e2e8f0;">
-									<strong>Region</strong>
-								</td>
-								<td style="padding: 10px 12px;
-									border-bottom: 1px solid #e2e8f0;">
-									{self.region or ''}
-								</td>
-							</tr>
+							
 
 						</table>
 
@@ -477,3 +425,42 @@ def get_engineer_permission_query(user):
     return "`tabFSO Engineer Alignment`.fso_assign_owner = {}".format(
         frappe.db.escape(user)
     )
+import json
+
+def sync_ticket(doc, state):
+	if not state:
+		return
+
+	ticket_name = (
+		doc.get("ticket")
+		or doc.get("ticket_id")
+		or (
+			frappe.db.get_value("FSO Engineer Alignment", doc.fso_engineer_alignment, "ticket")
+			if doc.get("fso_engineer_alignment")
+			else None
+		)
+	)
+	if not ticket_name:
+		return
+
+	wf = frappe.db.get_value("Workflow", {"document_type": doc.doctype, "is_active": 1}, "name")
+	allowed = frappe.get_all("Workflow Document State", filters={"parent": wf}, pluck="state") if wf else []
+	if allowed and state not in allowed:
+		return
+
+	ticket = frappe.get_doc("Ticket", ticket_name)
+	last_logged_state = None
+	if ticket.activity_history:
+		try:
+			history = json.loads(ticket.activity_history)
+			if history:
+				last_logged_state = history[-1].get("new_state")
+		except (ValueError, TypeError):
+			pass
+
+	previous_state = last_logged_state or ticket.workflow_state
+	if previous_state != state:
+		if ticket.workflow_state != state:
+			frappe.db.set_value("Ticket", ticket_name, "workflow_state", state)
+			ticket.workflow_state = state
+		ticket.add_activity(previous_state=previous_state)

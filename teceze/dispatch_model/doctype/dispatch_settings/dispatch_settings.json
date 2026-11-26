@@ -8,7 +8,9 @@
  "engine": "InnoDB",
  "field_order": [
   "fso_team",
-  "fso_owner"
+  "fso_owner",
+  "column_break_sojd",
+  "fso_head"
  ],
  "fields": [
   {
@@ -21,13 +23,22 @@
    "fieldtype": "Data",
    "label": "Fso Team",
    "options": "Email"
+  },
+  {
+   "fieldname": "column_break_sojd",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "fso_head",
+   "fieldtype": "Data",
+   "label": "FSO Head"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-11-20 13:22:51.953451",
+ "modified": "2026-11-25 14:46:07.423133",
  "modified_by": "Administrator",
  "module": "Dispatch Model",
  "name": "Dispatch Settings",

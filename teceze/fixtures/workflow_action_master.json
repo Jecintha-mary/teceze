@@ -86,13 +86,6 @@
  {
   "docstatus": 0,
   "doctype": "Workflow Action Master",
-  "modified": "2026-06-10 15:03:44.700673",
-  "name": "Reject",
-  "workflow_action_name": "Reject"
- },
- {
-  "docstatus": 0,
-  "doctype": "Workflow Action Master",
   "modified": "2026-10-08 23:37:14.507601",
   "name": "Respond",
   "workflow_action_name": "Respond"
@@ -191,6 +184,62 @@
  {
   "docstatus": 0,
   "doctype": "Workflow Action Master",
+  "modified": "2026-11-23 14:10:21.716489",
+  "name": "Assign to FSO",
+  "workflow_action_name": "Assign to FSO"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow Action Master",
+  "modified": "2026-11-25 22:29:00.459851",
+  "name": "Mark as Filled",
+  "workflow_action_name": "Mark as Filled"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow Action Master",
+  "modified": "2026-11-25 22:30:18.382533",
+  "name": "Decline",
+  "workflow_action_name": "Decline"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow Action Master",
+  "modified": "2026-11-25 22:32:09.531983",
+  "name": "In Active",
+  "workflow_action_name": "In Active"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow Action Master",
+  "modified": "2026-11-25 23:32:19.534000",
+  "name": "Associate",
+  "workflow_action_name": "Associate"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow Action Master",
+  "modified": "2026-11-25 23:34:08.791035",
+  "name": "Interview Scheduled",
+  "workflow_action_name": "Interview Scheduled"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow Action Master",
+  "modified": "2026-11-25 23:37:03.535396",
+  "name": "Schedule L1",
+  "workflow_action_name": "Schedule L1"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow Action Master",
+  "modified": "2026-11-25 23:38:02.508588",
+  "name": "Schedule Interview",
+  "workflow_action_name": "Schedule Interview"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow Action Master",
   "modified": "2026-11-18 14:19:11.115892",
   "name": "Send to FSO Payment Request",
   "workflow_action_name": "Send to FSO Payment Request"
@@ -208,20 +257,6 @@
   "modified": "2026-10-12 17:06:57.097211",
   "name": "Create Sales Order",
   "workflow_action_name": "Create Sales Order"
- },
- {
-  "docstatus": 0,
-  "doctype": "Workflow Action Master",
-  "modified": "2026-06-10 15:03:44.699021",
-  "name": "Approve",
-  "workflow_action_name": "Approve"
- },
- {
-  "docstatus": 0,
-  "doctype": "Workflow Action Master",
-  "modified": "2026-11-12 12:20:51.363016",
-  "name": "Start Process",
-  "workflow_action_name": "Start Process"
  },
  {
   "docstatus": 0,
@@ -254,6 +289,48 @@
  {
   "docstatus": 0,
   "doctype": "Workflow Action Master",
+  "modified": "2026-11-23 14:15:19.309945",
+  "name": "Send for Validation",
+  "workflow_action_name": "Send for Validation"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow Action Master",
+  "modified": "2026-11-23 14:19:16.986854",
+  "name": "Sign Off",
+  "workflow_action_name": "Sign Off"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow Action Master",
+  "modified": "2026-11-23 14:21:23.161153",
+  "name": "Complete",
+  "workflow_action_name": "Complete"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow Action Master",
+  "modified": "2026-11-25 16:06:49.741061",
+  "name": "Send For Approval",
+  "workflow_action_name": "Send For Approval"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow Action Master",
+  "modified": "2026-11-25 22:31:00.897614",
+  "name": "Put On Hold",
+  "workflow_action_name": "Put On Hold"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow Action Master",
+  "modified": "2026-11-25 23:39:02.759674",
+  "name": "Select",
+  "workflow_action_name": "Select"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow Action Master",
   "modified": "2026-09-15 11:45:41.108631",
   "name": "Revoke",
   "workflow_action_name": "Revoke"
@@ -268,8 +345,36 @@
  {
   "docstatus": 0,
   "doctype": "Workflow Action Master",
+  "modified": "2026-11-23 14:17:38.112720",
+  "name": "Resubmit",
+  "workflow_action_name": "Resubmit"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow Action Master",
+  "modified": "2026-06-10 15:03:44.699021",
+  "name": "Approve",
+  "workflow_action_name": "Approve"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow Action Master",
   "modified": "2026-11-12 12:21:43.547618",
   "name": "Send for Billing",
   "workflow_action_name": "Send for Billing"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow Action Master",
+  "modified": "2026-11-12 12:20:51.363016",
+  "name": "Start Process",
+  "workflow_action_name": "Start Process"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow Action Master",
+  "modified": "2026-06-10 15:03:44.700673",
+  "name": "Reject",
+  "workflow_action_name": "Reject"
  }
 ]

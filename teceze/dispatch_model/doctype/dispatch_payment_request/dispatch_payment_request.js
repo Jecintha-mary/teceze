@@ -4,6 +4,14 @@
 
 frappe.ui.form.on("Dispatch Payment Request", {
 
+    setup(frm) {
+        add_margin_styles();
+    },
+
+    refresh(frm) {
+        apply_margin_style(frm);
+    },
+
     billing_cost(frm) {
         calculate_billing_total(frm);
     },
@@ -15,52 +23,92 @@ frappe.ui.form.on("Dispatch Payment Request", {
     ot_cost(frm) {
         calculate_billing_total(frm);
     },
-
-
+    billing_currency(frm){
+        calculate_billing_total(frm);
+    },
 });
 
-function calculate_billing_total(frm) {
+// -----------------------------------------------------------------
+// Calculation
+// -----------------------------------------------------------------
+function get_margin_data(frm) {
+    const bill_cost = flt(frm.doc.billing_cost);
+    const travel_cost = flt(frm.doc.tot_cost);
+    const ot_cost = flt(frm.doc.ot_cost);
+    const engineer_cost = flt(frm.doc.engineer_total);
 
-    // 1. Get input values
-    let bill_cost = flt(frm.doc.billing_cost);
-    let travel_cost = flt(frm.doc.tot_cost);
-    let ot_cost = flt(frm.doc.ot_cost);
-    let engineer_cost = flt(frm.doc.engineer_total);
-
-    // 2. Calculate billing and margin
-    let billing_total = bill_cost + travel_cost + ot_cost;
-    let margin_value = billing_total - engineer_cost;
-
-    // 3. Calculate margin percentage
-    let margin_percentage = billing_total > 0
+    const billing_total = bill_cost + travel_cost + ot_cost;
+    const margin_value = billing_total - engineer_cost;
+    const margin_percentage = billing_total > 0
         ? (margin_value / billing_total) * 100
         : 0;
 
-    // 4. Get currency
-    let currency = frm.doc.billing_currency || "AED";
+    const currency = frm.doc.billing_currency || "AED";
 
-    // 5. Set margin color
-    let margin_color = margin_value > 0 ? "#198754" :
-                       margin_value < 0 ? "#dc3545" :
-                       "#f0ad4e";
-
-    // 6. Prepare margin message
-    let margin_text = 
+    const margin_text =
         `Margin ${format_currency(margin_value, currency)} ` +
-        `${margin_percentage.toFixed(1)}% of billing. ` +
+        `(${margin_percentage.toFixed(1)}% of billing). ` +
         `Engineer cost ${format_currency(engineer_cost, currency)}`;
 
-    // 7. Update form fields
-    frm.set_value("billing_total", billing_total);
-    frm.set_value("margin", margin_text);
+    return { billing_total, margin_value, margin_text };
+}
 
-    // 8. Apply margin styling
-    if (frm.fields_dict.margin && frm.fields_dict.margin.$input) {
-        frm.fields_dict.margin.$input.css({
-            "color": margin_color,
-            "font-weight": "bold",
-            "font-size": "15px"
-        });
-    }
+function calculate_billing_total(frm) {
+    const data = get_margin_data(frm);
 
+    frm.set_value("billing_total", data.billing_total)
+        .then(() => frm.set_value("margin", data.margin_text))
+        .then(() => apply_margin_style(frm));
+}
+
+// -----------------------------------------------------------------
+// Styling
+// -----------------------------------------------------------------
+function apply_margin_style(frm) {
+    const field = frm.fields_dict.margin;
+    if (!field || !field.$wrapper) return;
+
+    const { margin_value } = get_margin_data(frm);
+
+    const css_class = margin_value > 0 ? "margin-positive"
+                    : margin_value < 0 ? "margin-negative"
+                    : "margin-zero";
+
+    field.$wrapper
+        .removeClass("margin-positive margin-negative margin-zero")
+        .addClass(`margin-field ${css_class}`);
+}
+
+function add_margin_styles() {
+    if (document.getElementById("dispatch-margin-styles")) return;
+
+    const style = document.createElement("style");
+    style.id = "dispatch-margin-styles";
+    style.textContent = `
+        .margin-field textarea,
+        .margin-field .control-value,
+        .margin-field .like-disabled-input {
+            font-weight: bold !important;
+            font-size: 15px !important;
+        }
+
+        .margin-positive textarea,
+        .margin-positive .control-value,
+        .margin-positive .like-disabled-input {
+            color: #198754 !important;
+        }
+
+        .margin-negative textarea,
+        .margin-negative .control-value,
+        .margin-negative .like-disabled-input {
+            color: #dc3545 !important;
+        }
+
+        .margin-zero textarea,
+        .margin-zero .control-value,
+        .margin-zero .like-disabled-input {
+            color: #f0ad4e !important;
+        }
+    `;
+    document.head.appendChild(style);
 }

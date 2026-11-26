@@ -11,7 +11,79 @@
   "is_standard": "Yes",
   "javascript": null,
   "json": null,
-  "letter_head": "",
+  "letter_head": null,
+  "modified": "2026-11-12 15:23:06.037748",
+  "module": "Teceze",
+  "name": "Leave Encashment Report",
+  "prepared_report": 0,
+  "query": null,
+  "ref_doctype": "Leave Encashment",
+  "reference_report": null,
+  "report_name": "Leave Encashment Report",
+  "report_script": null,
+  "report_type": "Script Report",
+  "roles": [
+   {
+    "role": "System Manager"
+   },
+   {
+    "role": "HR Manager"
+   },
+   {
+    "role": "HR User"
+   }
+  ],
+  "timeout": 0
+ },
+ {
+  "add_total_row": 0,
+  "add_translate_data": 0,
+  "columns": [],
+  "disable_prepared_report_automation": 0,
+  "disabled": 0,
+  "docstatus": 0,
+  "doctype": "Report",
+  "filters": [],
+  "is_standard": "Yes",
+  "javascript": null,
+  "json": null,
+  "letter_head": null,
+  "modified": "2026-11-11 16:46:00.203052",
+  "module": "Teceze",
+  "name": "Raised Concerns Report",
+  "prepared_report": 0,
+  "query": null,
+  "ref_doctype": "Issue",
+  "reference_report": null,
+  "report_name": "Raised Concerns Report",
+  "report_script": null,
+  "report_type": "Script Report",
+  "roles": [
+   {
+    "role": "HR Manager"
+   },
+   {
+    "role": "HR User"
+   },
+   {
+    "role": "System Manager"
+   }
+  ],
+  "timeout": 0
+ },
+ {
+  "add_total_row": 0,
+  "add_translate_data": 0,
+  "columns": [],
+  "disable_prepared_report_automation": 0,
+  "disabled": 0,
+  "docstatus": 0,
+  "doctype": "Report",
+  "filters": [],
+  "is_standard": "Yes",
+  "javascript": null,
+  "json": null,
+  "letter_head": null,
   "modified": "2017-07-13 17:14:40.408706",
   "module": "Support",
   "name": "Support Hour Distribution",

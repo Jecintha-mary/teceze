@@ -3,7 +3,7 @@ const TABLE = "bank_details";
 const load_meta = (dt) => new Promise((resolve) => frappe.model.with_doctype(dt, resolve));
 
 frappe.ui.form.on("FSO Engineer Alignment", {
-	refresh: (frm) => load_banks(frm, true),
+	// refresh: (frm) => load_banks(frm, true),
 	engineer_name: (frm) => load_banks(frm, false),
 
 	bank_account(frm) {
@@ -12,7 +12,6 @@ frappe.ui.form.on("FSO Engineer Alignment", {
 	},
 	eng_cost(frm) {
         calculate_billing_total(frm);
-        console.log("Call")
     },
 
     other_cost(frm) {

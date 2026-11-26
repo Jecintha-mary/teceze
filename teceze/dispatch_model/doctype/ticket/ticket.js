@@ -111,93 +111,6 @@ frappe.ui.form.on("Ticket", {
 
 });
 
-function render_activity_log(frm) {
-    const wrapper = frm.fields_dict.activity_log_html?.$wrapper;
-    if (!wrapper) return;
-
-    frappe.call({
-        method: "teceze.dispatch_model.doctype.ticket.ticket.get_ticket_activity_log",
-        args: { ticket_name: frm.doc.name },
-        callback(r) {
-            if (!r.message) return;
-            const { workflow_states = [], activities = [], current_state } = r.message;
-            const escape = (v) => frappe.utils.escape_html(String(v || ""));
-
-            const visited = new Set(activities.map(a => a.new_state).filter(Boolean));
-            if (current_state) visited.add(current_state);
-
-            // 1. Workflow Stepper HTML
-            let workflowHTML = "";
-            workflow_states.forEach((state, i) => {
-                const isCurrent = state === current_state;
-                const isDone = visited.has(state) && !isCurrent;
-                const lineDone = i > 0 && visited.has(state);
-
-                workflowHTML += `
-                    <div style="flex:1; text-align:center;">
-                        <div style="display:flex; align-items:center;">
-                            <div style="flex:1; height:2px; background:${i === 0 ? 'transparent' : (lineDone ? '#16a34a' : 'var(--border-color)')}"></div>
-                            <div style="width:30px; height:30px; border-radius:50%; background:${isCurrent ? '#2563eb' : (isDone ? '#dcfce7' : 'var(--subtle-fg)')}; color:${isCurrent ? '#fff' : (isDone ? '#16a34a' : 'var(--text-muted)')}; display:flex; align-items:center; justify-content:center; margin:0 4px; font-size:13px; font-weight:600;">
-                                ${isDone ? '✓' : (i + 1)}
-                            </div>
-                            <div style="flex:1; height:2px; background:${i === workflow_states.length - 1 ? 'transparent' : 'var(--border-color)'}"></div>
-                        </div>
-                        <div style="font-size:11px; font-weight:600; margin-top:6px; color:${isCurrent ? '#2563eb' : 'var(--text-color)'}">${escape(state)}</div>
-                    </div>
-                `;
-            });
-
-            // 2. Activity History HTML (No background fill, clean border separators)
-            let activityHTML = "";
-            activities.forEach((act) => {
-                const user = escape(act.user_name || act.user || "System");
-                const time = act.creation ? frappe.datetime.str_to_user(act.creation) : "";
-                
-                const oldState = act.old_state;
-                const newState = act.new_state;
-                const workflowTransition = (oldState && newState) 
-                    ? `${escape(oldState)} &rarr; ${escape(newState)}` 
-                    : (newState ? escape(newState) : "Workflow Updated");
-
-                const isDone = newState !== current_state;
-
-                activityHTML += `
-                    <div style="display:flex; justify-content:space-between; align-items:center; padding:12px 4px; border-bottom:1px solid var(--border-color);">
-                        <div>
-                            <div style="font-weight:600; font-size:13px; color:var(--heading-color); display:flex; align-items:center; gap:8px;">
-                                <span>${workflowTransition}</span>
-                            </div>
-                            <div style="font-size:11px; color:var(--text-muted); margin-top:4px; display:flex; gap:14px;">
-                                <span>👤 ${user}</span>
-                                <span>🕒 ${time}</span>
-                            </div>
-                        </div>
-                        <span style="font-size:10px; font-weight:600; padding:3px 10px; border-radius:12px; background:${isDone ? '#dcfce7' : '#dbeafe'}; color:${isDone ? '#15803d' : '#1d4ed8'};">
-                            ${isDone ? '✓ Completed' : 'In Progress'}
-                        </span>
-                    </div>
-                `;
-            });
-
-            // 3. Render Final Component
-            wrapper.html(`
-                <div style="background:var(--card-bg); border:1px solid var(--border-color); border-radius:10px; padding:18px; font-family:var(--font-stack);">
-                    <div style="font-weight:600; font-size:14px; margin-bottom:16px; color:var(--heading-color); display:flex; align-items:center; gap:8px;">
-                        <span>📌</span> Ticket Status TimeLine
-                    </div>
-                    <div style="display:flex; align-items:center; margin-bottom:24px;">${workflowHTML}</div>
-                    
-                    <div style="font-weight:600; font-size:12px; margin-bottom:4px; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.04em;">
-                        Activity History
-                    </div>
-                    <div>${activityHTML || '<div style="color:var(--text-muted); padding:10px 0;">No activity recorded yet.</div>'}</div>
-                </div>
-            `);
-        }
-    });
-}
-
-
 function toggle_other_tools(frm) {
     let tools = frm.doc.tools_required || [];
 
@@ -211,4 +124,130 @@ function toggle_other_tools(frm) {
     if (!show_other) {
         frm.set_value("others", "");
     }
+}
+function render_activity_log(frm) {
+	const wrapper = frm.fields_dict.activity_log_html?.$wrapper;
+	if (!wrapper) return;
+
+	if (!frm.doc.name || frm.doc.__islocal) {
+		wrapper.html(`
+			<div style="padding:18px;color:#64748b;font-size:13px;background:#ffffff;border:1px solid #e5e7eb;border-radius:8px;">
+				Save the ticket to view activity history.
+			</div>
+		`);
+		return;
+	}
+
+	const palette = {
+		"Raised": { text: "#4E4780", dot: "#4E4780" },
+		"FSO Assigned": { text: "#365A7E", dot: "#365A7E" },
+		"In Progress": { text: "#7C5330", dot: "#7C5330" },
+		"Pending SDC Validation": { text: "#2F6360", dot: "#2F6360" },
+		"Rework Required": { text: "#84434F", dot: "#84434F" },
+		"Pending Sign-off": { text: "#6E4673", dot: "#6E4673" },
+		"Pending FSO Payment": { text: "#2F5F70", dot: "#2F5F70" },
+		"Pending SDM Billing": { text: "#695A24", dot: "#695A24" },
+		"Pending FSO Head Approval": { text: "#7F4A39", dot: "#7F4A39" },
+		"Pending Finance": { text: "#475469", dot: "#475469" },
+		"Completed": { text: "#3A6445", dot: "#3A6445" }
+	};
+
+	const fallback = { text: "#334155", dot: "#64748b" };
+
+	const get_initials = (name) => {
+		const parts = (name || "U").trim().split(/\s+/);
+		return parts.length === 1
+			? parts[0].slice(0, 2).toUpperCase()
+			: (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+	};
+
+	const format_ts = (ts) => {
+		if (!ts) return "";
+		const m = String(ts).match(/^(\d{4})-(\d{2})-(\d{2})[ T](\d{2}:\d{2}:\d{2})/);
+		return m ? `${m[3]}-${m[2]}-${m[1]} ${m[4]}` : frappe.utils.escape_html(ts);
+	};
+
+	frappe.call({
+		method: "teceze.dispatch_model.doctype.ticket.ticket.get_ticket_activity_log",
+		args: { ticket_name: frm.doc.name },
+		callback: (r) => {
+			const activities = (r.message && r.message.activities) || [];
+
+			if (!activities.length) {
+				wrapper.html(`
+					<div style="padding:20px;color:#64748b;font-size:13px;background:#ffffff;border:1px solid #e5e7eb;border-radius:8px;">
+						No workflow activity recorded yet.
+					</div>
+				`);
+				return;
+			}
+
+			const rowsHtml = activities.map((item, idx) => {
+				const oldState = item.old_state || "";
+				const newState = item.new_state || "";
+				const theme = palette[newState] || fallback;
+				const userName = item.user_name || item.user || "User";
+				const initials = get_initials(userName);
+				const isLast = idx === activities.length - 1;
+				const isFirst = idx === 0;
+
+				const titleHtml = oldState
+					? `<span style="display:inline-flex;align-items:center;gap:8px;flex-wrap:wrap;line-height:1.4;">
+						<span style="color:#64748b;font-size:13.5px;font-weight:500;">
+							${frappe.utils.escape_html(oldState)}
+						</span>
+						<span style="color:#94a3b8;font-size:13px;font-weight:500;">→</span>
+						<span style="color:${theme.text};font-size:14px;font-weight:700;">
+							${frappe.utils.escape_html(newState)}
+						</span>
+					</span>`
+					: `<span style="color:${theme.text};font-size:14px;font-weight:700;line-height:1.4;">
+						${frappe.utils.escape_html(newState)}
+					</span>`;
+
+				return `
+					<div style="display:grid;grid-template-columns:28px 1fr;gap:12px;position:relative;">
+						<!-- Left rail & hollow status ring -->
+						<div style="display:flex;flex-direction:column;align-items:center;position:relative;">
+							${!isFirst ? `<div style="width:1.5px;height:14px;background:#e2e8f0;"></div>` : `<div style="height:14px;"></div>`}
+							<span style="width:10px;height:10px;border-radius:50%;border:2px solid ${theme.dot};background:#ffffff;flex-shrink:0;z-index:1;"></span>
+							${!isLast ? `<div style="width:1.5px;flex:1;background:#e2e8f0;min-height:48px;"></div>` : ``}
+						</div>
+
+						<!-- Right content block -->
+						<div style="padding:10px 4px 16px 0;${!isLast ? "border-bottom:1px solid #f1f5f9;" : "padding-bottom:6px;"}">
+							<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:10px;">
+								<div>${titleHtml}</div>
+								<div style="font-size:12.5px;color:#64748b;white-space:nowrap;font-variant-numeric:tabular-nums;">
+									${format_ts(item.creation)}
+								</div>
+							</div>
+
+							<div style="display:flex;justify-content:space-between;align-items:center;gap:12px;">
+								<div style="display:flex;align-items:center;gap:10px;">
+									<span style="width:26px;height:26px;border-radius:50%;background:#f8fafc;border:1px solid #cbd5e1;color:#475569;font-size:11px;font-weight:600;display:inline-flex;align-items:center;justify-content:center;">
+										${frappe.utils.escape_html(initials)}
+									</span>
+									<span style="font-size:13px;color:#334155;font-weight:500;">
+										${frappe.utils.escape_html(userName)}
+									</span>
+								</div>
+
+								<span style="font-size:12.5px;color:#15803d;font-weight:600;display:inline-flex;align-items:center;gap:4px;white-space:nowrap;">
+									<span>✓</span>
+									<span>Completed</span>
+								</span>
+							</div>
+						</div>
+					</div>
+				`;
+			}).join("");
+
+			wrapper.html(`
+				<div style="background:#ffffff;border:1px solid #e5e7eb;border-radius:10px;padding:12px 18px;">
+					${rowsHtml}
+				</div>
+			`);
+		}
+	});
 }

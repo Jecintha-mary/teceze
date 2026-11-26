@@ -3,6 +3,7 @@
 
 import frappe
 from frappe.model.document import Document
+from teceze.dispatch_model.doctype.fso_engineer_alignment.fso_engineer_alignment import sync_ticket
 allowed_states = [
     "Pending SDC Validation",
     "Rework Required",
@@ -10,11 +11,14 @@ allowed_states = [
     "Pending FSO Payment",
     "Pending SDM Billing",
     "Pending FSO Head Approval",
-    "Pending Finance"
+    "Pending Finance",
+    "Completed"
 ]
 
 class ActivityAndSignOff(Document):
 	def validate(self):
+		if self.workflow_state == "Rework Required":
+			self.send_rework_mail()
 		if self.workflow_state == "Pending FSO Payment":
 			self.update_visit_details()
 		if self.workflow_state == "Rework Required":
@@ -25,7 +29,6 @@ class ActivityAndSignOff(Document):
 									self.add_discussion_note
 								)
 			frappe.db.commit()
-		#if self.workflow_state == "Pending Sign-off":
 		if self.workflow_state == "Pending FSO Payment":
 			mandatory_fields = {
 			"activity_date": "Activity Date",
@@ -34,7 +37,8 @@ class ActivityAndSignOff(Document):
 			"work_performed": "Work Performed",
 			"outcome": "Outcome",
 			"sign_off": "Signed Off By (Client)",
-			#"sign_off_sheet": "Sign-off Sheet"
+			"sign_off_sheet": "Sign off Sheet",
+			
 			}
 
 			missing_fields = [
@@ -103,342 +107,312 @@ class ActivityAndSignOff(Document):
 			update_modified=True
 			)
 	def on_update(self):
-		old_doc = self.get_doc_before_save()
-
-		old_state = old_doc.workflow_state if old_doc else None
-		new_state = self.workflow_state
-
+		sync_ticket(self, self.workflow_state)
+	def send_rework_mail(self):
 		# Send email only when workflow changes to Send Back to FSO
-		if new_state == "Send Back to FSO" and old_state != new_state:
-
-			# Get linked FSO Engineer Alignment
 			if not self.fso_engineer_alignment:
 				return
+			else:
 
-			alignment = frappe.get_doc(
-				"Rework Required",
-				self.fso_engineer_alignment
-			)
+				# Remove duplicate email addresses
+				recipients = self.fso_assign_owner
 
-			# Get FSO recipients
-			recipients = []
+				if not recipients:
+					frappe.log_error(
+						"No valid FSO email addresses found",
+						"Send Back to FSO Email"
+					)
+					return
 
-			# FSO Owner
-			fso_owner = alignment.fso_owner
-			if fso_owner and frappe.utils.validate_email_address(fso_owner):
-				recipients.append(fso_owner)
+				subject = f"Activity And Sign-Off Sent Back for FSO Review - {self.name}"
 
-			# FSO Assign Owner
-			fso_assign_owner = alignment.fso_assign_owner
-			if fso_assign_owner:
-				assign_email = frappe.db.get_value(
-					"FSO User",
-					fso_assign_owner,
-					"user_id"
-				)
+				message = f"""
+				<div style="font-family: Arial, Helvetica, sans-serif;
+							background-color: #f5f7fa; padding: 30px 15px;">
 
-				if assign_email and frappe.utils.validate_email_address(assign_email):
-					recipients.append(assign_email)
+					<div style="max-width: 650px; margin: 0 auto;
+								background-color: #ffffff;
+								border: 1px solid #e2e8f0;
+								border-radius: 8px; overflow: hidden;">
 
-			# Remove duplicate email addresses
-			recipients = list(set(recipients))
-
-			if not recipients:
-				frappe.log_error(
-					"No valid FSO email addresses found",
-					"Send Back to FSO Email"
-				)
-				return
-
-			subject = f"Activity And Sign-Off Sent Back for Review - {self.name}"
-
-			message = f"""
-			<div style="font-family: Arial, Helvetica, sans-serif;
-						background-color: #f5f7fa; padding: 30px 15px;">
-
-				<div style="max-width: 650px; margin: 0 auto;
-							background-color: #ffffff;
-							border: 1px solid #e2e8f0;
-							border-radius: 8px; overflow: hidden;">
-
-					<!-- Header -->
-					<div style="background-color: #12344d; padding: 20px 25px;">
-						<h2 style="margin: 0; color: #ffffff; font-size: 20px;">
-							Activity And Sign-Off Sent Back for Review
-						</h2>
-					</div>
-
-					<!-- Body -->
-					<div style="padding: 25px; color: #334155;
-								font-size: 14px; line-height: 1.6;">
-
-						<p>Dear FSO Team,</p>
-
-						<p>
-							The following Activity And Sign-Off has been sent back
-							to the FSO team for review and necessary action.
-						</p>
-
-						<div style="background-color: #eef6f8;
-									border-left: 4px solid #168aad;
-									padding: 10px 14px; margin: 22px 0 12px;">
-							<strong style="color: #12344d; font-size: 15px;">
-								Ticket Details
-							</strong>
+						<!-- Header -->
+						<div style="background-color: #12344d; padding: 20px 25px;">
+							<h2 style="margin: 0; color: #ffffff; font-size: 20px;">
+								Activity And Sign-Off Sent Back for Review
+							</h2>
 						</div>
 
-						<table style="width: 100%; border-collapse: collapse;
-									font-size: 14px; margin-bottom: 22px;">
+						<!-- Body -->
+						<div style="padding: 25px; color: #334155;
+									font-size: 14px; line-height: 1.6;">
 
-							<tr>
-								<td width="40%" style="padding: 10px 12px;
-									background-color: #f8fafc;
-									border-bottom: 1px solid #e2e8f0;">
-									<strong>Activity ID</strong>
-								</td>
-								<td style="padding: 10px 12px;
-									border-bottom: 1px solid #e2e8f0;">
-									{self.name}
-								</td>
-							</tr>
+							<p>Dear FSO Team,</p>
 
-							<tr>
-								<td style="padding: 10px 12px;
-									background-color: #f8fafc;
-									border-bottom: 1px solid #e2e8f0;">
-									<strong>Ticket ID</strong>
-								</td>
-								<td style="padding: 10px 12px;
-									border-bottom: 1px solid #e2e8f0;">
-									{self.ticket or ''}
-								</td>
-							</tr>
+							<p>
+								The following Activity And Sign-Off has been sent back
+								to the FSO team for review and necessary action.
+							</p>
 
-							<tr>
-								<td style="padding: 10px 12px;
-									background-color: #f8fafc;
-									border-bottom: 1px solid #e2e8f0;">
-									<strong>Category</strong>
-								</td>
-								<td style="padding: 10px 12px;
-									border-bottom: 1px solid #e2e8f0;">
-									{self.category or ''}
-								</td>
-							</tr>
+							<div style="background-color: #eef6f8;
+										border-left: 4px solid #168aad;
+										padding: 10px 14px; margin: 22px 0 12px;">
+								<strong style="color: #12344d; font-size: 15px;">
+									Ticket Details
+								</strong>
+							</div>
 
-							<tr>
-								<td style="padding: 10px 12px;
-									background-color: #f8fafc;
-									border-bottom: 1px solid #e2e8f0;">
-									<strong>Activity</strong>
-								</td>
-								<td style="padding: 10px 12px;
-									border-bottom: 1px solid #e2e8f0;">
-									{self.activity or ''}
-								</td>
-							</tr>
+							<table style="width: 100%; border-collapse: collapse;
+										font-size: 14px; margin-bottom: 22px;">
 
-							<tr>
-								<td style="padding: 10px 12px;
-									background-color: #f8fafc;
-									border-bottom: 1px solid #e2e8f0;">
-									<strong>Service Level</strong>
-								</td>
-								<td style="padding: 10px 12px;
-									border-bottom: 1px solid #e2e8f0;">
-									{self.service_level or ''}
-								</td>
-							</tr>
+								<tr>
+									<td width="40%" style="padding: 10px 12px;
+										background-color: #f8fafc;
+										border-bottom: 1px solid #e2e8f0;">
+										<strong>Activity ID</strong>
+									</td>
+									<td style="padding: 10px 12px;
+										border-bottom: 1px solid #e2e8f0;">
+										{self.name}
+									</td>
+								</tr>
 
-							<tr>
-								<td style="padding: 10px 12px;
-									background-color: #f8fafc;
-									border-bottom: 1px solid #e2e8f0;">
-									<strong>Activity Date</strong>
-								</td>
-								<td style="padding: 10px 12px;
-									border-bottom: 1px solid #e2e8f0;">
-									{self.activity_date or ''}
-								</td>
-							</tr>
+								<tr>
+									<td style="padding: 10px 12px;
+										background-color: #f8fafc;
+										border-bottom: 1px solid #e2e8f0;">
+										<strong>Ticket ID</strong>
+									</td>
+									<td style="padding: 10px 12px;
+										border-bottom: 1px solid #e2e8f0;">
+										{self.ticket or ''}
+									</td>
+								</tr>
 
-						</table>
+								<tr>
+									<td style="padding: 10px 12px;
+										background-color: #f8fafc;
+										border-bottom: 1px solid #e2e8f0;">
+										<strong>Category</strong>
+									</td>
+									<td style="padding: 10px 12px;
+										border-bottom: 1px solid #e2e8f0;">
+										{self.category or ''}
+									</td>
+								</tr>
 
-						<div style="background-color: #eef6f8;
-									border-left: 4px solid #168aad;
-									padding: 10px 14px; margin: 22px 0 12px;">
-							<strong style="color: #12344d; font-size: 15px;">
-								Engineer Details
-							</strong>
+								<tr>
+									<td style="padding: 10px 12px;
+										background-color: #f8fafc;
+										border-bottom: 1px solid #e2e8f0;">
+										<strong>Activity</strong>
+									</td>
+									<td style="padding: 10px 12px;
+										border-bottom: 1px solid #e2e8f0;">
+										{self.activity or ''}
+									</td>
+								</tr>
+
+								<tr>
+									<td style="padding: 10px 12px;
+										background-color: #f8fafc;
+										border-bottom: 1px solid #e2e8f0;">
+										<strong>Service Level</strong>
+									</td>
+									<td style="padding: 10px 12px;
+										border-bottom: 1px solid #e2e8f0;">
+										{self.service_level or ''}
+									</td>
+								</tr>
+
+								<tr>
+									<td style="padding: 10px 12px;
+										background-color: #f8fafc;
+										border-bottom: 1px solid #e2e8f0;">
+										<strong>Activity Date</strong>
+									</td>
+									<td style="padding: 10px 12px;
+										border-bottom: 1px solid #e2e8f0;">
+										{self.activity_date or ''}
+									</td>
+								</tr>
+
+							</table>
+
+							<div style="background-color: #eef6f8;
+										border-left: 4px solid #168aad;
+										padding: 10px 14px; margin: 22px 0 12px;">
+								<strong style="color: #12344d; font-size: 15px;">
+									Engineer Details
+								</strong>
+							</div>
+
+							<table style="width: 100%; border-collapse: collapse;
+										font-size: 14px; margin-bottom: 22px;">
+
+								<tr>
+									<td width="40%" style="padding: 10px 12px;
+										background-color: #f8fafc;
+										border-bottom: 1px solid #e2e8f0;">
+										<strong>Engineer Name</strong>
+									</td>
+									<td style="padding: 10px 12px;
+										border-bottom: 1px solid #e2e8f0;">
+										{self.engineer_name or ''}
+									</td>
+								</tr>
+
+								<tr>
+									<td style="padding: 10px 12px;
+										background-color: #f8fafc;
+										border-bottom: 1px solid #e2e8f0;">
+										<strong>Engineer Email</strong>
+									</td>
+									<td style="padding: 10px 12px;
+										border-bottom: 1px solid #e2e8f0;">
+										{self.engineer_email or ''}
+									</td>
+								</tr>
+
+								<tr>
+									<td style="padding: 10px 12px;
+										background-color: #f8fafc;
+										border-bottom: 1px solid #e2e8f0;">
+										<strong>Engineer Contact</strong>
+									</td>
+									<td style="padding: 10px 12px;
+										border-bottom: 1px solid #e2e8f0;">
+										{self.engineer_contact or ''}
+									</td>
+								</tr>
+
+								<tr>
+									<td style="padding: 10px 12px;
+										background-color: #f8fafc;
+										border-bottom: 1px solid #e2e8f0;">
+										<strong>Country</strong>
+									</td>
+									<td style="padding: 10px 12px;
+										border-bottom: 1px solid #e2e8f0;">
+										{self.country or ''}
+									</td>
+								</tr>
+
+								<tr>
+									<td style="padding: 10px 12px;
+										background-color: #f8fafc;
+										border-bottom: 1px solid #e2e8f0;">
+										<strong>FSO Owner</strong>
+									</td>
+									<td style="padding: 10px 12px;
+										border-bottom: 1px solid #e2e8f0;">
+										{self.fso_owner or ''}
+									</td>
+								</tr>
+
+								<tr>
+									<td style="padding: 10px 12px;
+										background-color: #f8fafc;
+										border-bottom: 1px solid #e2e8f0;">
+										<strong>Region</strong>
+									</td>
+									<td style="padding: 10px 12px;
+										border-bottom: 1px solid #e2e8f0;">
+										{self.region or ''}
+									</td>
+								</tr>
+
+							</table>
+
+							<div style="background-color: #eef6f8;
+										border-left: 4px solid #168aad;
+										padding: 10px 14px; margin: 22px 0 12px;">
+								<strong style="color: #12344d; font-size: 15px;">
+									Visit Schedule
+								</strong>
+							</div>
+
+							<table style="width: 100%; border-collapse: collapse;
+										font-size: 14px; margin-bottom: 22px;">
+
+								<tr>
+									<td width="40%" style="padding: 10px 12px;
+										background-color: #f8fafc;
+										border-bottom: 1px solid #e2e8f0;">
+										<strong>Scheduled Date</strong>
+									</td>
+									<td style="padding: 10px 12px;
+										border-bottom: 1px solid #e2e8f0;">
+										{self.scheduled_date or ''}
+									</td>
+								</tr>
+
+								<tr>
+									<td style="padding: 10px 12px;
+										background-color: #f8fafc;
+										border-bottom: 1px solid #e2e8f0;">
+										<strong>Location</strong>
+									</td>
+									<td style="padding: 10px 12px;
+										border-bottom: 1px solid #e2e8f0;">
+										{self.location or ''}
+									</td>
+								</tr>
+
+							</table>
+
+							<p>
+								Please review the ticket and engineer details,
+								check the activity information, and take the necessary
+								action before sending it back for review.
+							</p>
+
+							<div style="text-align: center; margin: 25px 0;">
+								<a href="{frappe.utils.get_url_to_form(self.doctype, self.name)}"
+								style="display: inline-block;
+										background-color: #168aad;
+										color: #ffffff;
+										text-decoration: none;
+										padding: 12px 24px;
+										border-radius: 5px;
+										font-size: 14px;
+										font-weight: 600;">
+									View Activity And Sign-Off
+								</a>
+							</div>
+
+							<p style="margin-bottom: 0;">
+								Regards,<br>
+								<strong style="color: #12344d;">
+									Teceze Dispatch Team
+								</strong><br>
+								<span style="color: #94a3b8; font-size: 12px;">
+									TECEZE Portal
+								</span>
+							</p>
+
 						</div>
 
-						<table style="width: 100%; border-collapse: collapse;
-									font-size: 14px; margin-bottom: 22px;">
-
-							<tr>
-								<td width="40%" style="padding: 10px 12px;
-									background-color: #f8fafc;
-									border-bottom: 1px solid #e2e8f0;">
-									<strong>Engineer Name</strong>
-								</td>
-								<td style="padding: 10px 12px;
-									border-bottom: 1px solid #e2e8f0;">
-									{alignment.engineer_name or ''}
-								</td>
-							</tr>
-
-							<tr>
-								<td style="padding: 10px 12px;
-									background-color: #f8fafc;
-									border-bottom: 1px solid #e2e8f0;">
-									<strong>Engineer Email</strong>
-								</td>
-								<td style="padding: 10px 12px;
-									border-bottom: 1px solid #e2e8f0;">
-									{alignment.engineer_email or ''}
-								</td>
-							</tr>
-
-							<tr>
-								<td style="padding: 10px 12px;
-									background-color: #f8fafc;
-									border-bottom: 1px solid #e2e8f0;">
-									<strong>Engineer Contact</strong>
-								</td>
-								<td style="padding: 10px 12px;
-									border-bottom: 1px solid #e2e8f0;">
-									{alignment.engineer_contact or ''}
-								</td>
-							</tr>
-
-							<tr>
-								<td style="padding: 10px 12px;
-									background-color: #f8fafc;
-									border-bottom: 1px solid #e2e8f0;">
-									<strong>Country</strong>
-								</td>
-								<td style="padding: 10px 12px;
-									border-bottom: 1px solid #e2e8f0;">
-									{alignment.country or ''}
-								</td>
-							</tr>
-
-							<tr>
-								<td style="padding: 10px 12px;
-									background-color: #f8fafc;
-									border-bottom: 1px solid #e2e8f0;">
-									<strong>FSO Owner</strong>
-								</td>
-								<td style="padding: 10px 12px;
-									border-bottom: 1px solid #e2e8f0;">
-									{alignment.fso_owner or ''}
-								</td>
-							</tr>
-
-							<tr>
-								<td style="padding: 10px 12px;
-									background-color: #f8fafc;
-									border-bottom: 1px solid #e2e8f0;">
-									<strong>Region</strong>
-								</td>
-								<td style="padding: 10px 12px;
-									border-bottom: 1px solid #e2e8f0;">
-									{alignment.region or ''}
-								</td>
-							</tr>
-
-						</table>
-
-						<div style="background-color: #eef6f8;
-									border-left: 4px solid #168aad;
-									padding: 10px 14px; margin: 22px 0 12px;">
-							<strong style="color: #12344d; font-size: 15px;">
-								Visit Schedule
-							</strong>
-						</div>
-
-						<table style="width: 100%; border-collapse: collapse;
-									font-size: 14px; margin-bottom: 22px;">
-
-							<tr>
-								<td width="40%" style="padding: 10px 12px;
-									background-color: #f8fafc;
-									border-bottom: 1px solid #e2e8f0;">
-									<strong>Scheduled Date</strong>
-								</td>
-								<td style="padding: 10px 12px;
-									border-bottom: 1px solid #e2e8f0;">
-									{self.scheduled_date or ''}
-								</td>
-							</tr>
-
-							<tr>
-								<td style="padding: 10px 12px;
-									background-color: #f8fafc;
-									border-bottom: 1px solid #e2e8f0;">
-									<strong>Location</strong>
-								</td>
-								<td style="padding: 10px 12px;
-									border-bottom: 1px solid #e2e8f0;">
-									{self.location or ''}
-								</td>
-							</tr>
-
-						</table>
-
-						<p>
-							Please review the ticket and engineer details,
-							check the activity information, and take the necessary
-							action before sending it back for review.
-						</p>
-
-						<div style="text-align: center; margin: 25px 0;">
-							<a href="{frappe.utils.get_url_to_form(self.doctype, self.name)}"
-							   style="display: inline-block;
-									  background-color: #168aad;
-									  color: #ffffff;
-									  text-decoration: none;
-									  padding: 12px 24px;
-									  border-radius: 5px;
-									  font-size: 14px;
-									  font-weight: 600;">
-								View Activity And Sign-Off
-							</a>
-						</div>
-
-						<p style="margin-bottom: 0;">
-							Regards,<br>
-							<strong style="color: #12344d;">
-								Teceze Dispatch Team
-							</strong><br>
-							<span style="color: #94a3b8; font-size: 12px;">
-								TECEZE Portal
+						<!-- Footer -->
+						<div style="background-color: #f8fafc;
+									border-top: 1px solid #e2e8f0;
+									padding: 12px 25px; text-align: center;">
+							<span style="font-size: 11px; color: #94a3b8;">
+								This is an automated notification from TECEZE Portal.
+								Please do not reply to this email.
 							</span>
-						</p>
+						</div>
 
 					</div>
-
-					<!-- Footer -->
-					<div style="background-color: #f8fafc;
-								border-top: 1px solid #e2e8f0;
-								padding: 12px 25px; text-align: center;">
-						<span style="font-size: 11px; color: #94a3b8;">
-							This is an automated notification from TECEZE Portal.
-							Please do not reply to this email.
-						</span>
-					</div>
-
 				</div>
-			</div>
-			"""
+				"""
 
-			frappe.sendmail(
-				recipients=recipients,
-				subject=subject,
-				message=message,
-				reference_doctype=self.doctype,
-				reference_name=self.name
-			)
+				frappe.sendmail(
+					recipients=recipients,
+					subject=subject,
+					message=message,
+					reference_doctype=self.doctype,
+					reference_name=self.name
+				)
 			
 							
 def get_sign_off_permission_query(user):

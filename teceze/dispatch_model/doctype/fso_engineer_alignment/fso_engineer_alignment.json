@@ -661,18 +661,21 @@
   },
   {
    "fieldname": "section_break_yfhy",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "hidden": 1
   },
   {
    "fieldname": "sdc",
    "fieldtype": "Data",
-   "label": "SDC"
+   "label": "SDC",
+   "read_only": 1
   },
   {
    "fieldname": "sdc_email",
    "fieldtype": "Data",
    "label": "SDC Email",
-   "options": "Email"
+   "options": "Email",
+   "read_only": 1
   },
   {
    "fieldname": "column_break_nmbz",
@@ -681,20 +684,22 @@
   {
    "fieldname": "sdm",
    "fieldtype": "Data",
-   "label": "SDM"
+   "label": "SDM",
+   "read_only": 1
   },
   {
    "fieldname": "sdm_email",
    "fieldtype": "Data",
    "label": "SDM Email",
-   "options": "Email"
+   "options": "Email",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-11-24 19:32:45.753030",
+ "modified": "2026-11-25 16:11:08.155337",
  "modified_by": "Administrator",
  "module": "Dispatch Model",
  "name": "FSO Engineer Alignment",

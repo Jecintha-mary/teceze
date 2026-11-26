@@ -69,7 +69,7 @@
   "finance_team_tab",
   "section_break_wuge",
   "status",
-  "transcation_id",
+  "transaction",
   "notes",
   "ticket",
   "engineer",
@@ -299,9 +299,9 @@
    "label": "<b style=\"color:#2490EF;font-size:15px\">Billing Cost</b>"
   },
   {
+   "depends_on": "eval:doc.workflow_state == \"Pending Finance\"",
    "fieldname": "finance_team_tab",
    "fieldtype": "Tab Break",
-   "hidden": 1,
    "label": "<b style=\"color:#555555;font-size:15px\">Finance Team</b>"
   },
   {
@@ -367,22 +367,20 @@
   {
    "fieldname": "ticket",
    "fieldtype": "Data",
+   "hidden": 1,
    "label": "Ticket"
   },
   {
    "fieldname": "engineer",
    "fieldtype": "Data",
+   "hidden": 1,
    "label": "Engineer ID"
   },
   {
    "fieldname": "sign_off",
    "fieldtype": "Data",
+   "hidden": 1,
    "label": "Sign Off"
-  },
-  {
-   "fieldname": "transcation_id",
-   "fieldtype": "Data",
-   "label": "Transcation Id"
   },
   {
    "fieldname": "section_break_zhkm",
@@ -409,24 +407,26 @@
    "fieldtype": "Section Break"
   },
   {
-   "description": "Billing total to client",
    "fieldname": "margin",
    "fieldtype": "Small Text",
    "read_only": 1
   },
   {
    "fieldname": "section_break_cyhe",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "hidden": 1
   },
   {
    "fieldname": "sdc",
    "fieldtype": "Data",
-   "label": "SDC"
+   "label": "SDC",
+   "read_only": 1
   },
   {
    "fieldname": "sdc_email",
    "fieldtype": "Data",
-   "label": "SDC Email"
+   "label": "SDC Email",
+   "read_only": 1
   },
   {
    "fieldname": "column_break_tgiq",
@@ -435,24 +435,31 @@
   {
    "fieldname": "sdm",
    "fieldtype": "Data",
-   "label": "SDM"
+   "label": "SDM",
+   "read_only": 1
   },
   {
    "fieldname": "sdm_email",
    "fieldtype": "Data",
-   "label": "SDM Email"
+   "label": "SDM Email",
+   "read_only": 1
   },
   {
    "depends_on": "eval:doc.workflow_state != \"Pending SDM Billing\"",
    "fieldname": "remarks",
    "fieldtype": "Small Text",
    "label": "Remarks"
+  },
+  {
+   "fieldname": "transaction",
+   "fieldtype": "Data",
+   "label": "Transaction ID"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-11-24 18:56:48.661401",
+ "modified": "2026-11-25 16:06:31.275041",
  "modified_by": "Administrator",
  "module": "Dispatch Model",
  "name": "Dispatch Payment Request",

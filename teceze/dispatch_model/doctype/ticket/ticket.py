@@ -22,6 +22,11 @@ class Ticket(Document):
 
 			# Create the first activity when Ticket is created
 			self.add_activity(previous_state=None)
+	def on_update(self):
+		prev = self.get_doc_before_save()
+		old_state = prev.workflow_state if prev else None
+		if self.workflow_state and old_state != self.workflow_state:
+			self.add_activity(previous_state=old_state)
 
     # to send email to FSO team when ticket is assigned to them
 	def send_fso_email(self):
@@ -289,14 +294,14 @@ def get_ticket_activity_log(ticket_name):
 
 def get_ticket_permission_query(user):
 
-    if not user:
-        user = frappe.session.user
+	if not user:
+		user = frappe.session.user
 
-    # System Manager can view all tickets
-    if "System Manager" in frappe.get_roles(user):
-        return ""
-
-    # Other users can view tickets owned by them
-    return "`tabTicket`.owner = {}".format(
-        frappe.db.escape(user)
-    )
+	# System Manager can view all tickets
+	if "System Manager" in frappe.get_roles(user):
+		return ""
+	else:
+		# Other users can view tickets owned by them
+		return "`tabTicket`.owner = {}".format(
+			frappe.db.escape(user)
+		)
