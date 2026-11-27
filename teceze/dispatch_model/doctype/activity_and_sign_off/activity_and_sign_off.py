@@ -21,6 +21,7 @@ class ActivityAndSignOff(Document):
 			self.send_rework_mail()
 		if self.workflow_state == "Pending FSO Payment":
 			self.update_visit_details()
+			self.send_fso_payment_mail()
 		if self.workflow_state == "Rework Required":
 			frappe.db.set_value(
 									"FSO Engineer Alignment",
@@ -38,6 +39,7 @@ class ActivityAndSignOff(Document):
 			"outcome": "Outcome",
 			"sign_off": "Signed Off By (Client)",
 			"sign_off_sheet": "Sign off Sheet",
+			
 			
 			}
 
@@ -102,7 +104,8 @@ class ActivityAndSignOff(Document):
 				"work_performed": self.work_performed,
 				"engineer_remarks": self.engineer_remarks,
 				"sign_off_sheet": self.sign_off_sheet,
-				"outcome": self.outcome
+				"outcome": self.outcome,
+				"rescheduled_date":self.rescheduled_date
 			},
 			update_modified=True
 			)
@@ -413,7 +416,178 @@ class ActivityAndSignOff(Document):
 					reference_doctype=self.doctype,
 					reference_name=self.name
 				)
-			
+	def send_fso_payment_mail(self):
+
+		# Get FSO Owner email from Dispatch Settings
+		fso_owner_email = frappe.db.get_single_value(
+			"Dispatch Settings",
+			"fso_owner"
+		)
+
+		if not fso_owner_email:
+			frappe.log_error(
+				"No valid FSO Owner email address found in Dispatch Settings",
+				"FSO Payment Notification"
+			)
+		else:
+
+			recipients = fso_owner_email
+
+			subject = f"Activity And Sign-Off Pending FSO Payment - {self.name}"
+
+			message = f"""
+			<div style="font-family: Arial, Helvetica, sans-serif;
+						background-color: #f5f7fa; padding: 30px 15px;">
+
+				<div style="max-width: 650px; margin: 0 auto;
+							background-color: #ffffff;
+							border: 1px solid #e2e8f0;
+							border-radius: 8px; overflow: hidden;">
+
+					<!-- Header -->
+					<div style="background-color: #12344d; padding: 20px 25px;">
+						<h2 style="margin: 0; color: #ffffff; font-size: 20px;">
+							Activity And Sign-Off Pending FSO Payment
+						</h2>
+					</div>
+
+					<!-- Body -->
+					<div style="padding: 25px; color: #334155;
+								font-size: 14px; line-height: 1.6;">
+
+						<p>Dear FSO Owner,</p>
+
+						<p>
+							The following Activity And Sign-Off has been submitted
+							and is pending FSO Payment.
+							Please review the details and take the necessary action.
+						</p>
+
+						<div style="background-color: #eef6f8;
+									border-left: 4px solid #168aad;
+									padding: 10px 14px; margin: 22px 0 12px;">
+							<strong style="color: #12344d; font-size: 15px;">
+								Activity Details
+							</strong>
+						</div>
+
+						<table style="width: 100%; border-collapse: collapse;
+									font-size: 14px; margin-bottom: 22px;">
+
+							<tr>
+								<td width="40%" style="padding: 10px 12px;
+									background-color: #f8fafc;
+									border-bottom: 1px solid #e2e8f0;">
+									<strong>Activity ID</strong>
+								</td>
+								<td style="padding: 10px 12px;
+									border-bottom: 1px solid #e2e8f0;">
+									{self.name}
+								</td>
+							</tr>
+
+							<tr>
+								<td style="padding: 10px 12px;
+									background-color: #f8fafc;
+									border-bottom: 1px solid #e2e8f0;">
+									<strong>Ticket ID</strong>
+								</td>
+								<td style="padding: 10px 12px;
+									border-bottom: 1px solid #e2e8f0;">
+									{self.ticket or ''}
+								</td>
+							</tr>
+
+							<tr>
+								<td style="padding: 10px 12px;
+									background-color: #f8fafc;
+									border-bottom: 1px solid #e2e8f0;">
+									<strong>Category</strong>
+								</td>
+								<td style="padding: 10px 12px;
+									border-bottom: 1px solid #e2e8f0;">
+									{self.category or ''}
+								</td>
+							</tr>
+
+							<tr>
+								<td style="padding: 10px 12px;
+									background-color: #f8fafc;
+									border-bottom: 1px solid #e2e8f0;">
+									<strong>Activity</strong>
+								</td>
+								<td style="padding: 10px 12px;
+									border-bottom: 1px solid #e2e8f0;">
+									{self.activity or ''}
+								</td>
+							</tr>
+
+							<tr>
+								<td style="padding: 10px 12px;
+									background-color: #f8fafc;
+									border-bottom: 1px solid #e2e8f0;">
+									<strong>Activity Date</strong>
+								</td>
+								<td style="padding: 10px 12px;
+									border-bottom: 1px solid #e2e8f0;">
+									{self.activity_date or ''}
+								</td>
+							</tr>
+
+						</table>
+
+						<p>
+							Please review the Activity And Sign-Off details
+							and proceed with the necessary FSO Payment action.
+						</p>
+
+						<div style="text-align: center; margin: 25px 0;">
+							<a href="{frappe.utils.get_url_to_form(self.doctype, self.name)}"
+							style="display: inline-block;
+									background-color: #168aad;
+									color: #ffffff;
+									text-decoration: none;
+									padding: 12px 24px;
+									border-radius: 5px;
+									font-size: 14px;
+									font-weight: 600;">
+								View Activity And Sign-Off
+							</a>
+						</div>
+
+						<p style="margin-bottom: 0;">
+							Regards,<br>
+							<strong style="color: #12344d;">
+								Teceze Dispatch Team
+							</strong><br>
+							<span style="color: #94a3b8; font-size: 12px;">
+								TECEZE Portal
+							</span>
+						</p>
+
+					</div>
+
+					<!-- Footer -->
+					<div style="background-color: #f8fafc;
+								border-top: 1px solid #e2e8f0;
+								padding: 12px 25px; text-align: center;">
+						<span style="font-size: 11px; color: #94a3b8;">
+							This is an automated notification from TECEZE Portal.
+							Please do not reply to this email.
+						</span>
+					</div>
+
+				</div>
+			</div>
+			"""
+
+			frappe.sendmail(
+				recipients=recipients,
+				subject=subject,
+				message=message,
+				reference_doctype=self.doctype,
+				reference_name=self.name
+			)
 							
 def get_sign_off_permission_query(user):
 

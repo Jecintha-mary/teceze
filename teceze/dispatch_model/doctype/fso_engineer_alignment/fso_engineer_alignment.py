@@ -146,6 +146,7 @@ class FSOEngineerAlignment(Document):
 		if not self.fso_assign_owner:
 			return 
 		else:
+			fso_owner_name = frappe.db.get_value("User", self.fso_assign_owner, "full_name") or "User"
 			subject = f" FSO - New Ticket Has Been Assigned - {self.name}"
 
 			message = f"""
@@ -168,7 +169,7 @@ class FSOEngineerAlignment(Document):
 					<div style="padding: 25px; color: #334155;
 								font-size: 14px; line-height: 1.6;">
 
-						<p>Dear FSO ,</p>
+						<p>Dear {fso_owner_name},</p>
 
 						<p>
 							The ticket <strong>{self.name}</strong> has been assigned to you.
@@ -299,6 +300,17 @@ class FSOEngineerAlignment(Document):
 		payment.sdc_email = self.sdc_email
 		payment.sdm = self.sdm
 		payment.sdm_email = self.sdm_email
+		payment.time_in= self.time_in
+		payment.time_out= self.time_out
+		payment.sign_off_by_client= self.sign_off_by_client
+		payment.working_hours = self.working_hours
+		payment.work_performed = self.work_performed
+		payment.engineer_remarks = self.engineer_remarks
+		payment.sign_off_sheet= self.sign_off_sheet
+		payment.outcome = self.outcome
+		payment.rescheduled_date=self.rescheduled_date
+		payment.billing_currency=self.rate_currency
+				
 		payment.insert(ignore_permissions=True)
 		frappe.msgprint(
 						f"""
@@ -349,8 +361,8 @@ class FSOEngineerAlignment(Document):
 		sign_off.category = self.category
 		sign_off.activity = self.activity
 		sign_off.activity_time = self.activity_time
-		sign_off.activity_date = self.activity_date
-		sign_off.activity_data_ = self.activity_time
+		#sign_off.activity_date = self.activity_date
+		sign_off.activity_data_ = self.activity_date
 		sign_off.service_level = self.service_level
 		sign_off.duration = self.duration
 		sign_off.spoc_contact = self.spoc_contact

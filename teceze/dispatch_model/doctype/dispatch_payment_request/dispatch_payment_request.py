@@ -21,6 +21,7 @@ class DispatchPaymentRequest(Document):
 				frappe.throw("Status is Mandatory!")
 			if not self. transaction:
 				frappe.throw("Transaction ID is Mandatory!")
+			
 		if self.workflow_state in allowed_states:
 			if self.workflow_state in allowed_states:
 			
@@ -105,7 +106,7 @@ class DispatchPaymentRequest(Document):
 								<p>Dear FSO Head,</p>
 		
 								<p>
-									The payment of <strong>{frappe.utils.fmt_money(self.billing_total or 0, currency="INR")}</strong>
+									The payment of <strong>{frappe.utils.fmt_money(self.billing_total or 0, currency=self.billing_currency or "INR")}</strong>
 									for ticket <strong>{self.name}</strong> has been processed by
                                     SDM <strong>{self.sdm or ''}</strong>.
                                     Please click the <strong>Review &amp; Approve Payment</strong> button below

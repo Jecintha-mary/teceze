@@ -81,6 +81,7 @@
   "visit_record_tab",
   "time_in",
   "time_out",
+  "rescheduled_date",
   "column_break_bkpf",
   "sign_off_by_client",
   "working_hours",
@@ -200,7 +201,7 @@
    "fieldtype": "Date",
    "label": "Scheduled Date",
    "mandatory_depends_on": "eval:doc.workflow_state==\"In Progress\"",
-   "read_only_depends_on": "eval:doc.workflow_state != \"In Progress\""
+   "read_only": 1
   },
   {
    "fieldname": "arrival_time",
@@ -693,13 +694,20 @@
    "label": "SDM Email",
    "options": "Email",
    "read_only": 1
+  },
+  {
+   "depends_on": "eval:[\"Pending FSO Payment\",\"Pending SDM Billing\",\"Pending FSO Head Approval\",\"Pending Finance\",\"Completed\"].includes(doc.workflow_state)",
+   "fieldname": "rescheduled_date",
+   "fieldtype": "Date",
+   "label": "Rescheduled Date",
+   "read_only_depends_on": "eval:[\"Pending FSO Payment\",\"Pending SDM Billing\",\"Pending FSO Head Approval\",\"Pending Finance\",\"Completed\"].includes(doc.workflow_state)"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-11-25 16:11:08.155337",
+ "modified": "2026-11-27 12:12:23.029995",
  "modified_by": "Administrator",
  "module": "Dispatch Model",
  "name": "FSO Engineer Alignment",

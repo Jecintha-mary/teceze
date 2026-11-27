@@ -2,40 +2,57 @@ const PARENT = "Engineer Onboarding";
 const TABLE = "bank_details";
 const load_meta = (dt) => new Promise((resolve) => frappe.model.with_doctype(dt, resolve));
 
+// Shared across all form instances in the current session
+let shared_fields = null;
+
+function set_if_changed(frm, fieldname, value) {
+	const current = frm.doc[fieldname] ?? "";
+	const next = value ?? "";
+	if (current !== next) {
+		return frm.set_value(fieldname, next);
+	}
+	return Promise.resolve();
+}
+
 frappe.ui.form.on("FSO Engineer Alignment", {
 	// refresh: (frm) => load_banks(frm, true),
 	engineer_name: (frm) => load_banks(frm, false),
 
-	bank_account(frm) {
+	async bank_account(frm) {
 		const row = frm._banks?.[frm.doc.bank_account];
-		(frm._fields || []).forEach((f) => frm.set_value(f, row?.[f] ?? ""));
+		const fields = await get_fields(frm);
+		await Promise.all(fields.map((f) => set_if_changed(frm, f, row?.[f] ?? "")));
 	},
+
 	eng_cost(frm) {
-        calculate_billing_total(frm);
-    },
+		calculate_billing_total(frm);
+	},
 
-    other_cost(frm) {
-        calculate_billing_total(frm);
-    },
+	other_cost(frm) {
+		calculate_billing_total(frm);
+	},
 
-    travel_cst(frm) {
-        calculate_billing_total(frm);
-    },
-
+	travel_cst(frm) {
+		calculate_billing_total(frm);
+	},
 });
 
-// child fieldnames that also exist on this doctype (auto-detected once)
+// Child fieldnames that also exist on this doctype (cached once per session)
 async function get_fields(frm) {
-	if (frm._fields) return frm._fields;
+	if (shared_fields) return shared_fields;
 
 	await load_meta(PARENT);
-	const child = frappe.get_meta(PARENT).fields.find((df) => df.fieldname === TABLE).options;
+	const child = frappe.get_meta(PARENT).fields.find((df) => df.fieldname === TABLE)?.options;
+	if (!child) return (shared_fields = []);
+
 	await load_meta(child);
 
 	const own = new Set(frappe.get_meta(frm.doctype).fields.map((df) => df.fieldname));
-	return (frm._fields = frappe.get_meta(child).fields
+	shared_fields = frappe.get_meta(child).fields
 		.filter((df) => !frappe.model.no_value_type.includes(df.fieldtype) && own.has(df.fieldname))
-		.map((df) => df.fieldname));
+		.map((df) => df.fieldname);
+
+	return shared_fields;
 }
 
 async function load_banks(frm, keep) {
@@ -44,31 +61,43 @@ async function load_banks(frm, keep) {
 	const fields = await get_fields(frm);
 
 	if (!keep) {
-		frm.set_value("bank_account", "");
-		fields.forEach((f) => frm.set_value(f, ""));
+		await Promise.all([
+			set_if_changed(frm, "bank_account", ""),
+			...fields.map((f) => set_if_changed(frm, f, "")),
+		]);
+		if (seq !== frm._seq) return;
 	}
 
 	let rows = [];
 	if (engineer) {
 		frm._cache = frm._cache || {};
-		rows = frm._cache[engineer] ||= (await frappe.db.get_doc(PARENT, engineer))[TABLE] || [];
-		if (seq !== frm._seq) return; // stale response
+		if (!frm._cache[engineer]) {
+			const doc = await frappe.db.get_doc(PARENT, engineer);
+			if (seq !== frm._seq) return; // stale response
+			frm._cache[engineer] = doc[TABLE] || [];
+		}
+		rows = frm._cache[engineer];
 	}
 
-	frm._banks = {};
-	rows.forEach((r) => {
-		let label = `${r.bank_name || "Bank"} - ${r.account_number || r.idx}`;
-		if (frm._banks[label]) label += ` (${r.idx})`;
-		frm._banks[label] = r;
-	});
+	const active_rows = rows.filter((r) => r.is_active);
+	const banks = {};
+	const options = [""];
 
-	frm.set_df_property("bank_account", "options", ["", ...Object.keys(frm._banks)].join("\n"));
-	if (frm.doc.bank_account && !frm._banks[frm.doc.bank_account]) {
-		frm.set_value("bank_account", "");
+	for (const r of active_rows) {
+		const status = r.is_active ? "Active" : "Inactive";
+		let label = `${r.bank_name || "Bank"} - ${r.account_number || r.idx} (${status})`;
+		if (banks[label]) label += ` [${r.idx}]`;
+		banks[label] = r;
+		options.push(label);
+	}
+
+	frm._banks = banks;
+	frm.set_df_property("bank_account", "options", options.join("\n"));
+
+	if (frm.doc.bank_account && !banks[frm.doc.bank_account]) {
+		await set_if_changed(frm, "bank_account", "");
 	}
 }
-
-
 function calculate_billing_total(frm) {
 
     // 1. Get input values

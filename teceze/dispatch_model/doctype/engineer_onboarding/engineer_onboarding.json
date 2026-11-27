@@ -19,19 +19,9 @@
   "column_break_xygg",
   "fso_owner",
   "bank_details_section",
-  "name_on_account",
-  "sort_code",
-  "column_break_zbpg",
-  "account_number",
-  "iban",
-  "column_break_ovqs",
-  "bank_name",
-  "column_break_ddgf",
-  "swift_bic",
+  "bank_details",
   "section_break_yyvr",
-  "bank_address",
-  "tab_2_tab",
-  "bank_details"
+  "bank_address"
  ],
  "fields": [
   {
@@ -92,38 +82,7 @@
   {
    "fieldname": "bank_details_section",
    "fieldtype": "Section Break",
-   "hidden": 1,
    "label": "<b style=\"color:#2490EF;font-size:15px\">Engineer Bank Details</b>"
-  },
-  {
-   "fieldname": "name_on_account",
-   "fieldtype": "Data",
-   "label": "Name On Account"
-  },
-  {
-   "fieldname": "account_number",
-   "fieldtype": "Data",
-   "label": "Account Number"
-  },
-  {
-   "fieldname": "bank_name",
-   "fieldtype": "Data",
-   "label": "Bank Name"
-  },
-  {
-   "fieldname": "swift_bic",
-   "fieldtype": "Data",
-   "label": "SWIFT / BIC / IFSC"
-  },
-  {
-   "fieldname": "sort_code",
-   "fieldtype": "Data",
-   "label": "Sort Code"
-  },
-  {
-   "fieldname": "iban",
-   "fieldtype": "Data",
-   "label": "IBAN"
   },
   {
    "fieldname": "section_break_yyvr",
@@ -140,10 +99,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "column_break_zbpg",
-   "fieldtype": "Column Break"
-  },
-  {
    "fieldname": "engineer",
    "fieldtype": "Section Break",
    "label": "<b style=\"color:#2490EF;font-size:15px\">Engineer Details</b>"
@@ -157,19 +112,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "column_break_ovqs",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "column_break_ddgf",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "tab_2_tab",
-   "fieldtype": "Tab Break",
-   "label": "Tab 2"
-  },
-  {
    "fieldname": "bank_details",
    "fieldtype": "Table",
    "label": "Bank Details",
@@ -179,7 +121,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-11-23 14:26:47.733584",
+ "modified": "2026-11-27 12:44:35.528151",
  "modified_by": "Administrator",
  "module": "Dispatch Model",
  "name": "Engineer Onboarding",

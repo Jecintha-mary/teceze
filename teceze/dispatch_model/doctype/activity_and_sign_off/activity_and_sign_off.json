@@ -67,18 +67,18 @@
   "scheduled_date",
   "arrival_timesite_local",
   "notes_for_engineer",
-  "section_break_beyv",
-  "progress_update",
-  "details",
   "sdc_validation_and_discussion_section",
   "validate_engineer",
   "column_break_noux",
   "document_review",
   "section_break_rwpr",
   "add_discussion_note",
+  "progress_update",
+  "details",
   "visit_record_tab",
   "amended_from",
   "activity_date",
+  "rescheduled_date",
   "time_in",
   "time_out",
   "column_break_bgle",
@@ -508,10 +508,6 @@
    "label": "<b style=\"color:#555555;font-size:15px\">Ticket Details</b>"
   },
   {
-   "fieldname": "section_break_beyv",
-   "fieldtype": "Section Break"
-  },
-  {
    "fieldname": "progress_update",
    "fieldtype": "Data",
    "label": "Progress Update",
@@ -564,6 +560,7 @@
    "fieldname": "sdc_email",
    "fieldtype": "Data",
    "label": "SDC Email",
+   "options": "Email",
    "read_only": 1
   },
   {
@@ -581,13 +578,18 @@
    "fieldtype": "Data",
    "label": "SDM Email",
    "read_only": 1
+  },
+  {
+   "fieldname": "rescheduled_date",
+   "fieldtype": "Date",
+   "label": "Rescheduled Date"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-11-26 11:24:38.043828",
+ "modified": "2026-11-26 17:57:19.640237",
  "modified_by": "Administrator",
  "module": "Dispatch Model",
  "name": "Activity And Sign-Off",

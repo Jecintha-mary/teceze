@@ -42,6 +42,21 @@
   "column_break_ofjd",
   "activity_details",
   "currency_unit",
+  "visit_record_tab",
+  "time_in",
+  "time_out",
+  "rescheduled_date",
+  "column_break_nngg",
+  "sign_off_by_client",
+  "working_hours",
+  "section_break_ipie",
+  "work_performed",
+  "column_break_ayrx",
+  "engineer_remarks",
+  "section_break_rhyb",
+  "sign_off_sheet",
+  "column_break_rsep",
+  "outcome",
   "engineer_cost_tab",
   "section_break_ahuq",
   "engineer_cost",
@@ -70,6 +85,7 @@
   "section_break_wuge",
   "status",
   "transaction",
+  "attachment",
   "notes",
   "ticket",
   "engineer",
@@ -202,6 +218,7 @@
   {
    "fieldname": "activity_details_tab",
    "fieldtype": "Tab Break",
+   "hidden": 1,
    "label": "<b style=\"color:#555555;font-size:15px\">Activity Details</b>"
   },
   {
@@ -299,7 +316,7 @@
    "label": "<b style=\"color:#2490EF;font-size:15px\">Billing Cost</b>"
   },
   {
-   "depends_on": "eval:doc.workflow_state == \"Pending Finance\"",
+   "depends_on": "eval:[\"Pending Finance\", \"Completed\"].includes(doc.workflow_state)",
    "fieldname": "finance_team_tab",
    "fieldtype": "Tab Break",
    "label": "<b style=\"color:#555555;font-size:15px\">Finance Team</b>"
@@ -391,7 +408,8 @@
    "fieldtype": "Link",
    "label": "Billing Currency",
    "mandatory_depends_on": "eval:doc.workflow_state==\"Pending SDM Billing\"",
-   "options": "Currency"
+   "options": "Currency",
+   "read_only": 1
   },
   {
    "fieldname": "column_break_acvq",
@@ -442,6 +460,7 @@
    "fieldname": "sdm_email",
    "fieldtype": "Data",
    "label": "SDM Email",
+   "options": "Email",
    "read_only": 1
   },
   {
@@ -453,13 +472,99 @@
   {
    "fieldname": "transaction",
    "fieldtype": "Data",
-   "label": "Transaction ID"
+   "label": "Transaction ID",
+   "mandatory_depends_on": "eval:doc.workflow_state==\"Pending Finance\""
+  },
+  {
+   "fieldname": "visit_record_tab",
+   "fieldtype": "Tab Break",
+   "label": "<b style=\"color:#555555;font-size:15px\">Visit Record</b>"
+  },
+  {
+   "fieldname": "time_in",
+   "fieldtype": "Time",
+   "label": "Time In",
+   "read_only": 1
+  },
+  {
+   "fieldname": "time_out",
+   "fieldtype": "Time",
+   "label": "Time Out",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_nngg",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "sign_off_by_client",
+   "fieldtype": "Data",
+   "label": "Signed off by (Client Name)",
+   "read_only": 1
+  },
+  {
+   "fieldname": "working_hours",
+   "fieldtype": "Float",
+   "label": "Total Working Hours",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_ipie",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "work_performed",
+   "fieldtype": "Small Text",
+   "label": "Work Performed",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_ayrx",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "engineer_remarks",
+   "fieldtype": "Small Text",
+   "label": "Engineer Remarks",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_rhyb",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "sign_off_sheet",
+   "fieldtype": "Attach",
+   "label": "Sign off Sheet",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_rsep",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "outcome",
+   "fieldtype": "Select",
+   "label": "Outcome",
+   "options": "\nCompleted\nPartially Completed\nRevisit Required\nCancelled On Site",
+   "read_only": 1
+  },
+  {
+   "fieldname": "rescheduled_date",
+   "fieldtype": "Date",
+   "label": "Rescheduled Date",
+   "read_only": 1
+  },
+  {
+   "fieldname": "attachment",
+   "fieldtype": "Attach",
+   "label": "Attachment"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-11-25 16:06:31.275041",
+ "modified": "2026-11-27 11:57:27.762134",
  "modified_by": "Administrator",
  "module": "Dispatch Model",
  "name": "Dispatch Payment Request",

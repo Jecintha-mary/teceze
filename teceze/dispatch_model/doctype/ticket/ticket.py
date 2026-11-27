@@ -218,6 +218,7 @@ class Ticket(Document):
 		fso_assignment.sdc_email=self.sdc_email
 		fso_assignment.sdm=self.sdm
 		fso_assignment.sdm_email=self.sdm_email
+		fso_assignment.scheduled_date=self.activity_date
 		tools_list = []
 		for row in self.get("tools_required", []):
 			if row.tool_name == "Others":
