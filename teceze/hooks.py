@@ -49,9 +49,24 @@ app_license = "mit"
 # doctype_list_js = {"doctype" : "public/js/doctype_list.js"}
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
 # doctype_calendar_js = {"doctype" : "public/js/doctype_calendar.js"}
+# def _policy_gate_asset(path):
+#     """URL of a policy gate file with its last-modified time added, so browsers
+#     load the new file after every update instead of a cached old copy."""
+#     import os
+
+#     try:
+#         version = int(os.path.getmtime(os.path.join(os.path.dirname(__file__), "public", path)))
+#     except OSError:
+#         return f"/assets/teceze/{path}"
+#     return f"/assets/teceze/{path}?v={version}"
+
+
 app_include_css = [
-    "/assets/teceze/css/custom.css"
+    "/assets/teceze/css/custom.css",
+    # _policy_gate_asset("css/policy_gate.css"),
 ]
+
+# app_include_js = [_policy_gate_asset("js/policy_gate.js")]
 
 override_whitelisted_methods = {
     "erpnext.crm.doctype.lead.lead.make_quotation":
@@ -71,14 +86,18 @@ doctype_js = {
     "Compensatory Leave Request" : ["public/js/compensatory_leave_request.js"],
     "Shift Request" : ["public/js/shift_request.js"],
     "Leave Encashment" : ["public/js/leave_encashment.js"],
+    # "Job Requisition" : ["public/js/job_requisition.js"],
+    # "Job Opening": ["public/js/job_opening.js"],
     # "Job Applicant": ["public/js/job_applicant.js"],
+    # "Interview": ["public/js/interview.js"],
+
     
 
 }
 doctype_list_js = {
 	 "Attendance Request" : ["public/js/attendance_request_list.js"],
      "Lead" : ["public/js/lead_list.js"],
-     "Opportunity":["public/js/opportunity_list.js"]
+     "Opportunity":["public/js/opportunity_list.js"],
 }
 
 doc_events = {
@@ -131,11 +150,31 @@ doc_events = {
     "File": {
 		"before_insert": "teceze.teceze.overrides.file_validation.validate_uploaded_file",
 	},
+    # "Job Opening": {
+    #     "validate": "teceze.teceze.overrides.job_opening.validate_job_opening_status",
+    #     "on_update": "teceze.teceze.overrides.job_requisition.update_job_requisition_owner"
+    # },
+    # "Job Requisition": {
+    #     "on_update": "teceze.teceze.overrides.job_requisition.create_job_opening"
+    # },
+    # "Job Applicant": {
+    #     "validate": "teceze.teceze.overrides.job_applicant.validate_job_applicant"
+    # },
+    # "Interview":{
+    #     "on_change": "teceze.teceze.overrides.interview.update_job_applicant_status",
+    #     "validate": "teceze.teceze.overrides.interview.validate_interview"
+    # },
+    #  "Offer Request": {
+    #     "on_update": "teceze.teceze.overrides.offer_request.sync_job_applicant_status"
+    # },
+   
+   
 }
 override_doctype_class = {
     "Shift Request": "teceze.teceze.overrides.shift_request.CustomShiftRequest",
     "Leave Encashment": "teceze.teceze.overrides.leave_encashment.CustomLeaveEncashment",
-        "Opportunity": "teceze.teceze.overrides.opportunity.CustomOpportunity"
+        "Opportunity": "teceze.teceze.overrides.opportunity.CustomOpportunity",
+    # "Job Opening": "teceze.teceze.overrides.job_opening.CustomJobOpening",
 
 }
 
@@ -240,18 +279,24 @@ permission_query_conditions = {
     "Quotation": "teceze.teceze.overrides.sales_permissions.quotation_query_conditions",
     "Lead": "teceze.teceze.overrides.sales_permissions.lead_query_conditions",
     "Ticket": "teceze.dispatch_model.doctype.ticket.ticket.get_ticket_permission_query",
-    "FSO Engineer Alignment": "teceze.dispatch_model.doctype.fso_engineer_alignment.fso_engineer_alignment.get_engineer_permission_query"
-}
+    "FSO Engineer Alignment": "teceze.dispatch_model.doctype.fso_engineer_alignment.fso_engineer_alignment.get_engineer_permission_query",
+    "Activity And Sign-Off": "teceze.dispatch_model.doctype.activity_and_sign_off.activity_and_sign_off.get_sign_off_permission_query",
+    "Dispatch Payment Request": "teceze.dispatch_model.doctype.dispatch_payment_request.dispatch_payment_request.get_payment_permission_query",
+        "User": "teceze.teceze.overrides.user.get_user_permission_query_conditions",
+
+
+    }   
 
 
 # has_permission = {
 # 	"Event": "frappe.desk.doctype.event.event.has_permission",
 # }
 has_permission = {
-    "User": "teceze.teceze.overrides.permission.user_has_permission",
+    # "User": "teceze.teceze.overrides.permission.user_has_permission",
      "Lead": "teceze.teceze.overrides.sales_permissions.lead_has_permission",
 
 }
+
 # Document Events
 # ---------------
 # Hook on document methods and events
@@ -359,10 +404,13 @@ override_whitelisted_methods = {
 
 # Request Events
 # ----------------
+before_request = [
+    "teceze.teceze.overrides.file_validation.validate_upload_request",
+    # "teceze.api.policy_acceptance.enforce_policy_lock",
+]
 # before_request = ["teceze.utils.before_request"]
 # after_request = ["teceze.utils.after_request"]
 # Validate attachments before Frappe processes them (see file_validation.py)
-before_request = ["teceze.teceze.overrides.file_validation.validate_upload_request"]
 # Job Events
 # ----------
 # before_job = ["teceze.utils.before_job"]
@@ -425,10 +473,10 @@ fixtures = [
 	# "filters": [{"is_standard":0}]
 	# # },
    	"Custom Field",
-   	"Property Setter",
-	"Workflow",
-   	"Workflow Action Master",
-   	"Workflow State",
+   	# "Property Setter",
+	# "Workflow",
+   	# "Workflow Action Master",
+   	# "Workflow State",
    	# "Role",
    	# "Workspace",
 	# "Print Format",
