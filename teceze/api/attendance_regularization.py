@@ -5,7 +5,7 @@ from frappe import _
 from frappe.utils import (
     get_first_day,
     get_last_day,
-    getdate,
+    getdate, today,
     time_diff_in_hours,
     get_datetime
 )
@@ -283,7 +283,76 @@ def validate_regularization_limit(doc, method=None):
     # ======================================================
 
     from_date = getdate(doc.from_date)
+    # ======================================================
+    # Prevent Future Date Regularization
+    # ======================================================
 
+    current_date = getdate(today())
+
+    if from_date > current_date:
+
+        frappe.throw(
+            _(
+                "You cannot apply for Attendance Regularization "
+                "for a future date ({0}). Today's date is {1}."
+            ).format(
+                from_date,
+                current_date
+            )
+        )
+
+    if doc.to_date:
+
+        to_date = getdate(doc.to_date)
+
+        if to_date > current_date:
+
+            frappe.throw(
+                _(
+                    "You cannot apply for Attendance Regularization "
+                    "for a future date ({0}). Today's date is {1}."
+                ).format(
+                    to_date,
+                    current_date
+                )
+            )
+    # ======================================================
+    # Validate From Date Against Check In / Check Out Dates
+    # ======================================================
+
+    if doc.custom_check_in and doc.custom_check_out:
+
+        check_in_date = getdate(
+            get_datetime(doc.custom_check_in)
+        )
+
+        check_out_date = getdate(
+            get_datetime(doc.custom_check_out)
+        )
+
+        # Check Out cannot be earlier than Check In date
+
+        if check_out_date < check_in_date:
+
+            frappe.throw(
+                _("Check Out date cannot be earlier than Check In date.")
+            )
+
+        # From Date must be between Check In and Check Out dates
+
+        if not (check_in_date <= from_date <= check_out_date):
+
+            frappe.throw(
+                _(
+                    "Selected From Date ({0}) must be between "
+                    "Check In date ({1}) and Check Out date ({2}). "
+                    "Please select the correct attendance date."
+                ).format(
+                    from_date,
+                    check_in_date,
+                    check_out_date
+                )
+            )
     # ======================================================
     # Existing Attendance Validation
     # ======================================================
